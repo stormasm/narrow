@@ -27,21 +27,14 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
     if array.null_count() == 0 {
         // fast case where we can copy regions without nullability checks
         Box::new(
-            move |mutable: &mut _MutableArrayData,
-                  index: usize,
-                  start: usize,
-                  len: usize| {
+            move |mutable: &mut _MutableArrayData, index: usize, start: usize, len: usize| {
                 let offset_buffer = &mut mutable.buffer1;
 
                 // this is safe due to how offset is built. See details on `get_last_offset`
                 let last_offset: T = unsafe { get_last_offset(offset_buffer) };
 
                 // offsets
-                extend_offsets::<T>(
-                    offset_buffer,
-                    last_offset,
-                    &offsets[start..start + len + 1],
-                );
+                extend_offsets::<T>(offset_buffer, last_offset, &offsets[start..start + len + 1]);
 
                 mutable.child_data[0].extend(
                     index,
@@ -53,10 +46,7 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
     } else {
         // nulls present: append item by item, ignoring null entries
         Box::new(
-            move |mutable: &mut _MutableArrayData,
-                  index: usize,
-                  start: usize,
-                  len: usize| {
+            move |mutable: &mut _MutableArrayData, index: usize, start: usize, len: usize| {
                 let offset_buffer = &mut mutable.buffer1;
 
                 // this is safe due to how offset is built. See details on `get_last_offset`
@@ -86,10 +76,7 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
     }
 }
 
-pub(super) fn extend_nulls<T: OffsetSizeTrait>(
-    mutable: &mut _MutableArrayData,
-    len: usize,
-) {
+pub(super) fn extend_nulls<T: OffsetSizeTrait>(mutable: &mut _MutableArrayData, len: usize) {
     let offset_buffer = &mut mutable.buffer1;
 
     // this is safe due to how offset is built. See details on `get_last_offset`

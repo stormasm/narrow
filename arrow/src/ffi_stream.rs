@@ -87,16 +87,10 @@ const ENOSYS: i32 = 78;
 #[derive(Debug)]
 pub struct FFI_ArrowArrayStream {
     pub get_schema: Option<
-        unsafe extern "C" fn(
-            arg1: *mut FFI_ArrowArrayStream,
-            out: *mut FFI_ArrowSchema,
-        ) -> c_int,
+        unsafe extern "C" fn(arg1: *mut FFI_ArrowArrayStream, out: *mut FFI_ArrowSchema) -> c_int,
     >,
     pub get_next: Option<
-        unsafe extern "C" fn(
-            arg1: *mut FFI_ArrowArrayStream,
-            out: *mut FFI_ArrowArray,
-        ) -> c_int,
+        unsafe extern "C" fn(arg1: *mut FFI_ArrowArrayStream, out: *mut FFI_ArrowArray) -> c_int,
     >,
     pub get_last_error:
         Option<unsafe extern "C" fn(arg1: *mut FFI_ArrowArrayStream) -> *const c_char>,
@@ -518,8 +512,7 @@ mod tests {
         // Import through `FFI_ArrowArrayStream` as `ArrowArrayStreamReader`
         let stream = Arc::new(FFI_ArrowArrayStream::new(reader));
         let stream_ptr = Arc::into_raw(stream) as *mut FFI_ArrowArrayStream;
-        let stream_reader =
-            unsafe { ArrowArrayStreamReader::from_raw(stream_ptr).unwrap() };
+        let stream_reader = unsafe { ArrowArrayStreamReader::from_raw(stream_ptr).unwrap() };
 
         let imported_schema = stream_reader.schema();
         assert_eq!(imported_schema, schema);

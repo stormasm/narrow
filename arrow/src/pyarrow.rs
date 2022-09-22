@@ -31,9 +31,7 @@ use crate::datatypes::{DataType, Field, Schema};
 use crate::error::ArrowError;
 use crate::ffi;
 use crate::ffi::FFI_ArrowSchema;
-use crate::ffi_stream::{
-    export_reader_into_raw, ArrowArrayStreamReader, FFI_ArrowArrayStream,
-};
+use crate::ffi_stream::{export_reader_into_raw, ArrowArrayStreamReader, FFI_ArrowArrayStream};
 use crate::record_batch::RecordBatch;
 
 import_exception!(pyarrow, ArrowException);
@@ -62,8 +60,7 @@ impl PyArrowConvert for DataType {
         let c_schema_ptr = &c_schema as *const FFI_ArrowSchema;
         let module = py.import("pyarrow")?;
         let class = module.getattr("DataType")?;
-        let dtype =
-            class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
+        let dtype = class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
         Ok(dtype.into())
     }
 }
@@ -82,8 +79,7 @@ impl PyArrowConvert for Field {
         let c_schema_ptr = &c_schema as *const FFI_ArrowSchema;
         let module = py.import("pyarrow")?;
         let class = module.getattr("Field")?;
-        let dtype =
-            class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
+        let dtype = class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
         Ok(dtype.into())
     }
 }
@@ -102,8 +98,7 @@ impl PyArrowConvert for Schema {
         let c_schema_ptr = &c_schema as *const FFI_ArrowSchema;
         let module = py.import("pyarrow")?;
         let class = module.getattr("Schema")?;
-        let schema =
-            class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
+        let schema = class.call_method1("_import_from_c", (c_schema_ptr as Py_uintptr_t,))?;
         Ok(schema.into())
     }
 }
@@ -126,8 +121,7 @@ impl PyArrowConvert for ArrayData {
         )?;
 
         let ffi_array = unsafe {
-            ffi::ArrowArray::try_from_raw(array_pointer, schema_pointer)
-                .map_err(to_py_err)?
+            ffi::ArrowArray::try_from_raw(array_pointer, schema_pointer).map_err(to_py_err)?
         };
         let data = ArrayData::try_from(ffi_array).map_err(to_py_err)?;
 
@@ -228,8 +222,7 @@ impl PyArrowConvert for ArrowArrayStreamReader {
         let args = PyTuple::new(value.py(), &[stream_ptr as Py_uintptr_t]);
         value.call_method1("_export_to_c", args)?;
 
-        let stream_reader =
-            unsafe { ArrowArrayStreamReader::from_raw(stream_ptr).unwrap() };
+        let stream_reader = unsafe { ArrowArrayStreamReader::from_raw(stream_ptr).unwrap() };
 
         unsafe {
             Box::from_raw(stream_ptr);

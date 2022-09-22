@@ -253,9 +253,7 @@ fn get_format_string(dtype: &DataType) -> Result<String> {
         DataType::LargeUtf8 => Ok("U".to_string()),
         DataType::FixedSizeBinary(num_bytes) => Ok(format!("w:{}", num_bytes)),
         DataType::FixedSizeList(_, num_elems) => Ok(format!("+w:{}", num_elems)),
-        DataType::Decimal128(precision, scale) => {
-            Ok(format!("d:{},{}", precision, scale))
-        }
+        DataType::Decimal128(precision, scale) => Ok(format!("d:{},{}", precision, scale)),
         DataType::Date32 => Ok("tdD".to_string()),
         DataType::Date64 => Ok("tdm".to_string()),
         DataType::Time32(TimeUnit::Second) => Ok("tts".to_string()),

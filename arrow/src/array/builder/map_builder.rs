@@ -57,11 +57,7 @@ impl Default for MapFieldNames {
 
 #[allow(dead_code)]
 impl<K: ArrayBuilder, V: ArrayBuilder> MapBuilder<K, V> {
-    pub fn new(
-        field_names: Option<MapFieldNames>,
-        key_builder: K,
-        value_builder: V,
-    ) -> Self {
+    pub fn new(field_names: Option<MapFieldNames>, key_builder: K, value_builder: V) -> Self {
         let capacity = key_builder.len();
         Self::with_capacity(field_names, key_builder, value_builder, capacity)
     }

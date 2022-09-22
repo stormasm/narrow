@@ -115,18 +115,15 @@ fn bench_like_utf8_scalar(arr_a: &StringArray, value_b: &str) {
 }
 
 fn bench_nlike_utf8_scalar(arr_a: &StringArray, value_b: &str) {
-    nlike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b))
-        .unwrap();
+    nlike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b)).unwrap();
 }
 
 fn bench_ilike_utf8_scalar(arr_a: &StringArray, value_b: &str) {
-    ilike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b))
-        .unwrap();
+    ilike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b)).unwrap();
 }
 
 fn bench_nilike_utf8_scalar(arr_a: &StringArray, value_b: &str) {
-    nilike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b))
-        .unwrap();
+    nilike_utf8_scalar(criterion::black_box(arr_a), criterion::black_box(value_b)).unwrap();
 }
 
 fn bench_regexp_is_match_utf8_scalar(arr_a: &StringArray, value_b: &str) {

@@ -92,10 +92,7 @@ impl InferredType {
             }
             (_, InferredType::Any) => {}
             // convert a scalar type to a single-item scalar array type.
-            (
-                InferredType::Array(self_inner_type),
-                other_scalar @ InferredType::Scalar(_),
-            ) => {
+            (InferredType::Array(self_inner_type), other_scalar @ InferredType::Scalar(_)) => {
                 self_inner_type.merge(other_scalar)?;
             }
             (s @ InferredType::Scalar(_), InferredType::Array(mut other_inner_type)) => {
@@ -238,9 +235,10 @@ impl<'a, R: Read> Iterator for ValueIter<'a, R> {
                     }
 
                     self.record_count += 1;
-                    return Some(serde_json::from_str(trimmed_s).map_err(|e| {
-                        ArrowError::JsonError(format!("Not valid JSON: {}", e))
-                    }));
+                    return Some(
+                        serde_json::from_str(trimmed_s)
+                            .map_err(|e| ArrowError::JsonError(format!("Not valid JSON: {}", e))),
+                    );
                 }
             }
         }
@@ -436,17 +434,13 @@ fn collect_field_types_from_object(
                         InferredType::Scalar(_) => {
                             field_types.insert(
                                 k.to_string(),
-                                InferredType::Array(Box::new(InferredType::Scalar(
-                                    HashSet::new(),
-                                ))),
+                                InferredType::Array(Box::new(InferredType::Scalar(HashSet::new()))),
                             );
                         }
                         InferredType::Object(_) => {
                             field_types.insert(
                                 k.to_string(),
-                                InferredType::Array(Box::new(InferredType::Object(
-                                    HashMap::new(),
-                                ))),
+                                InferredType::Array(Box::new(InferredType::Object(HashMap::new()))),
                             );
                         }
                         InferredType::Any | InferredType::Array(_) => {
@@ -498,8 +492,7 @@ fn collect_field_types_from_object(
             }
             Value::Object(inner_map) => {
                 if !field_types.contains_key(k) {
-                    field_types
-                        .insert(k.to_string(), InferredType::Object(HashMap::new()));
+                    field_types.insert(k.to_string(), InferredType::Object(HashMap::new()));
                 }
                 match field_types.get_mut(k).unwrap() {
                     InferredType::Object(inner_field_types) => {
@@ -629,10 +622,7 @@ impl DecoderOptions {
     }
 
     /// Set the decoder's format Strings param
-    pub fn with_format_strings(
-        mut self,
-        format_strings: HashMap<String, String>,
-    ) -> Self {
+    pub fn with_format_strings(mut self, format_strings: HashMap<String, String>) -> Self {
         self.format_strings = Some(format_strings);
         self
     }
@@ -699,11 +689,9 @@ impl Decoder {
 
         let rows = &rows[..];
 
-        let arrays =
-            self.build_struct_array(rows, self.schema.fields(), &self.options.projection);
+        let arrays = self.build_struct_array(rows, self.schema.fields(), &self.options.projection);
 
-        let projected_fields = if let Some(projection) = self.options.projection.as_ref()
-        {
+        let projected_fields = if let Some(projection) = self.options.projection.as_ref() {
             projection
                 .iter()
                 .filter_map(|name| self.schema.column_with_name(name))
@@ -736,59 +724,43 @@ impl Decoder {
     ) -> Result<ArrayRef> {
         match *key_type {
             DataType::Int8 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::Int8),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::Int8), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<Int8Type>(&dtype, col_name, rows)
             }
             DataType::Int16 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::Int16),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::Int16), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<Int16Type>(&dtype, col_name, rows)
             }
             DataType::Int32 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::Int32),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<Int32Type>(&dtype, col_name, rows)
             }
             DataType::Int64 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::Int64),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::Int64), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<Int64Type>(&dtype, col_name, rows)
             }
             DataType::UInt8 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::UInt8),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::UInt8), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<UInt8Type>(&dtype, col_name, rows)
             }
             DataType::UInt16 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::UInt16),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::UInt16), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<UInt16Type>(&dtype, col_name, rows)
             }
             DataType::UInt32 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::UInt32),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::UInt32), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<UInt32Type>(&dtype, col_name, rows)
             }
             DataType::UInt64 => {
-                let dtype = DataType::Dictionary(
-                    Box::new(DataType::UInt64),
-                    Box::new(DataType::Utf8),
-                );
+                let dtype =
+                    DataType::Dictionary(Box::new(DataType::UInt64), Box::new(DataType::Utf8));
                 self.list_array_string_array_builder::<UInt64Type>(&dtype, col_name, rows)
             }
             ref e => Err(ArrowError::JsonError(format!(
@@ -810,13 +782,11 @@ impl Decoder {
     {
         let mut builder: Box<dyn ArrayBuilder> = match data_type {
             DataType::Utf8 => {
-                let values_builder =
-                    StringBuilder::with_capacity(rows.len(), rows.len() * 5);
+                let values_builder = StringBuilder::with_capacity(rows.len(), rows.len() * 5);
                 Box::new(ListBuilder::new(values_builder))
             }
             DataType::Dictionary(_, _) => {
-                let values_builder =
-                    self.build_string_dictionary_builder::<DT>(rows.len() * 5);
+                let values_builder = self.build_string_dictionary_builder::<DT>(rows.len() * 5);
                 Box::new(ListBuilder::new(values_builder))
             }
             e => {
@@ -907,10 +877,7 @@ impl Decoder {
 
     #[inline(always)]
     #[allow(clippy::unnecessary_wraps)]
-    fn build_string_dictionary_builder<T>(
-        &self,
-        row_len: usize,
-    ) -> StringDictionaryBuilder<T>
+    fn build_string_dictionary_builder<T>(&self, row_len: usize) -> StringDictionaryBuilder<T>
     where
         T: ArrowPrimitiveType + ArrowDictionaryKeyType,
     {
@@ -928,27 +895,13 @@ impl Decoder {
         if let DataType::Utf8 = *value_type {
             match *key_type {
                 DataType::Int8 => self.build_dictionary_array::<Int8Type>(rows, col_name),
-                DataType::Int16 => {
-                    self.build_dictionary_array::<Int16Type>(rows, col_name)
-                }
-                DataType::Int32 => {
-                    self.build_dictionary_array::<Int32Type>(rows, col_name)
-                }
-                DataType::Int64 => {
-                    self.build_dictionary_array::<Int64Type>(rows, col_name)
-                }
-                DataType::UInt8 => {
-                    self.build_dictionary_array::<UInt8Type>(rows, col_name)
-                }
-                DataType::UInt16 => {
-                    self.build_dictionary_array::<UInt16Type>(rows, col_name)
-                }
-                DataType::UInt32 => {
-                    self.build_dictionary_array::<UInt32Type>(rows, col_name)
-                }
-                DataType::UInt64 => {
-                    self.build_dictionary_array::<UInt64Type>(rows, col_name)
-                }
+                DataType::Int16 => self.build_dictionary_array::<Int16Type>(rows, col_name),
+                DataType::Int32 => self.build_dictionary_array::<Int32Type>(rows, col_name),
+                DataType::Int64 => self.build_dictionary_array::<Int64Type>(rows, col_name),
+                DataType::UInt8 => self.build_dictionary_array::<UInt8Type>(rows, col_name),
+                DataType::UInt16 => self.build_dictionary_array::<UInt16Type>(rows, col_name),
+                DataType::UInt32 => self.build_dictionary_array::<UInt32Type>(rows, col_name),
+                DataType::UInt64 => self.build_dictionary_array::<UInt64Type>(rows, col_name),
                 _ => Err(ArrowError::JsonError(
                     "unsupported dictionary key type".to_string(),
                 )),
@@ -1001,9 +954,7 @@ impl Decoder {
                             value.as_u64().and_then(num::cast::cast)
                         } else if value.is_string() {
                             match format_string {
-                                Some(fmt) => {
-                                    T::parse_formatted(value.as_str().unwrap(), fmt)
-                                }
+                                Some(fmt) => T::parse_formatted(value.as_str().unwrap(), fmt),
                                 None => T::parse(value.as_str().unwrap()),
                             }
                         } else {
@@ -1046,8 +997,7 @@ impl Decoder {
             DataType::Boolean => {
                 let num_bytes = bit_util::ceil(valid_len, 8);
                 let mut bool_values = MutableBuffer::from_len_zeroed(num_bytes);
-                let mut bool_nulls =
-                    MutableBuffer::new(num_bytes).with_bitset(num_bytes, true);
+                let mut bool_nulls = MutableBuffer::new(num_bytes).with_bitset(num_bytes, true);
                 let mut curr_index = 0;
                 rows.iter().for_each(|v| {
                     if let Value::Array(vs) = v {
@@ -1055,17 +1005,11 @@ impl Decoder {
                             if let Value::Bool(child) = value {
                                 // if valid boolean, append value
                                 if *child {
-                                    bit_util::set_bit(
-                                        bool_values.as_slice_mut(),
-                                        curr_index,
-                                    );
+                                    bit_util::set_bit(bool_values.as_slice_mut(), curr_index);
                                 }
                             } else {
                                 // null slot
-                                bit_util::unset_bit(
-                                    bool_nulls.as_slice_mut(),
-                                    curr_index,
-                                );
+                                bit_util::unset_bit(bool_nulls.as_slice_mut(), curr_index);
                             }
                             curr_index += 1;
                         });
@@ -1112,13 +1056,13 @@ impl Decoder {
                 .data()
                 .clone(),
             DataType::List(field) => {
-                let child = self
-                    .build_nested_list_array::<i32>(&flatten_json_values(rows), field)?;
+                let child =
+                    self.build_nested_list_array::<i32>(&flatten_json_values(rows), field)?;
                 child.into_data()
             }
             DataType::LargeList(field) => {
-                let child = self
-                    .build_nested_list_array::<i64>(&flatten_json_values(rows), field)?;
+                let child =
+                    self.build_nested_list_array::<i64>(&flatten_json_values(rows), field)?;
                 child.into_data()
             }
             DataType::Struct(fields) => {
@@ -1133,10 +1077,7 @@ impl Decoder {
                         Value::Array(values) if !values.is_empty() => {
                             values.iter().for_each(|value| {
                                 if !value.is_null() {
-                                    bit_util::set_bit(
-                                        null_buffer.as_slice_mut(),
-                                        struct_index,
-                                    );
+                                    bit_util::set_bit(null_buffer.as_slice_mut(), struct_index);
                                 }
                                 struct_index += 1;
                             });
@@ -1147,8 +1088,7 @@ impl Decoder {
                         }
                     })
                     .collect();
-                let arrays =
-                    self.build_struct_array(rows.as_slice(), fields.as_slice(), &None)?;
+                let arrays = self.build_struct_array(rows.as_slice(), fields.as_slice(), &None)?;
                 let data_type = DataType::Struct(fields.clone());
                 let buf = null_buffer.into();
                 unsafe {
@@ -1200,9 +1140,7 @@ impl Decoder {
             })
             .map(|field| {
                 match field.data_type() {
-                    DataType::Null => {
-                        Ok(Arc::new(NullArray::new(rows.len())) as ArrayRef)
-                    }
+                    DataType::Null => Ok(Arc::new(NullArray::new(rows.len())) as ArrayRef),
                     DataType::Boolean => self.build_boolean_array(rows, field.name()),
                     DataType::Float64 => {
                         self.build_primitive_array::<Float64Type>(rows, field.name())
@@ -1210,18 +1148,10 @@ impl Decoder {
                     DataType::Float32 => {
                         self.build_primitive_array::<Float32Type>(rows, field.name())
                     }
-                    DataType::Int64 => {
-                        self.build_primitive_array::<Int64Type>(rows, field.name())
-                    }
-                    DataType::Int32 => {
-                        self.build_primitive_array::<Int32Type>(rows, field.name())
-                    }
-                    DataType::Int16 => {
-                        self.build_primitive_array::<Int16Type>(rows, field.name())
-                    }
-                    DataType::Int8 => {
-                        self.build_primitive_array::<Int8Type>(rows, field.name())
-                    }
+                    DataType::Int64 => self.build_primitive_array::<Int64Type>(rows, field.name()),
+                    DataType::Int32 => self.build_primitive_array::<Int32Type>(rows, field.name()),
+                    DataType::Int16 => self.build_primitive_array::<Int16Type>(rows, field.name()),
+                    DataType::Int8 => self.build_primitive_array::<Int8Type>(rows, field.name()),
                     DataType::UInt64 => {
                         self.build_primitive_array::<UInt64Type>(rows, field.name())
                     }
@@ -1231,31 +1161,18 @@ impl Decoder {
                     DataType::UInt16 => {
                         self.build_primitive_array::<UInt16Type>(rows, field.name())
                     }
-                    DataType::UInt8 => {
-                        self.build_primitive_array::<UInt8Type>(rows, field.name())
-                    }
+                    DataType::UInt8 => self.build_primitive_array::<UInt8Type>(rows, field.name()),
                     // TODO: this is incomplete
                     DataType::Timestamp(unit, _) => match unit {
-                        TimeUnit::Second => self
-                            .build_primitive_array::<TimestampSecondType>(
-                                rows,
-                                field.name(),
-                            ),
+                        TimeUnit::Second => {
+                            self.build_primitive_array::<TimestampSecondType>(rows, field.name())
+                        }
                         TimeUnit::Microsecond => self
-                            .build_primitive_array::<TimestampMicrosecondType>(
-                                rows,
-                                field.name(),
-                            ),
+                            .build_primitive_array::<TimestampMicrosecondType>(rows, field.name()),
                         TimeUnit::Millisecond => self
-                            .build_primitive_array::<TimestampMillisecondType>(
-                                rows,
-                                field.name(),
-                            ),
+                            .build_primitive_array::<TimestampMillisecondType>(rows, field.name()),
                         TimeUnit::Nanosecond => self
-                            .build_primitive_array::<TimestampNanosecondType>(
-                                rows,
-                                field.name(),
-                            ),
+                            .build_primitive_array::<TimestampNanosecondType>(rows, field.name()),
                     },
                     DataType::Date64 => {
                         self.build_primitive_array::<Date64Type>(rows, field.name())
@@ -1263,33 +1180,25 @@ impl Decoder {
                     DataType::Date32 => {
                         self.build_primitive_array::<Date32Type>(rows, field.name())
                     }
-                    DataType::Time64(unit) => match unit {
-                        TimeUnit::Microsecond => self
-                            .build_primitive_array::<Time64MicrosecondType>(
-                                rows,
-                                field.name(),
-                            ),
-                        TimeUnit::Nanosecond => self
-                            .build_primitive_array::<Time64NanosecondType>(
-                                rows,
-                                field.name(),
-                            ),
-                        t => Err(ArrowError::JsonError(format!(
-                            "TimeUnit {:?} not supported with Time64",
-                            t
-                        ))),
-                    },
+                    DataType::Time64(unit) => {
+                        match unit {
+                            TimeUnit::Microsecond => self
+                                .build_primitive_array::<Time64MicrosecondType>(rows, field.name()),
+                            TimeUnit::Nanosecond => self
+                                .build_primitive_array::<Time64NanosecondType>(rows, field.name()),
+                            t => Err(ArrowError::JsonError(format!(
+                                "TimeUnit {:?} not supported with Time64",
+                                t
+                            ))),
+                        }
+                    }
                     DataType::Time32(unit) => match unit {
-                        TimeUnit::Second => self
-                            .build_primitive_array::<Time32SecondType>(
-                                rows,
-                                field.name(),
-                            ),
-                        TimeUnit::Millisecond => self
-                            .build_primitive_array::<Time32MillisecondType>(
-                                rows,
-                                field.name(),
-                            ),
+                        TimeUnit::Second => {
+                            self.build_primitive_array::<Time32SecondType>(rows, field.name())
+                        }
+                        TimeUnit::Millisecond => {
+                            self.build_primitive_array::<Time32MillisecondType>(rows, field.name())
+                        }
                         t => Err(ArrowError::JsonError(format!(
                             "TimeUnit {:?} not supported with Time32",
                             t
@@ -1321,9 +1230,7 @@ impl Decoder {
                                 let extracted_rows = rows
                                     .iter()
                                     .map(|row| {
-                                        row.get(field.name())
-                                            .cloned()
-                                            .unwrap_or(Value::Null)
+                                        row.get(field.name()).cloned().unwrap_or(Value::Null)
                                     })
                                     .collect::<Vec<Value>>();
                                 self.build_nested_list_array::<i32>(
@@ -1333,13 +1240,9 @@ impl Decoder {
                             }
                         }
                     }
-                    DataType::Dictionary(ref key_ty, ref val_ty) => self
-                        .build_string_dictionary_array(
-                            rows,
-                            field.name(),
-                            key_ty,
-                            val_ty,
-                        ),
+                    DataType::Dictionary(ref key_ty, ref val_ty) => {
+                        self.build_string_dictionary_array(rows, field.name(), key_ty, val_ty)
+                    }
                     DataType::Struct(fields) => {
                         let len = rows.len();
                         let num_bytes = bit_util::ceil(len, 8);
@@ -1347,9 +1250,7 @@ impl Decoder {
                         let struct_rows = rows
                             .iter()
                             .enumerate()
-                            .map(|(i, row)| {
-                                (i, row.as_object().and_then(|v| v.get(field.name())))
-                            })
+                            .map(|(i, row)| (i, row.as_object().and_then(|v| v.get(field.name()))))
                             .map(|(i, v)| match v {
                                 // we want the field as an object, if it's not, we treat as null
                                 Some(Value::Object(value)) => {
@@ -1359,25 +1260,19 @@ impl Decoder {
                                 _ => Value::Object(Default::default()),
                             })
                             .collect::<Vec<Value>>();
-                        let arrays =
-                            self.build_struct_array(&struct_rows, fields, &None)?;
+                        let arrays = self.build_struct_array(&struct_rows, fields, &None)?;
                         // construct a struct array's data in order to set null buffer
                         let data_type = DataType::Struct(fields.clone());
                         let data = ArrayDataBuilder::new(data_type)
                             .len(len)
                             .null_bit_buffer(Some(null_buffer.into()))
-                            .child_data(
-                                arrays.into_iter().map(|a| a.into_data()).collect(),
-                            );
+                            .child_data(arrays.into_iter().map(|a| a.into_data()).collect());
                         let data = unsafe { data.build_unchecked() };
                         Ok(make_array(data))
                     }
-                    DataType::Map(map_field, _) => self.build_map_array(
-                        rows,
-                        field.name(),
-                        field.data_type(),
-                        map_field,
-                    ),
+                    DataType::Map(map_field, _) => {
+                        self.build_map_array(rows, field.name(), field.data_type(), map_field)
+                    }
                     _ => Err(ArrowError::JsonError(format!(
                         "{:?} type is not supported",
                         field.data_type()
@@ -1404,21 +1299,20 @@ impl Decoder {
         //
         // Thus we try to read a map by iterating through the keys and values
 
-        let (key_field, value_field) =
-            if let DataType::Struct(fields) = struct_field.data_type() {
-                if fields.len() != 2 {
-                    return Err(ArrowError::InvalidArgumentError(format!(
-                        "DataType::Map expects a struct with 2 fields, found {} fields",
-                        fields.len()
-                    )));
-                }
-                (&fields[0], &fields[1])
-            } else {
+        let (key_field, value_field) = if let DataType::Struct(fields) = struct_field.data_type() {
+            if fields.len() != 2 {
                 return Err(ArrowError::InvalidArgumentError(format!(
-                    "JSON map array builder expects a DataType::Map, found {:?}",
-                    struct_field.data_type()
+                    "DataType::Map expects a struct with 2 fields, found {} fields",
+                    fields.len()
                 )));
-            };
+            }
+            (&fields[0], &fields[1])
+        } else {
+            return Err(ArrowError::InvalidArgumentError(format!(
+                "JSON map array builder expects a DataType::Map, found {:?}",
+                struct_field.data_type()
+            )));
+        };
         let value_map_iter = rows.iter().map(|value| {
             value
                 .get(field_name)
@@ -1485,11 +1379,7 @@ impl Decoder {
     }
 
     #[inline(always)]
-    fn build_dictionary_array<T>(
-        &self,
-        rows: &[Value],
-        col_name: &str,
-    ) -> Result<ArrayRef>
+    fn build_dictionary_array<T>(&self, rows: &[Value], col_name: &str) -> Result<ArrayRef>
     where
         T::Native: num::NumCast,
         T: ArrowPrimitiveType + ArrowDictionaryKeyType,
@@ -1524,8 +1414,7 @@ impl Decoder {
                     values
                         .iter()
                         .map(|value| {
-                            let v: Option<T::Native> =
-                                value.as_f64().and_then(num::cast::cast);
+                            let v: Option<T::Native> = value.as_f64().and_then(num::cast::cast);
                             v
                         })
                         .collect::<Vec<Option<T::Native>>>()
@@ -1715,10 +1604,7 @@ impl ReaderBuilder {
     }
 
     /// Set the decoder's format Strings param
-    pub fn with_format_strings(
-        mut self,
-        format_strings: HashMap<String, String>,
-    ) -> Self {
+    pub fn with_format_strings(mut self, format_strings: HashMap<String, String>) -> Self {
         self.options = self.options.with_format_strings(format_strings);
         self
     }
@@ -2078,9 +1964,7 @@ mod tests {
     #[test]
     fn test_invalid_json_infer_schema() {
         let re = infer_json_schema_from_seekable(
-            &mut BufReader::new(
-                File::open("test/data/uk_cities_with_headers.csv").unwrap(),
-            ),
+            &mut BufReader::new(File::open("test/data/uk_cities_with_headers.csv").unwrap()),
             None,
         );
         assert_eq!(
@@ -2302,8 +2186,7 @@ mod tests {
             ]),
             true,
         );
-        let a_field =
-            Field::new("a", DataType::List(Box::new(a_struct_field.clone())), true);
+        let a_field = Field::new("a", DataType::List(Box::new(a_struct_field.clone())), true);
         let schema = Arc::new(Schema::new(vec![a_field.clone()]));
         let builder = ReaderBuilder::new().with_schema(schema).with_batch_size(64);
         let json_content = r#"
@@ -2406,8 +2289,7 @@ mod tests {
     #[test]
     fn test_map_json_arrays() {
         let account_field = Field::new("account", DataType::UInt16, false);
-        let value_list_type =
-            DataType::List(Box::new(Field::new("item", DataType::Utf8, false)));
+        let value_list_type = DataType::List(Box::new(Field::new("item", DataType::Utf8, false)));
         let entries_struct_type = DataType::Struct(vec![
             Field::new("key", DataType::Utf8, false),
             Field::new("value", value_list_type.clone(), true),
@@ -2460,13 +2342,12 @@ mod tests {
             .add_child_data(expected_values)
             .build()
             .unwrap();
-        let expected_stocks_data =
-            ArrayDataBuilder::new(stocks_field.data_type().clone())
-                .len(3)
-                .add_buffer(Buffer::from(vec![0i32, 2, 4, 7].to_byte_slice()))
-                .add_child_data(expected_stocks_entries_data)
-                .build()
-                .unwrap();
+        let expected_stocks_data = ArrayDataBuilder::new(stocks_field.data_type().clone())
+            .len(3)
+            .add_buffer(Buffer::from(vec![0i32, 2, 4, 7].to_byte_slice()))
+            .add_child_data(expected_stocks_entries_data)
+            .build()
+            .unwrap();
 
         let expected_stocks = make_array(expected_stocks_data);
 
@@ -2732,9 +2613,7 @@ mod tests {
             .with_schema(Arc::new(schema))
             .with_batch_size(64);
         let mut reader: Reader<File> = builder
-            .build::<File>(
-                File::open("test/data/list_string_dict_nested_nulls.json").unwrap(),
-            )
+            .build::<File>(File::open("test/data/list_string_dict_nested_nulls.json").unwrap())
             .unwrap();
         let batch = reader.next().unwrap().unwrap();
 
@@ -2904,8 +2783,7 @@ mod tests {
             ),
         ]);
 
-        let mut reader =
-            BufReader::new(File::open("test/data/mixed_arrays.json").unwrap());
+        let mut reader = BufReader::new(File::open("test/data/mixed_arrays.json").unwrap());
         let inferred_schema = infer_json_schema_from_seekable(&mut reader, None).unwrap();
 
         assert_eq!(inferred_schema, schema);
@@ -3312,8 +3190,7 @@ mod tests {
         let schema = Schema::new(vec![Field::new("c1", DataType::Binary, true)]);
         let binary_values = BinaryArray::from(vec!["₁₂₃".as_bytes(), "foo".as_bytes()]);
         let expected_batch =
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(binary_values)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(binary_values)]).unwrap();
         let expected_data = expected_batch.columns().iter().collect::<Vec<_>>();
 
         assert_eq!(data, expected_data);

@@ -411,15 +411,7 @@ pub fn is_null(input: &dyn Array) -> Result<BooleanArray> {
     };
 
     let data = unsafe {
-        ArrayData::new_unchecked(
-            DataType::Boolean,
-            len,
-            None,
-            None,
-            0,
-            vec![output],
-            vec![],
-        )
+        ArrayData::new_unchecked(DataType::Boolean, len, None, None, 0, vec![output], vec![])
     };
 
     Ok(BooleanArray::from(data))
@@ -454,15 +446,7 @@ pub fn is_not_null(input: &dyn Array) -> Result<BooleanArray> {
     };
 
     let data = unsafe {
-        ArrayData::new_unchecked(
-            DataType::Boolean,
-            len,
-            None,
-            None,
-            0,
-            vec![output],
-            vec![],
-        )
+        ArrayData::new_unchecked(DataType::Boolean, len, None, None, 0, vec![output], vec![])
     };
 
     Ok(BooleanArray::from(data))
@@ -475,17 +459,13 @@ pub fn is_not_null(input: &dyn Array) -> Result<BooleanArray> {
 // the left array's data needs to be sliced to a new offset, and for non-primitive arrays shifting the
 // data might be too complicated.   In the future, to avoid shifting left array's data, we could instead
 // shift the final bitbuffer to the right, prepending with 0's instead.
-pub fn nullif<T>(
-    left: &PrimitiveArray<T>,
-    right: &BooleanArray,
-) -> Result<PrimitiveArray<T>>
+pub fn nullif<T>(left: &PrimitiveArray<T>, right: &BooleanArray) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
 {
     if left.len() != right.len() {
         return Err(ArrowError::ComputeError(
-            "Cannot perform comparison operation on arrays of different length"
-                .to_string(),
+            "Cannot perform comparison operation on arrays of different length".to_string(),
         ));
     }
     let left_data = left.data();
@@ -802,8 +782,7 @@ mod tests {
         let a = a.as_any().downcast_ref::<BooleanArray>().unwrap();
         let c = not(a).unwrap();
 
-        let expected =
-            BooleanArray::from(vec![Some(false), Some(true), None, Some(false)]);
+        let expected = BooleanArray::from(vec![Some(false), Some(true), None, Some(false)]);
 
         assert_eq!(c, expected);
     }
@@ -852,12 +831,10 @@ mod tests {
     #[test]
     fn test_bool_array_and_sliced_same_offset() {
         let a = BooleanArray::from(vec![
-            false, false, false, false, false, false, false, false, false, false, true,
-            true,
+            false, false, false, false, false, false, false, false, false, false, true, true,
         ]);
         let b = BooleanArray::from(vec![
-            false, false, false, false, false, false, false, false, false, true, false,
-            true,
+            false, false, false, false, false, false, false, false, false, true, false, true,
         ]);
 
         let a = a.slice(8, 4);
@@ -875,12 +852,10 @@ mod tests {
     #[test]
     fn test_bool_array_and_sliced_same_offset_mod8() {
         let a = BooleanArray::from(vec![
-            false, false, true, true, false, false, false, false, false, false, false,
-            false,
+            false, false, true, true, false, false, false, false, false, false, false, false,
         ]);
         let b = BooleanArray::from(vec![
-            false, false, false, false, false, false, false, false, false, true, false,
-            true,
+            false, false, false, false, false, false, false, false, false, true, false, true,
         ]);
 
         let a = a.slice(0, 4);
@@ -898,8 +873,7 @@ mod tests {
     #[test]
     fn test_bool_array_and_sliced_offset1() {
         let a = BooleanArray::from(vec![
-            false, false, false, false, false, false, false, false, false, false, true,
-            true,
+            false, false, false, false, false, false, false, false, false, false, true, true,
         ]);
         let b = BooleanArray::from(vec![false, true, false, true]);
 
@@ -917,8 +891,7 @@ mod tests {
     fn test_bool_array_and_sliced_offset2() {
         let a = BooleanArray::from(vec![false, false, true, true]);
         let b = BooleanArray::from(vec![
-            false, false, false, false, false, false, false, false, false, true, false,
-            true,
+            false, false, false, false, false, false, false, false, false, true, false, true,
         ]);
 
         let b = b.slice(8, 4);
@@ -951,8 +924,7 @@ mod tests {
 
         let c = and(a, b).unwrap();
 
-        let expected =
-            BooleanArray::from(vec![Some(false), Some(false), None, Some(true)]);
+        let expected = BooleanArray::from(vec![Some(false), Some(false), None, Some(true)]);
 
         assert_eq!(expected, c);
     }
@@ -1096,8 +1068,7 @@ mod tests {
     #[test]
     fn test_nullif_int_array() {
         let a = Int32Array::from(vec![Some(15), None, Some(8), Some(1), Some(9)]);
-        let comp =
-            BooleanArray::from(vec![Some(false), None, Some(true), Some(false), None]);
+        let comp = BooleanArray::from(vec![Some(false), None, Some(true), Some(false), None]);
         let res = nullif(&a, &comp).unwrap();
 
         let expected = Int32Array::from(vec![

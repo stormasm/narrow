@@ -625,9 +625,7 @@ where
 
 /// Force downcast of an [`Array`], such as an [`ArrayRef`] to
 /// [`GenericListArray<T>`], panic'ing on failure.
-pub fn as_generic_list_array<S: OffsetSizeTrait>(
-    arr: &dyn Array,
-) -> &GenericListArray<S> {
+pub fn as_generic_list_array<S: OffsetSizeTrait>(arr: &dyn Array) -> &GenericListArray<S> {
     arr.as_any()
         .downcast_ref::<GenericListArray<S>>()
         .expect("Unable to downcast to list array")
@@ -650,9 +648,7 @@ pub fn as_large_list_array(arr: &dyn Array) -> &LargeListArray {
 /// Force downcast of an [`Array`], such as an [`ArrayRef`] to
 /// [`GenericBinaryArray<S>`], panic'ing on failure.
 #[inline]
-pub fn as_generic_binary_array<S: OffsetSizeTrait>(
-    arr: &dyn Array,
-) -> &GenericBinaryArray<S> {
+pub fn as_generic_binary_array<S: OffsetSizeTrait>(arr: &dyn Array) -> &GenericBinaryArray<S> {
     arr.as_any()
         .downcast_ref::<GenericBinaryArray<S>>()
         .expect("Unable to downcast to binary array")

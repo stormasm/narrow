@@ -140,8 +140,7 @@ impl<T: DecimalType> Decimal<T> {
         let raw_bytes = self.raw_value();
         let integer = BigInt::from_signed_bytes_le(raw_bytes.as_ref());
         let value_str = integer.to_string();
-        let (sign, rest) =
-            value_str.split_at(if integer >= BigInt::from(0) { 0 } else { 1 });
+        let (sign, rest) = value_str.split_at(if integer >= BigInt::from(0) { 0 } else { 1 });
         let bound = min(usize::from(self.precision()), rest.len()) + sign.len();
         let value_str = &value_str[0..bound];
         let scale_usize = usize::from(self.scale());
@@ -249,8 +248,7 @@ impl Decimal256 {
 
 impl From<BigInt> for Decimal256 {
     fn from(bigint: BigInt) -> Self {
-        Decimal256::from_big_int(&bigint, DECIMAL256_MAX_PRECISION, DECIMAL_DEFAULT_SCALE)
-            .unwrap()
+        Decimal256::from_big_int(&bigint, DECIMAL256_MAX_PRECISION, DECIMAL_DEFAULT_SCALE).unwrap()
     }
 }
 
@@ -403,9 +401,16 @@ mod tests {
         let value = Decimal256::from_big_int(&num, 30, 2).unwrap();
         assert_eq!(value.to_string(), "1234567.89");
 
-        let num = BigInt::from_str_radix("-5744373177007483132341216834415376678658315645522012356644966081642565415731", 10).unwrap();
+        let num = BigInt::from_str_radix(
+            "-5744373177007483132341216834415376678658315645522012356644966081642565415731",
+            10,
+        )
+        .unwrap();
         let value = Decimal256::from_big_int(&num, 76, 4).unwrap();
-        assert_eq!(value.to_string(), "-574437317700748313234121683441537667865831564552201235664496608164256541.5731");
+        assert_eq!(
+            value.to_string(),
+            "-574437317700748313234121683441537667865831564552201235664496608164256541.5731"
+        );
     }
 
     #[test]
@@ -463,10 +468,8 @@ mod tests {
         for _i in 0..100 {
             let left = random::<i128>();
             let right = random::<i128>();
-            let left_decimal =
-                Decimal256::from_big_int(&BigInt::from(left), 75, 2).unwrap();
-            let right_decimal =
-                Decimal256::from_big_int(&BigInt::from(right), 75, 2).unwrap();
+            let left_decimal = Decimal256::from_big_int(&BigInt::from(left), 75, 2).unwrap();
+            let right_decimal = Decimal256::from_big_int(&BigInt::from(right), 75, 2).unwrap();
             assert_eq!(left < right, left_decimal < right_decimal);
             assert_eq!(left == right, left_decimal == right_decimal)
         }

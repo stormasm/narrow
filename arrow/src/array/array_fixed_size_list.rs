@@ -187,8 +187,7 @@ impl fmt::Debug for FixedSizeListArray {
 #[cfg(test)]
 mod tests {
     use crate::{
-        array::ArrayData, array::Int32Array, buffer::Buffer, datatypes::Field,
-        util::bit_util,
+        array::ArrayData, array::Int32Array, buffer::Buffer, datatypes::Field, util::bit_util,
     };
 
     use super::*;
@@ -203,10 +202,8 @@ mod tests {
             .unwrap();
 
         // Construct a list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, false)),
-            3,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, false)), 3);
         let list_data = ArrayData::builder(list_data_type.clone())
             .len(3)
             .add_child_data(value_data.clone())
@@ -263,9 +260,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "FixedSizeListArray child array length should be a multiple of 3"
-    )]
+    #[should_panic(expected = "FixedSizeListArray child array length should be a multiple of 3")]
     // Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
     #[cfg(not(feature = "force_validate"))]
@@ -278,10 +273,8 @@ mod tests {
             .unwrap();
 
         // Construct a list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, false)),
-            3,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, false)), 3);
         let list_data = unsafe {
             ArrayData::builder(list_data_type)
                 .len(3)
@@ -309,10 +302,8 @@ mod tests {
         bit_util::set_bit(&mut null_bits, 4);
 
         // Construct a fixed size list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, false)),
-            2,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, false)), 2);
         let list_data = ArrayData::builder(list_data_type)
             .len(5)
             .add_child_data(value_data.clone())
@@ -371,10 +362,8 @@ mod tests {
         bit_util::set_bit(&mut null_bits, 4);
 
         // Construct a fixed size list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, false)),
-            2,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, false)), 2);
         let list_data = ArrayData::builder(list_data_type)
             .len(5)
             .add_child_data(value_data)

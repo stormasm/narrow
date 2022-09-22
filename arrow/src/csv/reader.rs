@@ -50,8 +50,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::sync::Arc;
 
 use crate::array::{
-    ArrayRef, BooleanArray, Decimal128Builder, DictionaryArray, PrimitiveArray,
-    StringArray,
+    ArrayRef, BooleanArray, Decimal128Builder, DictionaryArray, PrimitiveArray, StringArray,
 };
 use crate::datatypes::*;
 use crate::error::{ArrowError, Result};
@@ -63,8 +62,7 @@ use csv_crate::{ByteRecord, StringRecord};
 use std::ops::Neg;
 
 lazy_static! {
-    static ref PARSE_DECIMAL_RE: Regex =
-        Regex::new(r"^-?(\d+\.?\d*|\d*\.?\d+)$").unwrap();
+    static ref PARSE_DECIMAL_RE: Regex = Regex::new(r"^-?(\d+\.?\d*|\d*\.?\d+)$").unwrap();
     static ref DECIMAL_RE: Regex =
         Regex::new(r"^-?((\d*\.\d+|\d+\.\d*)([eE]-?\d+)?|\d+([eE]-?\d+))$").unwrap();
     static ref INTEGER_RE: Regex = Regex::new(r"^-?(\d+)$").unwrap();
@@ -73,8 +71,7 @@ lazy_static! {
         .build()
         .unwrap();
     static ref DATE_RE: Regex = Regex::new(r"^\d{4}-\d\d-\d\d$").unwrap();
-    static ref DATETIME_RE: Regex =
-        Regex::new(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$").unwrap();
+    static ref DATETIME_RE: Regex = Regex::new(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$").unwrap();
 }
 
 /// Infer the data type of a record
@@ -143,8 +140,7 @@ fn infer_file_schema_with_csv_options<R: Read + Seek>(
 ) -> Result<(Schema, usize)> {
     let saved_offset = reader.seek(SeekFrom::Current(0))?;
 
-    let (schema, records_count) =
-        infer_reader_schema_with_csv_options(&mut reader, roptions)?;
+    let (schema, records_count) = infer_reader_schema_with_csv_options(&mut reader, roptions)?;
     // return the reader seek back to the start
     reader.seek(SeekFrom::Start(saved_offset))?;
 
@@ -391,8 +387,7 @@ impl<R: Read> Reader<R> {
         projection: Option<Vec<usize>>,
         datetime_format: Option<String>,
     ) -> Self {
-        let csv_reader =
-            Self::build_csv_reader(reader, has_header, delimiter, None, None, None);
+        let csv_reader = Self::build_csv_reader(reader, has_header, delimiter, None, None, None);
         Self::from_csv_reader(
             csv_reader,
             schema,
@@ -548,60 +543,29 @@ fn parse(
                 DataType::Decimal128(precision, scale) => {
                     build_decimal_array(line_number, rows, i, *precision, *scale)
                 }
-                DataType::Int8 => {
-                    build_primitive_array::<Int8Type>(line_number, rows, i, None)
-                }
-                DataType::Int16 => {
-                    build_primitive_array::<Int16Type>(line_number, rows, i, None)
-                }
-                DataType::Int32 => {
-                    build_primitive_array::<Int32Type>(line_number, rows, i, None)
-                }
-                DataType::Int64 => {
-                    build_primitive_array::<Int64Type>(line_number, rows, i, None)
-                }
-                DataType::UInt8 => {
-                    build_primitive_array::<UInt8Type>(line_number, rows, i, None)
-                }
-                DataType::UInt16 => {
-                    build_primitive_array::<UInt16Type>(line_number, rows, i, None)
-                }
-                DataType::UInt32 => {
-                    build_primitive_array::<UInt32Type>(line_number, rows, i, None)
-                }
-                DataType::UInt64 => {
-                    build_primitive_array::<UInt64Type>(line_number, rows, i, None)
-                }
+                DataType::Int8 => build_primitive_array::<Int8Type>(line_number, rows, i, None),
+                DataType::Int16 => build_primitive_array::<Int16Type>(line_number, rows, i, None),
+                DataType::Int32 => build_primitive_array::<Int32Type>(line_number, rows, i, None),
+                DataType::Int64 => build_primitive_array::<Int64Type>(line_number, rows, i, None),
+                DataType::UInt8 => build_primitive_array::<UInt8Type>(line_number, rows, i, None),
+                DataType::UInt16 => build_primitive_array::<UInt16Type>(line_number, rows, i, None),
+                DataType::UInt32 => build_primitive_array::<UInt32Type>(line_number, rows, i, None),
+                DataType::UInt64 => build_primitive_array::<UInt64Type>(line_number, rows, i, None),
                 DataType::Float32 => {
                     build_primitive_array::<Float32Type>(line_number, rows, i, None)
                 }
                 DataType::Float64 => {
                     build_primitive_array::<Float64Type>(line_number, rows, i, None)
                 }
-                DataType::Date32 => {
-                    build_primitive_array::<Date32Type>(line_number, rows, i, None)
+                DataType::Date32 => build_primitive_array::<Date32Type>(line_number, rows, i, None),
+                DataType::Date64 => {
+                    build_primitive_array::<Date64Type>(line_number, rows, i, datetime_format)
                 }
-                DataType::Date64 => build_primitive_array::<Date64Type>(
-                    line_number,
-                    rows,
-                    i,
-                    datetime_format,
-                ),
                 DataType::Timestamp(TimeUnit::Microsecond, _) => {
-                    build_primitive_array::<TimestampMicrosecondType>(
-                        line_number,
-                        rows,
-                        i,
-                        None,
-                    )
+                    build_primitive_array::<TimestampMicrosecondType>(line_number, rows, i, None)
                 }
                 DataType::Timestamp(TimeUnit::Nanosecond, _) => {
-                    build_primitive_array::<TimestampNanosecondType>(
-                        line_number,
-                        rows,
-                        i,
-                        None,
-                    )
+                    build_primitive_array::<TimestampNanosecondType>(line_number, rows, i, None)
                 }
                 DataType::Utf8 => Ok(Arc::new(
                     rows.iter().map(|row| row.get(i)).collect::<StringArray>(),
@@ -664,8 +628,7 @@ fn parse(
         })
         .collect();
 
-    let projected_fields: Vec<Field> =
-        projection.iter().map(|i| fields[*i].clone()).collect();
+    let projected_fields: Vec<Field> = projection.iter().map(|i| fields[*i].clone()).collect();
 
     let projected_schema = Arc::new(match metadata {
         None => Schema::new(projected_fields),
@@ -709,8 +672,7 @@ fn build_decimal_array(
     precision: u8,
     scale: u8,
 ) -> Result<ArrayRef> {
-    let mut decimal_builder =
-        Decimal128Builder::with_capacity(rows.len(), precision, scale);
+    let mut decimal_builder = Decimal128Builder::with_capacity(rows.len(), precision, scale);
     for row in rows {
         let col_s = row.get(col_idx);
         match col_s {
@@ -1229,8 +1191,7 @@ mod tests {
 
         let file = File::open("test/data/decimal_test.csv").unwrap();
 
-        let mut csv =
-            Reader::new(file, Arc::new(schema), false, None, 1024, None, None, None);
+        let mut csv = Reader::new(file, Arc::new(schema), false, None, 1024, None, None, None);
         let batch = csv.next().unwrap().unwrap();
         // access data from a primitive array
         let lat = batch
@@ -1259,8 +1220,7 @@ mod tests {
             Field::new("lng", DataType::Float64, false),
         ]);
 
-        let file_with_headers =
-            File::open("test/data/uk_cities_with_headers.csv").unwrap();
+        let file_with_headers = File::open("test/data/uk_cities_with_headers.csv").unwrap();
         let file_without_headers = File::open("test/data/uk_cities.csv").unwrap();
         let both_files = file_with_headers
             .chain(Cursor::new("\n".to_string()))
@@ -1464,8 +1424,7 @@ mod tests {
 
         let file = File::open("test/data/null_test.csv").unwrap();
 
-        let mut csv =
-            Reader::new(file, Arc::new(schema), true, None, 1024, None, None, None);
+        let mut csv = Reader::new(file, Arc::new(schema), true, None, 1024, None, None, None);
         let batch = csv.next().unwrap().unwrap();
 
         assert!(!batch.column(1).is_null(0));
@@ -1501,8 +1460,7 @@ mod tests {
         assert_eq!(&DataType::Date32, schema.field(4).data_type());
         assert_eq!(&DataType::Date64, schema.field(5).data_type());
 
-        let names: Vec<&str> =
-            schema.fields().iter().map(|x| x.name().as_str()).collect();
+        let names: Vec<&str> = schema.fields().iter().map(|x| x.name().as_str()).collect();
         assert_eq!(
             names,
             vec![
@@ -1612,16 +1570,12 @@ mod tests {
             -2203932304000
         );
         assert_eq!(
-            parse_formatted::<Date64Type>("1900-02-28 12:34:56", "%Y-%m-%d %H:%M:%S")
-                .unwrap(),
+            parse_formatted::<Date64Type>("1900-02-28 12:34:56", "%Y-%m-%d %H:%M:%S").unwrap(),
             -2203932304000
         );
         assert_eq!(
-            parse_formatted::<Date64Type>(
-                "1900-02-28 12:34:56+0030",
-                "%Y-%m-%d %H:%M:%S%z"
-            )
-            .unwrap(),
+            parse_formatted::<Date64Type>("1900-02-28 12:34:56+0030", "%Y-%m-%d %H:%M:%S%z")
+                .unwrap(),
             -2203932304000 - (30 * 60 * 1000)
         );
     }
@@ -1705,9 +1659,7 @@ mod tests {
         // naive_datetime_to_timestamp to compute the utc offset to
         // try and double check the logic
         let utc_offset_secs = match Local.offset_from_local_datetime(naive_datetime) {
-            LocalResult::Single(local_offset) => {
-                local_offset.fix().local_minus_utc() as i64
-            }
+            LocalResult::Single(local_offset) => local_offset.fix().local_minus_utc() as i64,
             _ => panic!(
                 "Unexpected failure converting {} to local datetime",
                 naive_datetime

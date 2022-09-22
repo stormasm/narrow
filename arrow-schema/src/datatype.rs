@@ -291,16 +291,7 @@ impl DataType {
         use DataType::*;
         matches!(
             t,
-            UInt8
-                | UInt16
-                | UInt32
-                | UInt64
-                | Int8
-                | Int16
-                | Int32
-                | Int64
-                | Float32
-                | Float64
+            UInt8 | UInt16 | UInt32 | UInt64 | Int8 | Int16 | Int32 | Int64 | Float32 | Float64
         )
     }
 
@@ -309,13 +300,7 @@ impl DataType {
         use DataType::*;
         matches!(
             t,
-            Date32
-                | Date64
-                | Timestamp(_, _)
-                | Time32(_)
-                | Time64(_)
-                | Duration(_)
-                | Interval(_)
+            Date32 | Date64 | Timestamp(_, _) | Time32(_) | Time64(_) | Duration(_) | Interval(_)
         )
     }
 
@@ -333,12 +318,7 @@ impl DataType {
         use DataType::*;
         matches!(
             t,
-            List(_)
-                | FixedSizeList(_, _)
-                | LargeList(_)
-                | Struct(_)
-                | Union(_, _, _)
-                | Map(_, _)
+            List(_) | FixedSizeList(_, _) | LargeList(_) | Struct(_) | Union(_, _, _) | Map(_, _)
         )
     }
 
@@ -348,8 +328,7 @@ impl DataType {
         match (&self, other) {
             (DataType::List(a), DataType::List(b))
             | (DataType::LargeList(a), DataType::LargeList(b)) => {
-                a.is_nullable() == b.is_nullable()
-                    && a.data_type().equals_datatype(b.data_type())
+                a.is_nullable() == b.is_nullable() && a.data_type().equals_datatype(b.data_type())
             }
             (DataType::FixedSizeList(a, a_size), DataType::FixedSizeList(b, b_size)) => {
                 a_size == b_size
@@ -363,10 +342,9 @@ impl DataType {
                             && a.data_type().equals_datatype(b.data_type())
                     })
             }
-            (
-                DataType::Map(a_field, a_is_sorted),
-                DataType::Map(b_field, b_is_sorted),
-            ) => a_field == b_field && a_is_sorted == b_is_sorted,
+            (DataType::Map(a_field, a_is_sorted), DataType::Map(b_field, b_is_sorted)) => {
+                a_field == b_field && a_is_sorted == b_is_sorted
+            }
             _ => self == other,
         }
     }
@@ -385,12 +363,12 @@ mod tests {
         let field_metadata: BTreeMap<String, String> = kv_array.iter().cloned().collect();
 
         // Non-empty map: should be converted as JSON obj { ... }
-        let first_name = Field::new("first_name", DataType::Utf8, false)
-            .with_metadata(Some(field_metadata));
+        let first_name =
+            Field::new("first_name", DataType::Utf8, false).with_metadata(Some(field_metadata));
 
         // Empty map: should be omitted.
-        let last_name = Field::new("last_name", DataType::Utf8, false)
-            .with_metadata(Some(BTreeMap::default()));
+        let last_name =
+            Field::new("last_name", DataType::Utf8, false).with_metadata(Some(BTreeMap::default()));
 
         let person = DataType::Struct(vec![
             first_name,
@@ -438,10 +416,8 @@ mod tests {
         assert!(!list_b.equals_datatype(&list_c));
         assert!(!list_a.equals_datatype(&list_d));
 
-        let list_e =
-            DataType::FixedSizeList(Box::new(Field::new("item", list_a, false)), 3);
-        let list_f =
-            DataType::FixedSizeList(Box::new(Field::new("array", list_b, false)), 3);
+        let list_e = DataType::FixedSizeList(Box::new(Field::new("item", list_a, false)), 3);
+        let list_f = DataType::FixedSizeList(Box::new(Field::new("array", list_b, false)), 3);
         let list_g = DataType::FixedSizeList(
             Box::new(Field::new("item", DataType::FixedSizeBinary(3), true)),
             3,

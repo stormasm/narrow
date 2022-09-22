@@ -22,12 +22,9 @@ use std::iter::IntoIterator;
 use std::{convert::From, iter::FromIterator};
 
 use super::{
-    make_array, Array, ArrayData, ArrayRef, PrimitiveArray, StringArray,
-    StringDictionaryBuilder,
+    make_array, Array, ArrayData, ArrayRef, PrimitiveArray, StringArray, StringDictionaryBuilder,
 };
-use crate::datatypes::{
-    ArrowDictionaryKeyType, ArrowNativeType, ArrowPrimitiveType, DataType,
-};
+use crate::datatypes::{ArrowDictionaryKeyType, ArrowNativeType, ArrowPrimitiveType, DataType};
 use crate::error::Result;
 
 /// A dictionary array where each element is a single value indexed by an integer key.
@@ -185,8 +182,7 @@ impl<K: ArrowPrimitiveType> DictionaryArray<K> {
     ///
     /// Panics if `values` is not a [`StringArray`].
     pub fn lookup_key(&self, value: &str) -> Option<K::Native> {
-        let rd_buf: &StringArray =
-            self.values.as_any().downcast_ref::<StringArray>().unwrap();
+        let rd_buf: &StringArray = self.values.as_any().downcast_ref::<StringArray>().unwrap();
 
         (0..rd_buf.len())
             .position(|i| rd_buf.value(i) == value)
@@ -520,8 +516,7 @@ mod tests {
     use crate::array::{Float32Array, Int8Array};
     use crate::datatypes::{Float32Type, Int16Type};
     use crate::{
-        array::Int16DictionaryArray, array::PrimitiveDictionaryBuilder,
-        datatypes::DataType,
+        array::Int16DictionaryArray, array::PrimitiveDictionaryBuilder, datatypes::DataType,
     };
     use crate::{
         array::{Int16Array, Int32Array},
@@ -546,8 +541,7 @@ mod tests {
         // Construct a dictionary array from the above two
         let key_type = DataType::Int16;
         let value_type = DataType::Int8;
-        let dict_data_type =
-            DataType::Dictionary(Box::new(key_type), Box::new(value_type));
+        let dict_data_type = DataType::Dictionary(Box::new(key_type), Box::new(value_type));
         let dict_data = ArrayData::builder(dict_data_type.clone())
             .len(3)
             .add_buffer(keys.clone())
@@ -585,8 +579,7 @@ mod tests {
 
     #[test]
     fn test_dictionary_array_fmt_debug() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<UInt8Type, UInt32Type>::with_capacity(3, 2);
+        let mut builder = PrimitiveDictionaryBuilder::<UInt8Type, UInt32Type>::with_capacity(3, 2);
         builder.append(12345678).unwrap();
         builder.append_null();
         builder.append(22345678).unwrap();
@@ -596,8 +589,7 @@ mod tests {
             format!("{:?}", array)
         );
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<UInt8Type, UInt32Type>::with_capacity(20, 2);
+        let mut builder = PrimitiveDictionaryBuilder::<UInt8Type, UInt32Type>::with_capacity(20, 2);
         for _ in 0..20 {
             builder.append(1).unwrap();
         }
@@ -773,9 +765,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Value at position 1 out of bounds: 3 (should be in [0, 1])"
-    )]
+    #[should_panic(expected = "Value at position 1 out of bounds: 3 (should be in [0, 1])")]
     fn test_try_new_index_too_large() {
         let values: StringArray = [Some("foo"), Some("bar")].into_iter().collect();
         // dictionary only has 2 values, so offset 3 is out of bounds
@@ -784,9 +774,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Value at position 0 out of bounds: -100 (should be in [0, 1])"
-    )]
+    #[should_panic(expected = "Value at position 0 out of bounds: -100 (should be in [0, 1])")]
     fn test_try_new_index_too_small() {
         let values: StringArray = [Some("foo"), Some("bar")].into_iter().collect();
         let keys: Int32Array = [Some(-100)].into_iter().collect();

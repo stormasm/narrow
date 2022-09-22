@@ -188,8 +188,7 @@ impl<OffsetSize: OffsetSizeTrait> GenericBinaryArray<OffsetSize> {
         let (_, data_len) = iter.size_hint();
         let data_len = data_len.expect("Iterator must be sized"); // panic if no upper bound.
 
-        let mut offsets =
-            MutableBuffer::new((data_len + 1) * std::mem::size_of::<OffsetSize>());
+        let mut offsets = MutableBuffer::new((data_len + 1) * std::mem::size_of::<OffsetSize>());
         let mut values = MutableBuffer::new(0);
 
         let mut length_so_far = OffsetSize::zero();
@@ -265,9 +264,7 @@ impl<OffsetSize: OffsetSizeTrait> Array for GenericBinaryArray<OffsetSize> {
     }
 }
 
-impl<'a, OffsetSize: OffsetSizeTrait> ArrayAccessor
-    for &'a GenericBinaryArray<OffsetSize>
-{
+impl<'a, OffsetSize: OffsetSizeTrait> ArrayAccessor for &'a GenericBinaryArray<OffsetSize> {
     type Item = &'a [u8];
 
     fn value(&self, index: usize) -> Self::Item {
@@ -307,9 +304,7 @@ impl<OffsetSize: OffsetSizeTrait> From<GenericBinaryArray<OffsetSize>> for Array
     }
 }
 
-impl<OffsetSize: OffsetSizeTrait> From<Vec<Option<&[u8]>>>
-    for GenericBinaryArray<OffsetSize>
-{
+impl<OffsetSize: OffsetSizeTrait> From<Vec<Option<&[u8]>>> for GenericBinaryArray<OffsetSize> {
     fn from(v: Vec<Option<&[u8]>>) -> Self {
         Self::from_opt_vec(v)
     }
@@ -327,8 +322,7 @@ impl<T: OffsetSizeTrait> From<GenericListArray<T>> for GenericBinaryArray<T> {
     }
 }
 
-impl<Ptr, OffsetSize: OffsetSizeTrait> FromIterator<Option<Ptr>>
-    for GenericBinaryArray<OffsetSize>
+impl<Ptr, OffsetSize: OffsetSizeTrait> FromIterator<Option<Ptr>> for GenericBinaryArray<OffsetSize>
 where
     Ptr: AsRef<[u8]>,
 {
@@ -613,9 +607,11 @@ mod tests {
             .unwrap();
         let binary_array1 = GenericBinaryArray::<O>::from(array_data1);
 
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt8, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt8,
+            false,
+        )));
 
         let array_data2 = ArrayData::builder(data_type)
             .len(3)
@@ -663,9 +659,11 @@ mod tests {
 
         let offsets = [0, 5, 8, 15].map(|n| O::from_usize(n).unwrap());
         let null_buffer = Buffer::from_slice_ref(&[0b101]);
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt8, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt8,
+            false,
+        )));
 
         // [None, Some(b"Parquet")]
         let array_data = ArrayData::builder(data_type)
@@ -696,9 +694,7 @@ mod tests {
         _test_generic_binary_array_from_list_array_with_offset::<i64>();
     }
 
-    fn _test_generic_binary_array_from_list_array_with_child_nulls_failed<
-        O: OffsetSizeTrait,
-    >() {
+    fn _test_generic_binary_array_from_list_array_with_child_nulls_failed<O: OffsetSizeTrait>() {
         let values = b"HelloArrow";
         let child_data = ArrayData::builder(DataType::UInt8)
             .len(10)
@@ -708,9 +704,11 @@ mod tests {
             .unwrap();
 
         let offsets = [0, 5, 10].map(|n| O::from_usize(n).unwrap());
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt8, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt8,
+            false,
+        )));
 
         // [None, Some(b"Parquet")]
         let array_data = ArrayData::builder(data_type)
@@ -786,11 +784,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "assertion failed: `(left == right)`\n  left: `UInt32`,\n \
+    #[should_panic(expected = "assertion failed: `(left == right)`\n  left: `UInt32`,\n \
                     right: `UInt8`: BinaryArray can only be created from List<u8> arrays, \
-                    mismatched data types."
-    )]
+                    mismatched data types.")]
     fn test_binary_array_from_incorrect_list_array() {
         let values: [u32; 12] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
         let values_data = ArrayData::builder(DataType::UInt32)
@@ -800,8 +796,7 @@ mod tests {
             .unwrap();
         let offsets: [i32; 4] = [0, 5, 5, 12];
 
-        let data_type =
-            DataType::List(Box::new(Field::new("item", DataType::UInt32, false)));
+        let data_type = DataType::List(Box::new(Field::new("item", DataType::UInt32, false)));
         let array_data = ArrayData::builder(data_type)
             .len(3)
             .add_buffer(Buffer::from_slice_ref(&offsets))
@@ -817,8 +812,7 @@ mod tests {
         expected = "Trying to access an element at index 4 from a BinaryArray of length 3"
     )]
     fn test_binary_array_get_value_index_out_of_bound() {
-        let values: [u8; 12] =
-            [104, 101, 108, 108, 111, 112, 97, 114, 113, 117, 101, 116];
+        let values: [u8; 12] = [104, 101, 108, 108, 111, 112, 97, 114, 113, 117, 101, 116];
         let offsets: [i32; 4] = [0, 5, 5, 12];
         let array_data = ArrayData::builder(DataType::Binary)
             .len(3)

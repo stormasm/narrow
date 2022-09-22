@@ -18,8 +18,8 @@
 //! A comparable row-oriented representation of a collection of [`Array`]
 
 use crate::array::{
-    as_boolean_array, as_generic_binary_array, as_largestring_array, as_string_array,
-    Array, ArrayRef, Decimal128Array, Decimal256Array,
+    as_boolean_array, as_generic_binary_array, as_largestring_array, as_string_array, Array,
+    ArrayRef, Decimal128Array, Decimal256Array,
 };
 use crate::compute::SortOptions;
 use crate::datatypes::*;
@@ -216,9 +216,7 @@ impl RowConverter {
 
         let mut rows = new_empty_rows(columns, &dictionaries)?;
 
-        for ((column, field), dictionary) in
-            columns.iter().zip(&self.fields).zip(dictionaries)
-        {
+        for ((column, field), dictionary) in columns.iter().zip(&self.fields).zip(dictionaries) {
             // We encode a column at a time to minimise dispatch overheads
             encode_column(&mut rows, column, field.options, dictionary.as_deref())
         }
@@ -302,10 +300,7 @@ fn compute_dictionary_mapping(
 }
 
 /// Computes the length of each encoded [`Rows`] and returns an empty [`Rows`]
-fn new_empty_rows(
-    cols: &[ArrayRef],
-    dictionaries: &[Option<Vec<Option<&[u8]>>>],
-) -> Result<Rows> {
+fn new_empty_rows(cols: &[ArrayRef], dictionaries: &[Option<Vec<Option<&[u8]>>>]) -> Result<Rows> {
     use fixed::FixedLengthEncoding;
 
     let num_rows = cols.first().map(|x| x.len()).unwrap_or(0);
@@ -460,9 +455,8 @@ fn encode_column(
 mod tests {
     use super::*;
     use crate::array::{
-        BinaryArray, BooleanArray, DictionaryArray, Float32Array, GenericStringArray,
-        Int16Array, Int32Array, OffsetSizeTrait, PrimitiveArray,
-        PrimitiveDictionaryBuilder, StringArray,
+        BinaryArray, BooleanArray, DictionaryArray, Float32Array, GenericStringArray, Int16Array,
+        Int32Array, OffsetSizeTrait, PrimitiveArray, PrimitiveDictionaryBuilder, StringArray,
     };
     use crate::compute::{LexicographicalComparator, SortColumn};
     use crate::util::display::array_value_to_string;
@@ -637,8 +631,7 @@ mod tests {
             Some("hello"),
         ])) as ArrayRef;
 
-        let mut converter =
-            RowConverter::new(vec![SortField::new(a.data_type().clone())]);
+        let mut converter = RowConverter::new(vec![SortField::new(a.data_type().clone())]);
         let rows_a = converter.convert_columns(&[Arc::clone(&a)]).unwrap();
 
         assert!(rows_a.row(3) < rows_a.row(5));
@@ -689,8 +682,7 @@ mod tests {
 
         let a = builder.finish();
 
-        let mut converter =
-            RowConverter::new(vec![SortField::new(a.data_type().clone())]);
+        let mut converter = RowConverter::new(vec![SortField::new(a.data_type().clone())]);
         let rows = converter.convert_columns(&[Arc::new(a)]).unwrap();
         assert!(rows.row(0) < rows.row(1));
         assert!(rows.row(2) < rows.row(0));
@@ -701,14 +693,11 @@ mod tests {
 
     #[test]
     fn test_dictionary_nulls() {
-        let values =
-            Int32Array::from_iter([Some(1), Some(-1), None, Some(4), None]).into_data();
+        let values = Int32Array::from_iter([Some(1), Some(-1), None, Some(4), None]).into_data();
         let keys =
-            Int32Array::from_iter([Some(0), Some(0), Some(1), Some(2), Some(4), None])
-                .into_data();
+            Int32Array::from_iter([Some(0), Some(0), Some(1), Some(2), Some(4), None]).into_data();
 
-        let data_type =
-            DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Int32));
+        let data_type = DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Int32));
         let data = keys
             .into_builder()
             .data_type(data_type.clone())
@@ -773,10 +762,8 @@ mod tests {
             })
             .collect();
 
-        let data_type = DataType::Dictionary(
-            Box::new(K::DATA_TYPE),
-            Box::new(values.data_type().clone()),
-        );
+        let data_type =
+            DataType::Dictionary(Box::new(K::DATA_TYPE), Box::new(values.data_type().clone()));
 
         let data = keys
             .into_data()

@@ -26,11 +26,7 @@ use crate::error::{ArrowError, Result};
 /// * `mask` - Boolean values used to determine from which array to take the values.
 /// * `truthy` - Values of this array are taken if mask evaluates `true`
 /// * `falsy` - Values of this array are taken if mask evaluates `false`
-pub fn zip(
-    mask: &BooleanArray,
-    truthy: &dyn Array,
-    falsy: &dyn Array,
-) -> Result<ArrayRef> {
+pub fn zip(mask: &BooleanArray, truthy: &dyn Array, falsy: &dyn Array) -> Result<ArrayRef> {
     if truthy.data_type() != falsy.data_type() {
         return Err(ArrowError::InvalidArgumentError(
             "arguments need to have the same data type".into(),

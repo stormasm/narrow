@@ -88,8 +88,7 @@ pub fn create_random_array(
         Float64 => Arc::new(create_primitive_array::<Float64Type>(size, null_density)),
         Timestamp(_, _) => {
             let int64_array =
-                Arc::new(create_primitive_array::<Int64Type>(size, null_density))
-                    as ArrayRef;
+                Arc::new(create_primitive_array::<Int64Type>(size, null_density)) as ArrayRef;
             return crate::compute::cast(&int64_array, field.data_type());
         }
         Date32 => Arc::new(create_primitive_array::<Date32Type>(size, null_density)),
@@ -99,9 +98,10 @@ pub fn create_random_array(
                 size,
                 null_density,
             )) as ArrayRef,
-            TimeUnit::Millisecond => Arc::new(create_primitive_array::<
-                Time32MillisecondType,
-            >(size, null_density)),
+            TimeUnit::Millisecond => Arc::new(create_primitive_array::<Time32MillisecondType>(
+                size,
+                null_density,
+            )),
             _ => {
                 return Err(ArrowError::InvalidArgumentError(format!(
                     "Unsupported unit {:?} for Time32",
@@ -110,12 +110,14 @@ pub fn create_random_array(
             }
         },
         Time64(unit) => match unit {
-            TimeUnit::Microsecond => Arc::new(create_primitive_array::<
-                Time64MicrosecondType,
-            >(size, null_density)) as ArrayRef,
-            TimeUnit::Nanosecond => Arc::new(create_primitive_array::<
-                Time64NanosecondType,
-            >(size, null_density)),
+            TimeUnit::Microsecond => Arc::new(create_primitive_array::<Time64MicrosecondType>(
+                size,
+                null_density,
+            )) as ArrayRef,
+            TimeUnit::Nanosecond => Arc::new(create_primitive_array::<Time64NanosecondType>(
+                size,
+                null_density,
+            )),
             _ => {
                 return Err(ArrowError::InvalidArgumentError(format!(
                     "Unsupported unit {:?} for Time64",
@@ -127,13 +129,9 @@ pub fn create_random_array(
         LargeUtf8 => Arc::new(create_string_array::<i64>(size, null_density)),
         Binary => Arc::new(create_binary_array::<i32>(size, null_density)),
         LargeBinary => Arc::new(create_binary_array::<i64>(size, null_density)),
-        FixedSizeBinary(len) => {
-            Arc::new(create_fsb_array(size, null_density, *len as usize))
-        }
+        FixedSizeBinary(len) => Arc::new(create_fsb_array(size, null_density, *len as usize)),
         List(_) => create_random_list_array(field, size, null_density, true_density)?,
-        LargeList(_) => {
-            create_random_list_array(field, size, null_density, true_density)?
-        }
+        LargeList(_) => create_random_list_array(field, size, null_density, true_density)?,
         Struct(fields) => Arc::new(StructArray::try_from(
             fields
                 .iter()
@@ -143,9 +141,7 @@ pub fn create_random_array(
                 })
                 .collect::<Result<Vec<(&str, ArrayRef)>>>()?,
         )?),
-        d @ Dictionary(_, value_type)
-            if crate::compute::can_cast_types(value_type, d) =>
-        {
+        d @ Dictionary(_, value_type) if crate::compute::can_cast_types(value_type, d) => {
             let f = Field::new(
                 field.name(),
                 value_type.as_ref().clone(),

@@ -27,10 +27,10 @@ use std::io::{BufWriter, Write};
 use flatbuffers::FlatBufferBuilder;
 
 use crate::array::{
-    as_large_list_array, as_list_array, as_map_array, as_struct_array, as_union_array,
-    layout, make_array, Array, ArrayData, ArrayRef, BinaryArray, BufferBuilder,
-    BufferSpec, FixedSizeListArray, GenericBinaryArray, GenericStringArray,
-    LargeBinaryArray, LargeStringArray, OffsetSizeTrait, StringArray,
+    as_large_list_array, as_list_array, as_map_array, as_struct_array, as_union_array, layout,
+    make_array, Array, ArrayData, ArrayRef, BinaryArray, BufferBuilder, BufferSpec,
+    FixedSizeListArray, GenericBinaryArray, GenericStringArray, LargeBinaryArray, LargeStringArray,
+    OffsetSizeTrait, StringArray,
 };
 use crate::buffer::{Buffer, MutableBuffer};
 use crate::datatypes::*;
@@ -74,8 +74,7 @@ impl IpcWriteOptions {
     ) -> Result<Self> {
         self.batch_compression_type = batch_compression_type;
 
-        if self.batch_compression_type.is_some()
-            && self.metadata_version < ipc::MetadataVersion::V5
+        if self.batch_compression_type.is_some() && self.metadata_version < ipc::MetadataVersion::V5
         {
             return Err(ArrowError::InvalidArgumentError(
                 "Compression only supported in metadata v5 and above".to_string(),
@@ -95,11 +94,11 @@ impl IpcWriteOptions {
             ));
         }
         match metadata_version {
-            ipc::MetadataVersion::V1
-            | ipc::MetadataVersion::V2
-            | ipc::MetadataVersion::V3 => Err(ArrowError::InvalidArgumentError(
-                "Writing IPC metadata version 3 and lower not supported".to_string(),
-            )),
+            ipc::MetadataVersion::V1 | ipc::MetadataVersion::V2 | ipc::MetadataVersion::V3 => {
+                Err(ArrowError::InvalidArgumentError(
+                    "Writing IPC metadata version 3 and lower not supported".to_string(),
+                ))
+            }
             ipc::MetadataVersion::V4 => Ok(Self {
                 alignment,
                 write_legacy_ipc_format,
@@ -109,8 +108,7 @@ impl IpcWriteOptions {
             ipc::MetadataVersion::V5 => {
                 if write_legacy_ipc_format {
                     Err(ArrowError::InvalidArgumentError(
-                        "Legacy IPC format only supported on metadata version 4"
-                            .to_string(),
+                        "Legacy IPC format only supported on metadata version 4".to_string(),
                     ))
                 } else {
                     Ok(Self {
@@ -144,11 +142,7 @@ impl Default for IpcWriteOptions {
 pub struct IpcDataGenerator {}
 
 impl IpcDataGenerator {
-    pub fn schema_to_bytes(
-        &self,
-        schema: &Schema,
-        write_options: &IpcWriteOptions,
-    ) -> EncodedData {
+    pub fn schema_to_bytes(&self, schema: &Schema, write_options: &IpcWriteOptions) -> EncodedData {
         let mut fbb = FlatBufferBuilder::new();
         let schema = {
             let fb = ipc::convert::schema_to_fb_offset(&mut fbb, schema);
@@ -228,9 +222,7 @@ impl IpcDataGenerator {
                 let map_array = as_map_array(column);
 
                 let (keys, values) = match field.data_type() {
-                    DataType::Struct(fields) if fields.len() == 2 => {
-                        (&fields[0], &fields[1])
-                    }
+                    DataType::Struct(fields) if fields.len() == 2 => (&fields[0], &fields[1]),
                     _ => panic!("Incorrect field data type {:?}", field.data_type()),
                 };
 
@@ -630,14 +622,12 @@ impl<W: Write> FileWriter<W> {
             let (meta, data) =
                 write_message(&mut self.writer, encoded_dictionary, &self.write_options)?;
 
-            let block =
-                ipc::Block::new(self.block_offsets as i64, meta as i32, data as i64);
+            let block = ipc::Block::new(self.block_offsets as i64, meta as i32, data as i64);
             self.dictionary_blocks.push(block);
             self.block_offsets += meta + data;
         }
 
-        let (meta, data) =
-            write_message(&mut self.writer, encoded_message, &self.write_options)?;
+        let (meta, data) = write_message(&mut self.writer, encoded_message, &self.write_options)?;
         // add a record block for the footer
         let block = ipc::Block::new(
             self.block_offsets as i64,
@@ -901,9 +891,7 @@ fn write_continuation<W: Write>(
 
     // the version of the writer determines whether continuation markers should be added
     match write_options.metadata_version {
-        ipc::MetadataVersion::V1
-        | ipc::MetadataVersion::V2
-        | ipc::MetadataVersion::V3 => {
+        ipc::MetadataVersion::V1 | ipc::MetadataVersion::V2 | ipc::MetadataVersion::V3 => {
             unreachable!("Options with the metadata version cannot be created")
         }
         ipc::MetadataVersion::V4 => {
@@ -998,9 +986,7 @@ fn get_binary_buffer_len(array_data: &ArrayData) -> usize {
 }
 
 /// Rebase value offsets for given ArrayData to zero-based.
-fn get_zero_based_value_offsets<OffsetSize: OffsetSizeTrait>(
-    array_data: &ArrayData,
-) -> Buffer {
+fn get_zero_based_value_offsets<OffsetSize: OffsetSizeTrait>(array_data: &ArrayData) -> Buffer {
     match array_data.data_type() {
         DataType::Binary | DataType::LargeBinary => {
             let array: GenericBinaryArray<OffsetSize> = array_data.clone().into();
@@ -1131,15 +1117,8 @@ fn write_array_data(
             let total_bytes = get_binary_buffer_len(array_data);
             let value_buffer = &array_data.buffers()[1];
             let buffer_length = min(total_bytes, value_buffer.len() - byte_offset);
-            let buffer_slice =
-                &value_buffer.as_slice()[byte_offset..(byte_offset + buffer_length)];
-            offset = write_buffer(
-                buffer_slice,
-                buffers,
-                arrow_data,
-                offset,
-                compression_codec,
-            )?;
+            let buffer_slice = &value_buffer.as_slice()[byte_offset..(byte_offset + buffer_length)];
+            offset = write_buffer(buffer_slice, buffers, arrow_data, offset, compression_codec)?;
         } else {
             for buffer in array_data.buffers() {
                 offset = write_buffer(
@@ -1170,15 +1149,8 @@ fn write_array_data(
         if buffer_need_truncate(array_data.offset(), buffer, spec, min_length) {
             let byte_offset = array_data.offset() * byte_width;
             let buffer_length = min(min_length, buffer.len() - byte_offset);
-            let buffer_slice =
-                &buffer.as_slice()[byte_offset..(byte_offset + buffer_length)];
-            offset = write_buffer(
-                buffer_slice,
-                buffers,
-                arrow_data,
-                offset,
-                compression_codec,
-            )?;
+            let buffer_slice = &buffer.as_slice()[byte_offset..(byte_offset + buffer_length)];
+            offset = write_buffer(buffer_slice, buffers, arrow_data, offset, compression_codec)?;
         } else {
             offset = write_buffer(
                 buffer.as_slice(),
@@ -1190,8 +1162,7 @@ fn write_array_data(
         }
     } else {
         for buffer in array_data.buffers() {
-            offset =
-                write_buffer(buffer, buffers, arrow_data, offset, compression_codec)?;
+            offset = write_buffer(buffer, buffers, arrow_data, offset, compression_codec)?;
         }
     }
 
@@ -1244,10 +1215,7 @@ fn write_buffer(
     }
     .try_into()
     .map_err(|e| {
-        ArrowError::InvalidArgumentError(format!(
-            "Could not convert compressed size to i64: {}",
-            e
-        ))
+        ArrowError::InvalidArgumentError(format!("Could not convert compressed size to i64: {}", e))
     })?;
 
     // make new index entry
@@ -1286,21 +1254,18 @@ mod tests {
         let values: Vec<Option<i32>> = vec![];
         let array = Int32Array::from(values);
         let record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)]).unwrap();
 
         let mut file = tempfile::tempfile().unwrap();
 
         {
-            let write_option =
-                IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(Some(ipc::CompressionType::LZ4_FRAME))
-                    .unwrap();
+            let write_option = IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(Some(ipc::CompressionType::LZ4_FRAME))
+                .unwrap();
 
             let mut writer =
-                FileWriter::try_new_with_options(&mut file, &schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(&mut file, &schema, write_option).unwrap();
             writer.write(&record_batch).unwrap();
             writer.finish().unwrap();
         }
@@ -1339,20 +1304,17 @@ mod tests {
         let values: Vec<Option<i32>> = vec![Some(12), Some(1)];
         let array = Int32Array::from(values);
         let record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)]).unwrap();
 
         let mut file = tempfile::tempfile().unwrap();
         {
-            let write_option =
-                IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(Some(ipc::CompressionType::LZ4_FRAME))
-                    .unwrap();
+            let write_option = IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(Some(ipc::CompressionType::LZ4_FRAME))
+                .unwrap();
 
             let mut writer =
-                FileWriter::try_new_with_options(&mut file, &schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(&mut file, &schema, write_option).unwrap();
             writer.write(&record_batch).unwrap();
             writer.finish().unwrap();
         }
@@ -1391,19 +1353,16 @@ mod tests {
         let values: Vec<Option<i32>> = vec![Some(12), Some(1)];
         let array = Int32Array::from(values);
         let record_batch =
-            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array)]).unwrap();
         let mut file = tempfile::tempfile().unwrap();
         {
-            let write_option =
-                IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
-                    .unwrap()
-                    .try_with_compression(Some(ipc::CompressionType::ZSTD))
-                    .unwrap();
+            let write_option = IpcWriteOptions::try_new(8, false, ipc::MetadataVersion::V5)
+                .unwrap()
+                .try_with_compression(Some(ipc::CompressionType::ZSTD))
+                .unwrap();
 
             let mut writer =
-                FileWriter::try_new_with_options(&mut file, &schema, write_option)
-                    .unwrap();
+                FileWriter::try_new_with_options(&mut file, &schema, write_option).unwrap();
             writer.write(&record_batch).unwrap();
             writer.finish().unwrap();
         }
@@ -1450,11 +1409,9 @@ mod tests {
             None,
         ];
         let array1 = UInt32Array::from(values);
-        let batch = RecordBatch::try_new(
-            Arc::new(schema.clone()),
-            vec![Arc::new(array1) as ArrayRef],
-        )
-        .unwrap();
+        let batch =
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(array1) as ArrayRef])
+                .unwrap();
         let mut file = tempfile::tempfile().unwrap();
         {
             let mut writer = FileWriter::try_new(&mut file, &schema).unwrap();
@@ -1504,8 +1461,7 @@ mod tests {
         let file_name = format!("target/debug/testdata/nulls_{}.arrow_file", suffix);
         {
             let file = File::create(&file_name).unwrap();
-            let mut writer =
-                FileWriter::try_new_with_options(file, &schema, options).unwrap();
+            let mut writer = FileWriter::try_new_with_options(file, &schema, options).unwrap();
 
             writer.write(&batch).unwrap();
             writer.finish().unwrap();
@@ -1567,15 +1523,13 @@ mod tests {
         let array = Arc::new(inner) as ArrayRef;
 
         // Dict field with id 2
-        let dctfield =
-            Field::new_dict("dict", array.data_type().clone(), false, 2, false);
+        let dctfield = Field::new_dict("dict", array.data_type().clone(), false, 2, false);
 
         let types = Buffer::from_slice_ref(&[0_i8, 0, 0]);
         let offsets = Buffer::from_slice_ref(&[0_i32, 1, 2]);
 
         let union =
-            UnionArray::try_new(&[0], types, Some(offsets), vec![(dctfield, array)])
-                .unwrap();
+            UnionArray::try_new(&[0], types, Some(offsets), vec![(dctfield, array)]).unwrap();
 
         let schema = Arc::new(Schema::new(vec![Field::new(
             "union",
@@ -1601,8 +1555,7 @@ mod tests {
         let array = Arc::new(inner) as ArrayRef;
 
         // Dict field with id 2
-        let dctfield =
-            Field::new_dict("dict", array.data_type().clone(), false, 2, false);
+        let dctfield = Field::new_dict("dict", array.data_type().clone(), false, 2, false);
 
         let s = StructArray::from(vec![(dctfield, array)]);
         let struct_array = Arc::new(s) as ArrayRef;
@@ -1656,11 +1609,12 @@ mod tests {
         .unwrap();
         let reader = StreamReader::try_new(data_file, None).unwrap();
 
-        reader.into_iter().zip(rewrite_reader.into_iter()).for_each(
-            |(batch1, batch2)| {
+        reader
+            .into_iter()
+            .zip(rewrite_reader.into_iter())
+            .for_each(|(batch1, batch2)| {
                 assert_eq!(batch1.unwrap(), batch2.unwrap());
-            },
-        );
+            });
     }
 
     fn write_union_file(options: IpcWriteOptions) {
@@ -1684,16 +1638,13 @@ mod tests {
         builder.append::<Int32Type>("a", 4).unwrap();
         let union = builder.build().unwrap();
 
-        let batch = RecordBatch::try_new(
-            Arc::new(schema.clone()),
-            vec![Arc::new(union) as ArrayRef],
-        )
-        .unwrap();
+        let batch =
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(union) as ArrayRef])
+                .unwrap();
 
         let mut file = tempfile::tempfile().unwrap();
         {
-            let mut writer =
-                FileWriter::try_new_with_options(&mut file, &schema, options).unwrap();
+            let mut writer = FileWriter::try_new_with_options(&mut file, &schema, options).unwrap();
 
             writer.write(&batch).unwrap();
             writer.finish().unwrap();
@@ -1719,12 +1670,8 @@ mod tests {
 
     #[test]
     fn test_write_union_file_v4_v5() {
-        write_union_file(
-            IpcWriteOptions::try_new(8, false, MetadataVersion::V4).unwrap(),
-        );
-        write_union_file(
-            IpcWriteOptions::try_new(8, false, MetadataVersion::V5).unwrap(),
-        );
+        write_union_file(IpcWriteOptions::try_new(8, false, MetadataVersion::V4).unwrap());
+        write_union_file(IpcWriteOptions::try_new(8, false, MetadataVersion::V5).unwrap());
     }
 
     fn serialize(record: &RecordBatch) -> Vec<u8> {
@@ -1737,8 +1684,7 @@ mod tests {
 
     fn deserialize(bytes: Vec<u8>) -> RecordBatch {
         let mut stream_reader =
-            ipc::reader::StreamReader::try_new(std::io::Cursor::new(bytes), None)
-                .unwrap();
+            ipc::reader::StreamReader::try_new(std::io::Cursor::new(bytes), None).unwrap();
         stream_reader.next().unwrap().unwrap()
     }
 
@@ -1753,8 +1699,7 @@ mod tests {
             let a = Int32Array::from_iter_values(0..rows as i32);
             let b = StringArray::from_iter_values((0..rows).map(|i| i.to_string()));
 
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)])
-                .unwrap()
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]).unwrap()
         }
 
         let big_record_batch = create_batch(65536);
@@ -1764,9 +1709,7 @@ mod tests {
 
         let offset = 2;
         let record_batch_slice = big_record_batch.slice(offset, length);
-        assert!(
-            serialize(&big_record_batch).len() > serialize(&small_record_batch).len()
-        );
+        assert!(serialize(&big_record_batch).len() > serialize(&small_record_batch).len());
         assert_eq!(
             serialize(&small_record_batch).len(),
             serialize(&record_batch_slice).len()
@@ -1789,8 +1732,7 @@ mod tests {
             let a = Int32Array::from(vec![Some(1), None, Some(1), None, Some(1)]);
             let b = StringArray::from(vec![None, Some("a"), Some("a"), None, Some("a")]);
 
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)])
-                .unwrap()
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]).unwrap()
         }
 
         let record_batch = create_batch();
@@ -1813,13 +1755,11 @@ mod tests {
             let values: StringArray = [Some("foo"), Some("bar"), Some("baz")]
                 .into_iter()
                 .collect();
-            let keys: Int32Array =
-                [Some(0), Some(2), None, Some(1)].into_iter().collect();
+            let keys: Int32Array = [Some(0), Some(2), None, Some(1)].into_iter().collect();
 
             let array = DictionaryArray::<Int32Type>::try_new(&keys, &values).unwrap();
 
-            let schema =
-                Schema::new(vec![Field::new("dict", array.data_type().clone(), true)]);
+            let schema = Schema::new(vec![Field::new("dict", array.data_type().clone(), true)]);
 
             RecordBatch::try_new(Arc::new(schema), vec![Arc::new(array)]).unwrap()
         }
@@ -1842,8 +1782,7 @@ mod tests {
             let strings: StringArray = [Some("foo"), None, Some("bar"), Some("baz")]
                 .into_iter()
                 .collect();
-            let ints: Int32Array =
-                [Some(0), Some(2), None, Some(1)].into_iter().collect();
+            let ints: Int32Array = [Some(0), Some(2), None, Some(1)].into_iter().collect();
 
             let struct_array = StructArray::from(vec![
                 (
@@ -1888,8 +1827,7 @@ mod tests {
     fn truncate_ipc_string_array_with_all_empty_string() {
         fn create_batch() -> RecordBatch {
             let schema = Schema::new(vec![Field::new("a", DataType::Utf8, true)]);
-            let a =
-                StringArray::from(vec![Some(""), Some(""), Some(""), Some(""), Some("")]);
+            let a = StringArray::from(vec![Some(""), Some(""), Some(""), Some(""), Some("")]);
             RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a)]).unwrap()
         }
 

@@ -16,9 +16,7 @@
 // under the License.
 
 use super::PrimitiveBuilder;
-use crate::array::{
-    Array, ArrayBuilder, ArrayRef, DictionaryArray, StringArray, StringBuilder,
-};
+use crate::array::{Array, ArrayBuilder, ArrayRef, DictionaryArray, StringArray, StringBuilder};
 use crate::datatypes::{ArrowDictionaryKeyType, ArrowNativeType, DataType};
 use crate::error::{ArrowError, Result};
 use hashbrown::hash_map::RawEntryMut;
@@ -166,13 +164,12 @@ where
                 Some(value) => {
                     let hash = state.hash_one(value.as_bytes());
 
-                    let key = K::Native::from_usize(idx)
-                        .ok_or(ArrowError::DictionaryKeyOverflowError)?;
+                    let key =
+                        K::Native::from_usize(idx).ok_or(ArrowError::DictionaryKeyOverflowError)?;
 
-                    let entry =
-                        dedup.raw_entry_mut().from_hash(hash, |key: &K::Native| {
-                            value.as_bytes() == get_bytes(&values_builder, key)
-                        });
+                    let entry = dedup.raw_entry_mut().from_hash(hash, |key: &K::Native| {
+                        value.as_bytes() == get_bytes(&values_builder, key)
+                    });
 
                     if let RawEntryMut::Vacant(v) = entry {
                         v.insert_with_hasher(hash, key, (), |key| {
@@ -256,8 +253,8 @@ where
             RawEntryMut::Vacant(entry) => {
                 let index = storage.len();
                 storage.append_value(value);
-                let key = K::Native::from_usize(index)
-                    .ok_or(ArrowError::DictionaryKeyOverflowError)?;
+                let key =
+                    K::Native::from_usize(index).ok_or(ArrowError::DictionaryKeyOverflowError)?;
 
                 *entry
                     .insert_with_hasher(hash, key, (), |key| {
@@ -282,8 +279,7 @@ where
         let values = self.values_builder.finish();
         let keys = self.keys_builder.finish();
 
-        let data_type =
-            DataType::Dictionary(Box::new(K::DATA_TYPE), Box::new(DataType::Utf8));
+        let data_type = DataType::Dictionary(Box::new(K::DATA_TYPE), Box::new(DataType::Utf8));
 
         let builder = keys
             .into_data()
@@ -342,8 +338,7 @@ mod tests {
     fn test_string_dictionary_builder_with_existing_dictionary() {
         let dictionary = StringArray::from(vec![None, Some("def"), Some("abc")]);
 
-        let mut builder =
-            StringDictionaryBuilder::new_with_dictionary(6, &dictionary).unwrap();
+        let mut builder = StringDictionaryBuilder::new_with_dictionary(6, &dictionary).unwrap();
         builder.append("abc").unwrap();
         builder.append_null();
         builder.append("def").unwrap();
@@ -373,8 +368,7 @@ mod tests {
         let dictionary = StringArray::from(dictionary);
 
         let mut builder =
-            StringDictionaryBuilder::<Int16Type>::new_with_dictionary(4, &dictionary)
-                .unwrap();
+            StringDictionaryBuilder::<Int16Type>::new_with_dictionary(4, &dictionary).unwrap();
         builder.append("abc").unwrap();
         builder.append_null();
         builder.append("def").unwrap();

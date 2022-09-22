@@ -15,9 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::array::{
-    ArrayBuilder, ArrayData, ArrayRef, FixedSizeBinaryArray, UInt8BufferBuilder,
-};
+use crate::array::{ArrayBuilder, ArrayData, ArrayRef, FixedSizeBinaryArray, UInt8BufferBuilder};
 use crate::datatypes::DataType;
 use crate::error::{ArrowError, Result};
 use std::any::Any;
@@ -61,7 +59,8 @@ impl FixedSizeBinaryBuilder {
     pub fn append_value(&mut self, value: impl AsRef<[u8]>) -> Result<()> {
         if self.value_length != value.as_ref().len() as i32 {
             Err(ArrowError::InvalidArgumentError(
-                "Byte slice does not have the same length as FixedSizeBinaryBuilder value lengths".to_string()
+                "Byte slice does not have the same length as FixedSizeBinaryBuilder value lengths"
+                    .to_string(),
             ))
         } else {
             self.values_builder.append_slice(value.as_ref());
@@ -81,11 +80,10 @@ impl FixedSizeBinaryBuilder {
     /// Builds the [`FixedSizeBinaryArray`] and reset this builder.
     pub fn finish(&mut self) -> FixedSizeBinaryArray {
         let array_length = self.len();
-        let array_data_builder =
-            ArrayData::builder(DataType::FixedSizeBinary(self.value_length))
-                .add_buffer(self.values_builder.finish())
-                .null_bit_buffer(self.null_buffer_builder.finish())
-                .len(array_length);
+        let array_data_builder = ArrayData::builder(DataType::FixedSizeBinary(self.value_length))
+            .add_buffer(self.values_builder.finish())
+            .null_bit_buffer(self.null_buffer_builder.finish())
+            .len(array_length);
         let array_data = unsafe { array_data_builder.build_unchecked() };
         FixedSizeBinaryArray::from(array_data)
     }

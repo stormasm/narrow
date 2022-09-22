@@ -57,10 +57,7 @@ macro_rules! extract_component_from_array {
     };
     ($iter:ident, $builder:ident, $extract_fn:ident, $using:expr, $tz:ident, $parsed:ident, $value_as_datetime:expr, $convert:expr) => {
         if ($tz.starts_with('+') || $tz.starts_with('-')) && !$tz.contains(':') {
-            return_compute_error_with!(
-                "Invalid timezone",
-                "Expected format [+-]XX:XX".to_string()
-            )
+            return_compute_error_with!("Invalid timezone", "Expected format [+-]XX:XX".to_string())
         } else {
             let tz_parse_result = parse(&mut $parsed, &$tz, StrftimeItems::new("%z"));
             let fixed_offset_from_parsed = match tz_parse_result {
@@ -77,14 +74,11 @@ macro_rules! extract_component_from_array {
                         Some(utc) => {
                             let fixed_offset = match fixed_offset_from_parsed {
                                 Some(fo) => fo,
-                                None => match using_chrono_tz_and_utc_naive_date_time(
-                                    &$tz, utc,
-                                ) {
+                                None => match using_chrono_tz_and_utc_naive_date_time(&$tz, utc) {
                                     Some(fo) => fo,
-                                    err => return_compute_error_with!(
-                                        "Unable to parse timezone",
-                                        err
-                                    ),
+                                    err => {
+                                        return_compute_error_with!("Unable to parse timezone", err)
+                                    }
                                 },
                             };
                             match $using(value, fixed_offset) {
@@ -94,10 +88,7 @@ macro_rules! extract_component_from_array {
                                 None => $builder.append_null(),
                             }
                         }
-                        err => return_compute_error_with!(
-                            "Unable to read value as datetime",
-                            err
-                        ),
+                        err => return_compute_error_with!("Unable to read value as datetime", err),
                     }
                 } else {
                     $builder.append_null();
@@ -190,9 +181,7 @@ where
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            hour_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => hour_internal::<T, A>(array, value_type.as_ref()),
         dt => hour_internal::<T, A>(array, &dt),
     }
 }
@@ -235,8 +224,7 @@ where
                 iter,
                 b,
                 hour,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -265,9 +253,7 @@ where
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            year_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => year_internal::<T, A>(array, value_type.as_ref()),
         dt => year_internal::<T, A>(array, &dt),
     }
 }
@@ -311,17 +297,13 @@ where
 
 /// Extracts the quarter of a given temporal array as an array of integersa within
 /// the range of [1, 4].
-pub fn quarter_generic<T, A: ArrayAccessor<Item = T::Native>>(
-    array: A,
-) -> Result<Int32Array>
+pub fn quarter_generic<T, A: ArrayAccessor<Item = T::Native>>(array: A) -> Result<Int32Array>
 where
     T: ArrowTemporalType + ArrowNumericType,
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            quarter_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => quarter_internal::<T, A>(array, value_type.as_ref()),
         dt => quarter_internal::<T, A>(array, &dt),
     }
 }
@@ -354,8 +336,7 @@ where
                 iter,
                 b,
                 quarter,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -379,17 +360,13 @@ where
 }
 
 /// Extracts the month of a given temporal array as an array of integers
-pub fn month_generic<T, A: ArrayAccessor<Item = T::Native>>(
-    array: A,
-) -> Result<Int32Array>
+pub fn month_generic<T, A: ArrayAccessor<Item = T::Native>>(array: A) -> Result<Int32Array>
 where
     T: ArrowTemporalType + ArrowNumericType,
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            month_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => month_internal::<T, A>(array, value_type.as_ref()),
         dt => month_internal::<T, A>(array, &dt),
     }
 }
@@ -422,8 +399,7 @@ where
                 iter,
                 b,
                 month,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -504,8 +480,7 @@ where
                 iter,
                 b,
                 num_days_from_monday,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -586,18 +561,14 @@ where
                 iter,
                 b,
                 num_days_from_sunday,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
                 |h| h as i32
             )
         }
-        _ => return_compute_error_with!(
-            "num_days_from_sunday does not support",
-            array.data_type()
-        ),
+        _ => return_compute_error_with!("num_days_from_sunday does not support", array.data_type()),
     }
 
     Ok(b.finish())
@@ -619,9 +590,7 @@ where
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            day_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => day_internal::<T, A>(array, value_type.as_ref()),
         dt => day_internal::<T, A>(array, &dt),
     }
 }
@@ -654,8 +623,7 @@ where
                 iter,
                 b,
                 day,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -686,9 +654,7 @@ where
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            doy_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => doy_internal::<T, A>(array, value_type.as_ref()),
         dt => doy_internal::<T, A>(array, &dt),
     }
 }
@@ -723,8 +689,7 @@ where
                 iter,
                 b,
                 ordinal,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -747,17 +712,13 @@ where
 }
 
 /// Extracts the minutes of a given temporal array as an array of integers
-pub fn minute_generic<T, A: ArrayAccessor<Item = T::Native>>(
-    array: A,
-) -> Result<Int32Array>
+pub fn minute_generic<T, A: ArrayAccessor<Item = T::Native>>(array: A) -> Result<Int32Array>
 where
     T: ArrowTemporalType + ArrowNumericType,
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            minute_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => minute_internal::<T, A>(array, value_type.as_ref()),
         dt => minute_internal::<T, A>(array, &dt),
     }
 }
@@ -790,8 +751,7 @@ where
                 iter,
                 b,
                 minute,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -820,9 +780,7 @@ where
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            week_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => week_internal::<T, A>(array, value_type.as_ref()),
         dt => week_internal::<T, A>(array, &dt),
     }
 }
@@ -866,17 +824,13 @@ where
 }
 
 /// Extracts the seconds of a given temporal array as an array of integers
-pub fn second_generic<T, A: ArrayAccessor<Item = T::Native>>(
-    array: A,
-) -> Result<Int32Array>
+pub fn second_generic<T, A: ArrayAccessor<Item = T::Native>>(array: A) -> Result<Int32Array>
 where
     T: ArrowTemporalType + ArrowNumericType,
     i64: std::convert::From<T::Native>,
 {
     match array.data_type().clone() {
-        DataType::Dictionary(_, value_type) => {
-            second_internal::<T, A>(array, value_type.as_ref())
-        }
+        DataType::Dictionary(_, value_type) => second_internal::<T, A>(array, value_type.as_ref()),
         dt => second_internal::<T, A>(array, &dt),
     }
 }
@@ -909,8 +863,7 @@ where
                 iter,
                 b,
                 second,
-                |value, tz| as_datetime::<T>(i64::from(value))
-                    .map(|datetime| datetime + tz),
+                |value, tz| as_datetime::<T>(i64::from(value)).map(|datetime| datetime + tz),
                 tz,
                 scratch,
                 |value| as_datetime::<T>(i64::from(value)),
@@ -961,8 +914,7 @@ mod tests {
 
     #[test]
     fn test_temporal_array_time64_micro_hour() {
-        let a: PrimitiveArray<Time64MicrosecondType> =
-            vec![37800000000, 86339000000].into();
+        let a: PrimitiveArray<Time64MicrosecondType> = vec![37800000000, 86339000000].into();
 
         let b = hour(&a).unwrap();
         assert_eq!(10, b.value(0));
@@ -1025,12 +977,10 @@ mod tests {
     #[test]
     fn test_temporal_array_timestamp_quarter_with_timezone() {
         // 24 * 60 * 60 = 86400
-        let a =
-            TimestampSecondArray::from_vec(vec![86400 * 90], Some("+00:00".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![86400 * 90], Some("+00:00".to_string()));
         let b = quarter(&a).unwrap();
         assert_eq!(2, b.value(0));
-        let a =
-            TimestampSecondArray::from_vec(vec![86400 * 90], Some("-10:00".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![86400 * 90], Some("-10:00".to_string()));
         let b = quarter(&a).unwrap();
         assert_eq!(1, b.value(0));
     }
@@ -1061,12 +1011,10 @@ mod tests {
     #[test]
     fn test_temporal_array_timestamp_month_with_timezone() {
         // 24 * 60 * 60 = 86400
-        let a =
-            TimestampSecondArray::from_vec(vec![86400 * 31], Some("+00:00".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![86400 * 31], Some("+00:00".to_string()));
         let b = month(&a).unwrap();
         assert_eq!(2, b.value(0));
-        let a =
-            TimestampSecondArray::from_vec(vec![86400 * 31], Some("-10:00".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![86400 * 31], Some("-10:00".to_string()));
         let b = month(&a).unwrap();
         assert_eq!(1, b.value(0));
     }
@@ -1280,42 +1228,34 @@ mod tests {
 
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone() {
-        let a = TimestampSecondArray::from_vec(
-            vec![60 * 60 * 10],
-            Some("+01:00".to_string()),
-        );
+        let a = TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("+01:00".to_string()));
         let b = hour(&a).unwrap();
         assert_eq!(11, b.value(0));
     }
 
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone_without_colon() {
-        let a =
-            TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("+0100".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("+0100".to_string()));
         assert!(matches!(hour(&a), Err(ArrowError::ComputeError(_))))
     }
 
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone_without_initial_sign() {
-        let a =
-            TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("0100".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("0100".to_string()));
         assert!(matches!(hour(&a), Err(ArrowError::ComputeError(_))))
     }
 
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone_with_only_colon() {
-        let a =
-            TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("01:00".to_string()));
+        let a = TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("01:00".to_string()));
         assert!(matches!(hour(&a), Err(ArrowError::ComputeError(_))))
     }
 
     #[cfg(feature = "chrono-tz")]
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone_using_chrono_tz() {
-        let a = TimestampSecondArray::from_vec(
-            vec![60 * 60 * 10],
-            Some("Asia/Kolkata".to_string()),
-        );
+        let a =
+            TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("Asia/Kolkata".to_string()));
         let b = hour(&a).unwrap();
         assert_eq!(15, b.value(0));
     }
@@ -1339,10 +1279,8 @@ mod tests {
     #[cfg(not(feature = "chrono-tz"))]
     #[test]
     fn test_temporal_array_timestamp_hour_with_timezone_using_chrono_tz() {
-        let a = TimestampSecondArray::from_vec(
-            vec![60 * 60 * 10],
-            Some("Asia/Kolkatta".to_string()),
-        );
+        let a =
+            TimestampSecondArray::from_vec(vec![60 * 60 * 10], Some("Asia/Kolkatta".to_string()));
         assert!(matches!(hour(&a), Err(ArrowError::ComputeError(_))))
     }
 
@@ -1366,40 +1304,28 @@ mod tests {
         let utc_just_before_sydney_dst_ends =
             NaiveDate::from_ymd(2021, 4, 3).and_hms_nano(15, 30, 0, 0);
         assert_eq!(
-            using_chrono_tz_and_utc_naive_date_time(
-                &sydney_tz,
-                utc_just_before_sydney_dst_ends
-            ),
+            using_chrono_tz_and_utc_naive_date_time(&sydney_tz, utc_just_before_sydney_dst_ends),
             Some(sydney_offset_with_dst)
         );
         // Sydney 2021-04-04T02:30:00+10:00 is 2021-04-03T16:30:00Z
         let utc_just_after_sydney_dst_ends =
             NaiveDate::from_ymd(2021, 4, 3).and_hms_nano(16, 30, 0, 0);
         assert_eq!(
-            using_chrono_tz_and_utc_naive_date_time(
-                &sydney_tz,
-                utc_just_after_sydney_dst_ends
-            ),
+            using_chrono_tz_and_utc_naive_date_time(&sydney_tz, utc_just_after_sydney_dst_ends),
             Some(sydney_offset_without_dst)
         );
         // Sydney 2021-10-03T01:30:00+10:00 is 2021-10-02T15:30:00Z
         let utc_just_before_sydney_dst_starts =
             NaiveDate::from_ymd(2021, 10, 2).and_hms_nano(15, 30, 0, 0);
         assert_eq!(
-            using_chrono_tz_and_utc_naive_date_time(
-                &sydney_tz,
-                utc_just_before_sydney_dst_starts
-            ),
+            using_chrono_tz_and_utc_naive_date_time(&sydney_tz, utc_just_before_sydney_dst_starts),
             Some(sydney_offset_without_dst)
         );
         // Sydney 2021-04-04T03:30:00+11:00 is 2021-10-02T16:30:00Z
         let utc_just_after_sydney_dst_starts =
             NaiveDate::from_ymd(2022, 10, 2).and_hms_nano(16, 30, 0, 0);
         assert_eq!(
-            using_chrono_tz_and_utc_naive_date_time(
-                &sydney_tz,
-                utc_just_after_sydney_dst_starts
-            ),
+            using_chrono_tz_and_utc_naive_date_time(&sydney_tz, utc_just_after_sydney_dst_starts),
             Some(sydney_offset_with_dst)
         );
     }
@@ -1441,15 +1367,13 @@ mod tests {
 
     #[test]
     fn test_year_dictionary_array() {
-        let a: PrimitiveArray<Date64Type> =
-            vec![Some(1514764800000), Some(1550636625000)].into();
+        let a: PrimitiveArray<Date64Type> = vec![Some(1514764800000), Some(1550636625000)].into();
 
         let keys = Int8Array::from_iter_values([0_i8, 1, 1, 0]);
         let dict = DictionaryArray::try_new(&keys, &a).unwrap();
 
         let b =
-            year_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap())
-                .unwrap();
+            year_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
 
         let expected = Int32Array::from(vec![2018, 2019, 2019, 2018]);
         assert_eq!(expected, b);
@@ -1459,23 +1383,19 @@ mod tests {
     fn test_quarter_month_dictionary_array() {
         //1514764800000 -> 2018-01-01
         //1566275025000 -> 2019-08-20
-        let a: PrimitiveArray<Date64Type> =
-            vec![Some(1514764800000), Some(1566275025000)].into();
+        let a: PrimitiveArray<Date64Type> = vec![Some(1514764800000), Some(1566275025000)].into();
 
         let keys = Int8Array::from_iter_values([0_i8, 1, 1, 0]);
         let dict = DictionaryArray::try_new(&keys, &a).unwrap();
 
-        let b = quarter_generic::<Date64Type, _>(
-            dict.downcast_dict::<Date64Array>().unwrap(),
-        )
-        .unwrap();
+        let b =
+            quarter_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
 
         let expected = Int32Array::from(vec![1, 3, 3, 1]);
         assert_eq!(expected, b);
 
         let b =
-            month_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap())
-                .unwrap();
+            month_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
 
         let expected = Int32Array::from(vec![1, 8, 8, 1]);
         assert_eq!(expected, b);
@@ -1485,8 +1405,7 @@ mod tests {
     fn test_num_days_from_monday_sunday_day_doy_week_dictionary_array() {
         //1514764800000 -> 2018-01-01 (Monday)
         //1550636625000 -> 2019-02-20 (Wednesday)
-        let a: PrimitiveArray<Date64Type> =
-            vec![Some(1514764800000), Some(1550636625000)].into();
+        let a: PrimitiveArray<Date64Type> = vec![Some(1514764800000), Some(1550636625000)].into();
 
         let keys = Int8Array::from(vec![Some(0_i8), Some(1), Some(1), Some(0), None]);
         let dict = DictionaryArray::try_new(&keys, &a).unwrap();
@@ -1505,21 +1424,16 @@ mod tests {
         let expected = Int32Array::from(vec![Some(1), Some(3), Some(3), Some(1), None]);
         assert_eq!(expected, b);
 
-        let b =
-            day_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap())
-                .unwrap();
+        let b = day_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
         let expected = Int32Array::from(vec![Some(1), Some(20), Some(20), Some(1), None]);
         assert_eq!(expected, b);
 
-        let b =
-            doy_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap())
-                .unwrap();
+        let b = doy_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
         let expected = Int32Array::from(vec![Some(1), Some(51), Some(51), Some(1), None]);
         assert_eq!(expected, b);
 
         let b =
-            week_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap())
-                .unwrap();
+            week_generic::<Date64Type, _>(dict.downcast_dict::<Date64Array>().unwrap()).unwrap();
         let expected = Int32Array::from(vec![Some(1), Some(8), Some(8), Some(1), None]);
         assert_eq!(expected, b);
     }

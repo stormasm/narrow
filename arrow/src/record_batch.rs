@@ -148,9 +148,7 @@ impl RecordBatch {
 
         if columns.iter().any(|c| c.len() != row_count) {
             let err = match options.row_count {
-                Some(_) => {
-                    "all columns in a record batch must have the specified row count"
-                }
+                Some(_) => "all columns in a record batch must have the specified row count",
                 None => "all columns in a record batch must have the same length",
             };
             return Err(ArrowError::InvalidArgumentError(err.to_string()));
@@ -159,9 +157,7 @@ impl RecordBatch {
         // function for comparing column type and field type
         // return true if 2 types are not matched
         let type_not_match = if options.match_field_names {
-            |(_, (col_type, field_type)): &(usize, (&DataType, &DataType))| {
-                col_type != field_type
-            }
+            |(_, (col_type, field_type)): &(usize, (&DataType, &DataType))| col_type != field_type
         } else {
             |(_, (col_type, field_type)): &(usize, (&DataType, &DataType))| {
                 !col_type.equals_datatype(field_type)
@@ -504,8 +500,7 @@ mod tests {
         let b = StringArray::from(vec!["a", "b", "c", "d", "e"]);
 
         let record_batch =
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]).unwrap();
         check_batch(record_batch, 5)
     }
 
@@ -531,8 +526,7 @@ mod tests {
         let b = StringArray::from(vec!["a", "b", "c", "d", "e", "f", "h", "i"]);
 
         let record_batch =
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]).unwrap();
 
         let offset = 2;
         let length = 5;
@@ -581,8 +575,8 @@ mod tests {
         ]));
         let b: ArrayRef = Arc::new(StringArray::from(vec!["a", "b", "c", "d", "e"]));
 
-        let record_batch = RecordBatch::try_from_iter(vec![("a", a), ("b", b)])
-            .expect("valid conversion");
+        let record_batch =
+            RecordBatch::try_from_iter(vec![("a", a), ("b", b)]).expect("valid conversion");
 
         let expected_schema = Schema::new(vec![
             Field::new("a", DataType::Int32, true),
@@ -598,11 +592,9 @@ mod tests {
         let b: ArrayRef = Arc::new(StringArray::from(vec!["a", "b", "c", "d", "e"]));
 
         // Note there are no nulls in a or b, but we specify that b is nullable
-        let record_batch = RecordBatch::try_from_iter_with_nullable(vec![
-            ("a", a, false),
-            ("b", b, true),
-        ])
-        .expect("valid conversion");
+        let record_batch =
+            RecordBatch::try_from_iter_with_nullable(vec![("a", a, false), ("b", b, true)])
+                .expect("valid conversion");
 
         let expected_schema = Schema::new(vec![
             Field::new("a", DataType::Int32, false),
@@ -679,8 +671,7 @@ mod tests {
         let a = Int32Array::from(vec![1, 2, 3, 4, 5]);
         let b = Int32Array::from(vec![1, 2, 3, 4, 5]);
 
-        let batch =
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]);
+        let batch = RecordBatch::try_new(Arc::new(schema), vec![Arc::new(a), Arc::new(b)]);
         assert!(batch.is_err());
     }
 
@@ -873,15 +864,12 @@ mod tests {
         let b: ArrayRef = Arc::new(StringArray::from(vec!["a", "b", "c"]));
         let c: ArrayRef = Arc::new(StringArray::from(vec!["d", "e", "f"]));
 
-        let record_batch = RecordBatch::try_from_iter(vec![
-            ("a", a.clone()),
-            ("b", b.clone()),
-            ("c", c.clone()),
-        ])
-        .expect("valid conversion");
+        let record_batch =
+            RecordBatch::try_from_iter(vec![("a", a.clone()), ("b", b.clone()), ("c", c.clone())])
+                .expect("valid conversion");
 
-        let expected = RecordBatch::try_from_iter(vec![("a", a), ("c", c)])
-            .expect("valid conversion");
+        let expected =
+            RecordBatch::try_from_iter(vec![("a", a), ("c", c)]).expect("valid conversion");
 
         assert_eq!(expected, record_batch.project(&[0, 2]).unwrap());
     }
@@ -917,8 +905,7 @@ mod tests {
 
         let options = RecordBatchOptions::new().with_row_count(Some(10));
 
-        let ok =
-            RecordBatch::try_new_with_options(schema.clone(), vec![], &options).unwrap();
+        let ok = RecordBatch::try_new_with_options(schema.clone(), vec![], &options).unwrap();
         assert_eq!(ok.num_rows(), 10);
 
         let a = ok.slice(2, 5);

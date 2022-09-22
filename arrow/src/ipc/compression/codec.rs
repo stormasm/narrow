@@ -56,11 +56,7 @@ impl CompressionCodec {
     /// [8 bytes]:         uncompressed length
     /// [remaining bytes]: compressed data stream
     /// ```
-    pub(crate) fn compress_to_vec(
-        &self,
-        input: &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<usize> {
+    pub(crate) fn compress_to_vec(&self, input: &[u8], output: &mut Vec<u8>) -> Result<usize> {
         let uncompressed_data_len = input.len();
         let original_output_len = output.len();
 
@@ -104,8 +100,7 @@ impl CompressionCodec {
             input.slice(LENGTH_OF_PREFIX_DATA as usize)
         } else {
             // decompress data using the codec
-            let mut uncompressed_buffer =
-                Vec::with_capacity(decompressed_length as usize);
+            let mut uncompressed_buffer = Vec::with_capacity(decompressed_length as usize);
             let input_data = &input[(LENGTH_OF_PREFIX_DATA as usize)..];
             self.decompress(input_data, &mut uncompressed_buffer)?;
             Buffer::from(uncompressed_buffer)

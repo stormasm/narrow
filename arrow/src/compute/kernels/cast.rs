@@ -562,9 +562,7 @@ pub fn cast_with_options(
         (_, Struct(_)) => Err(ArrowError::CastError(
             "Cannot cast to struct from other types".to_string(),
         )),
-        (List(_), List(ref to)) => {
-            cast_list_inner::<i32>(array, to, to_type, cast_options)
-        }
+        (List(_), List(ref to)) => cast_list_inner::<i32>(array, to, to_type, cast_options),
         (LargeList(_), LargeList(ref to)) => {
             cast_list_inner::<i64>(array, to, to_type, cast_options)
         }
@@ -589,57 +587,31 @@ pub fn cast_with_options(
         (List(_), _) => Err(ArrowError::CastError(
             "Cannot cast list to non-list data types".to_string(),
         )),
-        (_, List(ref to)) => {
-            cast_primitive_to_list::<i32>(array, to, to_type, cast_options)
-        }
-        (_, LargeList(ref to)) => {
-            cast_primitive_to_list::<i64>(array, to, to_type, cast_options)
-        }
+        (_, List(ref to)) => cast_primitive_to_list::<i32>(array, to, to_type, cast_options),
+        (_, LargeList(ref to)) => cast_primitive_to_list::<i64>(array, to, to_type, cast_options),
         (Dictionary(index_type, _), _) => match **index_type {
             DataType::Int8 => dictionary_cast::<Int8Type>(array, to_type, cast_options),
             DataType::Int16 => dictionary_cast::<Int16Type>(array, to_type, cast_options),
             DataType::Int32 => dictionary_cast::<Int32Type>(array, to_type, cast_options),
             DataType::Int64 => dictionary_cast::<Int64Type>(array, to_type, cast_options),
             DataType::UInt8 => dictionary_cast::<UInt8Type>(array, to_type, cast_options),
-            DataType::UInt16 => {
-                dictionary_cast::<UInt16Type>(array, to_type, cast_options)
-            }
-            DataType::UInt32 => {
-                dictionary_cast::<UInt32Type>(array, to_type, cast_options)
-            }
-            DataType::UInt64 => {
-                dictionary_cast::<UInt64Type>(array, to_type, cast_options)
-            }
+            DataType::UInt16 => dictionary_cast::<UInt16Type>(array, to_type, cast_options),
+            DataType::UInt32 => dictionary_cast::<UInt32Type>(array, to_type, cast_options),
+            DataType::UInt64 => dictionary_cast::<UInt64Type>(array, to_type, cast_options),
             _ => Err(ArrowError::CastError(format!(
                 "Casting from dictionary type {:?} to {:?} not supported",
                 from_type, to_type,
             ))),
         },
         (_, Dictionary(index_type, value_type)) => match **index_type {
-            DataType::Int8 => {
-                cast_to_dictionary::<Int8Type>(array, value_type, cast_options)
-            }
-            DataType::Int16 => {
-                cast_to_dictionary::<Int16Type>(array, value_type, cast_options)
-            }
-            DataType::Int32 => {
-                cast_to_dictionary::<Int32Type>(array, value_type, cast_options)
-            }
-            DataType::Int64 => {
-                cast_to_dictionary::<Int64Type>(array, value_type, cast_options)
-            }
-            DataType::UInt8 => {
-                cast_to_dictionary::<UInt8Type>(array, value_type, cast_options)
-            }
-            DataType::UInt16 => {
-                cast_to_dictionary::<UInt16Type>(array, value_type, cast_options)
-            }
-            DataType::UInt32 => {
-                cast_to_dictionary::<UInt32Type>(array, value_type, cast_options)
-            }
-            DataType::UInt64 => {
-                cast_to_dictionary::<UInt64Type>(array, value_type, cast_options)
-            }
+            DataType::Int8 => cast_to_dictionary::<Int8Type>(array, value_type, cast_options),
+            DataType::Int16 => cast_to_dictionary::<Int16Type>(array, value_type, cast_options),
+            DataType::Int32 => cast_to_dictionary::<Int32Type>(array, value_type, cast_options),
+            DataType::Int64 => cast_to_dictionary::<Int64Type>(array, value_type, cast_options),
+            DataType::UInt8 => cast_to_dictionary::<UInt8Type>(array, value_type, cast_options),
+            DataType::UInt16 => cast_to_dictionary::<UInt16Type>(array, value_type, cast_options),
+            DataType::UInt32 => cast_to_dictionary::<UInt32Type>(array, value_type, cast_options),
+            DataType::UInt64 => cast_to_dictionary::<UInt64Type>(array, value_type, cast_options),
             _ => Err(ArrowError::CastError(format!(
                 "Casting from type {:?} to dictionary type {:?} not supported",
                 from_type, to_type,
@@ -702,9 +674,7 @@ pub fn cast_with_options(
             Date32 => cast_string_to_date32::<i32>(&**array, cast_options),
             Date64 => cast_string_to_date64::<i32>(&**array, cast_options),
             Binary => cast_string_to_binary(array),
-            Time32(TimeUnit::Second) => {
-                cast_string_to_time32second::<i32>(&**array, cast_options)
-            }
+            Time32(TimeUnit::Second) => cast_string_to_time32second::<i32>(&**array, cast_options),
             Time32(TimeUnit::Millisecond) => {
                 cast_string_to_time32millisecond::<i32>(&**array, cast_options)
             }
@@ -744,9 +714,7 @@ pub fn cast_with_options(
                 TimeUnit::Millisecond => {
                     cast_timestamp_to_string::<TimestampMillisecondType, i32>(array, tz)
                 }
-                TimeUnit::Second => {
-                    cast_timestamp_to_string::<TimestampSecondType, i32>(array, tz)
-                }
+                TimeUnit::Second => cast_timestamp_to_string::<TimestampSecondType, i32>(array, tz),
             },
             Date32 => cast_date32_to_string::<i32>(array),
             Date64 => cast_date64_to_string::<i32>(array),
@@ -800,9 +768,7 @@ pub fn cast_with_options(
                 TimeUnit::Millisecond => {
                     cast_timestamp_to_string::<TimestampMillisecondType, i64>(array, tz)
                 }
-                TimeUnit::Second => {
-                    cast_timestamp_to_string::<TimestampSecondType, i64>(array, tz)
-                }
+                TimeUnit::Second => cast_timestamp_to_string::<TimestampSecondType, i64>(array, tz),
             },
             Date32 => cast_date32_to_string::<i64>(array),
             Date64 => cast_date64_to_string::<i64>(array),
@@ -849,9 +815,7 @@ pub fn cast_with_options(
             Date32 => cast_string_to_date32::<i64>(&**array, cast_options),
             Date64 => cast_string_to_date64::<i64>(&**array, cast_options),
             LargeBinary => cast_string_to_binary(array),
-            Time32(TimeUnit::Second) => {
-                cast_string_to_time32second::<i64>(&**array, cast_options)
-            }
+            Time32(TimeUnit::Second) => cast_string_to_time32second::<i64>(&**array, cast_options),
             Time32(TimeUnit::Millisecond) => {
                 cast_string_to_time32millisecond::<i64>(&**array, cast_options)
             }
@@ -871,269 +835,105 @@ pub fn cast_with_options(
         },
 
         // start numeric casts
-        (UInt8, UInt16) => {
-            cast_numeric_arrays::<UInt8Type, UInt16Type>(array, cast_options)
-        }
-        (UInt8, UInt32) => {
-            cast_numeric_arrays::<UInt8Type, UInt32Type>(array, cast_options)
-        }
-        (UInt8, UInt64) => {
-            cast_numeric_arrays::<UInt8Type, UInt64Type>(array, cast_options)
-        }
+        (UInt8, UInt16) => cast_numeric_arrays::<UInt8Type, UInt16Type>(array, cast_options),
+        (UInt8, UInt32) => cast_numeric_arrays::<UInt8Type, UInt32Type>(array, cast_options),
+        (UInt8, UInt64) => cast_numeric_arrays::<UInt8Type, UInt64Type>(array, cast_options),
         (UInt8, Int8) => cast_numeric_arrays::<UInt8Type, Int8Type>(array, cast_options),
-        (UInt8, Int16) => {
-            cast_numeric_arrays::<UInt8Type, Int16Type>(array, cast_options)
-        }
-        (UInt8, Int32) => {
-            cast_numeric_arrays::<UInt8Type, Int32Type>(array, cast_options)
-        }
-        (UInt8, Int64) => {
-            cast_numeric_arrays::<UInt8Type, Int64Type>(array, cast_options)
-        }
-        (UInt8, Float32) => {
-            cast_numeric_arrays::<UInt8Type, Float32Type>(array, cast_options)
-        }
-        (UInt8, Float64) => {
-            cast_numeric_arrays::<UInt8Type, Float64Type>(array, cast_options)
-        }
+        (UInt8, Int16) => cast_numeric_arrays::<UInt8Type, Int16Type>(array, cast_options),
+        (UInt8, Int32) => cast_numeric_arrays::<UInt8Type, Int32Type>(array, cast_options),
+        (UInt8, Int64) => cast_numeric_arrays::<UInt8Type, Int64Type>(array, cast_options),
+        (UInt8, Float32) => cast_numeric_arrays::<UInt8Type, Float32Type>(array, cast_options),
+        (UInt8, Float64) => cast_numeric_arrays::<UInt8Type, Float64Type>(array, cast_options),
 
-        (UInt16, UInt8) => {
-            cast_numeric_arrays::<UInt16Type, UInt8Type>(array, cast_options)
-        }
-        (UInt16, UInt32) => {
-            cast_numeric_arrays::<UInt16Type, UInt32Type>(array, cast_options)
-        }
-        (UInt16, UInt64) => {
-            cast_numeric_arrays::<UInt16Type, UInt64Type>(array, cast_options)
-        }
-        (UInt16, Int8) => {
-            cast_numeric_arrays::<UInt16Type, Int8Type>(array, cast_options)
-        }
-        (UInt16, Int16) => {
-            cast_numeric_arrays::<UInt16Type, Int16Type>(array, cast_options)
-        }
-        (UInt16, Int32) => {
-            cast_numeric_arrays::<UInt16Type, Int32Type>(array, cast_options)
-        }
-        (UInt16, Int64) => {
-            cast_numeric_arrays::<UInt16Type, Int64Type>(array, cast_options)
-        }
-        (UInt16, Float32) => {
-            cast_numeric_arrays::<UInt16Type, Float32Type>(array, cast_options)
-        }
-        (UInt16, Float64) => {
-            cast_numeric_arrays::<UInt16Type, Float64Type>(array, cast_options)
-        }
+        (UInt16, UInt8) => cast_numeric_arrays::<UInt16Type, UInt8Type>(array, cast_options),
+        (UInt16, UInt32) => cast_numeric_arrays::<UInt16Type, UInt32Type>(array, cast_options),
+        (UInt16, UInt64) => cast_numeric_arrays::<UInt16Type, UInt64Type>(array, cast_options),
+        (UInt16, Int8) => cast_numeric_arrays::<UInt16Type, Int8Type>(array, cast_options),
+        (UInt16, Int16) => cast_numeric_arrays::<UInt16Type, Int16Type>(array, cast_options),
+        (UInt16, Int32) => cast_numeric_arrays::<UInt16Type, Int32Type>(array, cast_options),
+        (UInt16, Int64) => cast_numeric_arrays::<UInt16Type, Int64Type>(array, cast_options),
+        (UInt16, Float32) => cast_numeric_arrays::<UInt16Type, Float32Type>(array, cast_options),
+        (UInt16, Float64) => cast_numeric_arrays::<UInt16Type, Float64Type>(array, cast_options),
 
-        (UInt32, UInt8) => {
-            cast_numeric_arrays::<UInt32Type, UInt8Type>(array, cast_options)
-        }
-        (UInt32, UInt16) => {
-            cast_numeric_arrays::<UInt32Type, UInt16Type>(array, cast_options)
-        }
-        (UInt32, UInt64) => {
-            cast_numeric_arrays::<UInt32Type, UInt64Type>(array, cast_options)
-        }
-        (UInt32, Int8) => {
-            cast_numeric_arrays::<UInt32Type, Int8Type>(array, cast_options)
-        }
-        (UInt32, Int16) => {
-            cast_numeric_arrays::<UInt32Type, Int16Type>(array, cast_options)
-        }
-        (UInt32, Int32) => {
-            cast_numeric_arrays::<UInt32Type, Int32Type>(array, cast_options)
-        }
-        (UInt32, Int64) => {
-            cast_numeric_arrays::<UInt32Type, Int64Type>(array, cast_options)
-        }
-        (UInt32, Float32) => {
-            cast_numeric_arrays::<UInt32Type, Float32Type>(array, cast_options)
-        }
-        (UInt32, Float64) => {
-            cast_numeric_arrays::<UInt32Type, Float64Type>(array, cast_options)
-        }
+        (UInt32, UInt8) => cast_numeric_arrays::<UInt32Type, UInt8Type>(array, cast_options),
+        (UInt32, UInt16) => cast_numeric_arrays::<UInt32Type, UInt16Type>(array, cast_options),
+        (UInt32, UInt64) => cast_numeric_arrays::<UInt32Type, UInt64Type>(array, cast_options),
+        (UInt32, Int8) => cast_numeric_arrays::<UInt32Type, Int8Type>(array, cast_options),
+        (UInt32, Int16) => cast_numeric_arrays::<UInt32Type, Int16Type>(array, cast_options),
+        (UInt32, Int32) => cast_numeric_arrays::<UInt32Type, Int32Type>(array, cast_options),
+        (UInt32, Int64) => cast_numeric_arrays::<UInt32Type, Int64Type>(array, cast_options),
+        (UInt32, Float32) => cast_numeric_arrays::<UInt32Type, Float32Type>(array, cast_options),
+        (UInt32, Float64) => cast_numeric_arrays::<UInt32Type, Float64Type>(array, cast_options),
 
-        (UInt64, UInt8) => {
-            cast_numeric_arrays::<UInt64Type, UInt8Type>(array, cast_options)
-        }
-        (UInt64, UInt16) => {
-            cast_numeric_arrays::<UInt64Type, UInt16Type>(array, cast_options)
-        }
-        (UInt64, UInt32) => {
-            cast_numeric_arrays::<UInt64Type, UInt32Type>(array, cast_options)
-        }
-        (UInt64, Int8) => {
-            cast_numeric_arrays::<UInt64Type, Int8Type>(array, cast_options)
-        }
-        (UInt64, Int16) => {
-            cast_numeric_arrays::<UInt64Type, Int16Type>(array, cast_options)
-        }
-        (UInt64, Int32) => {
-            cast_numeric_arrays::<UInt64Type, Int32Type>(array, cast_options)
-        }
-        (UInt64, Int64) => {
-            cast_numeric_arrays::<UInt64Type, Int64Type>(array, cast_options)
-        }
-        (UInt64, Float32) => {
-            cast_numeric_arrays::<UInt64Type, Float32Type>(array, cast_options)
-        }
-        (UInt64, Float64) => {
-            cast_numeric_arrays::<UInt64Type, Float64Type>(array, cast_options)
-        }
+        (UInt64, UInt8) => cast_numeric_arrays::<UInt64Type, UInt8Type>(array, cast_options),
+        (UInt64, UInt16) => cast_numeric_arrays::<UInt64Type, UInt16Type>(array, cast_options),
+        (UInt64, UInt32) => cast_numeric_arrays::<UInt64Type, UInt32Type>(array, cast_options),
+        (UInt64, Int8) => cast_numeric_arrays::<UInt64Type, Int8Type>(array, cast_options),
+        (UInt64, Int16) => cast_numeric_arrays::<UInt64Type, Int16Type>(array, cast_options),
+        (UInt64, Int32) => cast_numeric_arrays::<UInt64Type, Int32Type>(array, cast_options),
+        (UInt64, Int64) => cast_numeric_arrays::<UInt64Type, Int64Type>(array, cast_options),
+        (UInt64, Float32) => cast_numeric_arrays::<UInt64Type, Float32Type>(array, cast_options),
+        (UInt64, Float64) => cast_numeric_arrays::<UInt64Type, Float64Type>(array, cast_options),
 
         (Int8, UInt8) => cast_numeric_arrays::<Int8Type, UInt8Type>(array, cast_options),
-        (Int8, UInt16) => {
-            cast_numeric_arrays::<Int8Type, UInt16Type>(array, cast_options)
-        }
-        (Int8, UInt32) => {
-            cast_numeric_arrays::<Int8Type, UInt32Type>(array, cast_options)
-        }
-        (Int8, UInt64) => {
-            cast_numeric_arrays::<Int8Type, UInt64Type>(array, cast_options)
-        }
+        (Int8, UInt16) => cast_numeric_arrays::<Int8Type, UInt16Type>(array, cast_options),
+        (Int8, UInt32) => cast_numeric_arrays::<Int8Type, UInt32Type>(array, cast_options),
+        (Int8, UInt64) => cast_numeric_arrays::<Int8Type, UInt64Type>(array, cast_options),
         (Int8, Int16) => cast_numeric_arrays::<Int8Type, Int16Type>(array, cast_options),
         (Int8, Int32) => cast_numeric_arrays::<Int8Type, Int32Type>(array, cast_options),
         (Int8, Int64) => cast_numeric_arrays::<Int8Type, Int64Type>(array, cast_options),
-        (Int8, Float32) => {
-            cast_numeric_arrays::<Int8Type, Float32Type>(array, cast_options)
-        }
-        (Int8, Float64) => {
-            cast_numeric_arrays::<Int8Type, Float64Type>(array, cast_options)
-        }
+        (Int8, Float32) => cast_numeric_arrays::<Int8Type, Float32Type>(array, cast_options),
+        (Int8, Float64) => cast_numeric_arrays::<Int8Type, Float64Type>(array, cast_options),
 
-        (Int16, UInt8) => {
-            cast_numeric_arrays::<Int16Type, UInt8Type>(array, cast_options)
-        }
-        (Int16, UInt16) => {
-            cast_numeric_arrays::<Int16Type, UInt16Type>(array, cast_options)
-        }
-        (Int16, UInt32) => {
-            cast_numeric_arrays::<Int16Type, UInt32Type>(array, cast_options)
-        }
-        (Int16, UInt64) => {
-            cast_numeric_arrays::<Int16Type, UInt64Type>(array, cast_options)
-        }
+        (Int16, UInt8) => cast_numeric_arrays::<Int16Type, UInt8Type>(array, cast_options),
+        (Int16, UInt16) => cast_numeric_arrays::<Int16Type, UInt16Type>(array, cast_options),
+        (Int16, UInt32) => cast_numeric_arrays::<Int16Type, UInt32Type>(array, cast_options),
+        (Int16, UInt64) => cast_numeric_arrays::<Int16Type, UInt64Type>(array, cast_options),
         (Int16, Int8) => cast_numeric_arrays::<Int16Type, Int8Type>(array, cast_options),
-        (Int16, Int32) => {
-            cast_numeric_arrays::<Int16Type, Int32Type>(array, cast_options)
-        }
-        (Int16, Int64) => {
-            cast_numeric_arrays::<Int16Type, Int64Type>(array, cast_options)
-        }
-        (Int16, Float32) => {
-            cast_numeric_arrays::<Int16Type, Float32Type>(array, cast_options)
-        }
-        (Int16, Float64) => {
-            cast_numeric_arrays::<Int16Type, Float64Type>(array, cast_options)
-        }
+        (Int16, Int32) => cast_numeric_arrays::<Int16Type, Int32Type>(array, cast_options),
+        (Int16, Int64) => cast_numeric_arrays::<Int16Type, Int64Type>(array, cast_options),
+        (Int16, Float32) => cast_numeric_arrays::<Int16Type, Float32Type>(array, cast_options),
+        (Int16, Float64) => cast_numeric_arrays::<Int16Type, Float64Type>(array, cast_options),
 
-        (Int32, UInt8) => {
-            cast_numeric_arrays::<Int32Type, UInt8Type>(array, cast_options)
-        }
-        (Int32, UInt16) => {
-            cast_numeric_arrays::<Int32Type, UInt16Type>(array, cast_options)
-        }
-        (Int32, UInt32) => {
-            cast_numeric_arrays::<Int32Type, UInt32Type>(array, cast_options)
-        }
-        (Int32, UInt64) => {
-            cast_numeric_arrays::<Int32Type, UInt64Type>(array, cast_options)
-        }
+        (Int32, UInt8) => cast_numeric_arrays::<Int32Type, UInt8Type>(array, cast_options),
+        (Int32, UInt16) => cast_numeric_arrays::<Int32Type, UInt16Type>(array, cast_options),
+        (Int32, UInt32) => cast_numeric_arrays::<Int32Type, UInt32Type>(array, cast_options),
+        (Int32, UInt64) => cast_numeric_arrays::<Int32Type, UInt64Type>(array, cast_options),
         (Int32, Int8) => cast_numeric_arrays::<Int32Type, Int8Type>(array, cast_options),
-        (Int32, Int16) => {
-            cast_numeric_arrays::<Int32Type, Int16Type>(array, cast_options)
-        }
-        (Int32, Int64) => {
-            cast_numeric_arrays::<Int32Type, Int64Type>(array, cast_options)
-        }
-        (Int32, Float32) => {
-            cast_numeric_arrays::<Int32Type, Float32Type>(array, cast_options)
-        }
-        (Int32, Float64) => {
-            cast_numeric_arrays::<Int32Type, Float64Type>(array, cast_options)
-        }
+        (Int32, Int16) => cast_numeric_arrays::<Int32Type, Int16Type>(array, cast_options),
+        (Int32, Int64) => cast_numeric_arrays::<Int32Type, Int64Type>(array, cast_options),
+        (Int32, Float32) => cast_numeric_arrays::<Int32Type, Float32Type>(array, cast_options),
+        (Int32, Float64) => cast_numeric_arrays::<Int32Type, Float64Type>(array, cast_options),
 
-        (Int64, UInt8) => {
-            cast_numeric_arrays::<Int64Type, UInt8Type>(array, cast_options)
-        }
-        (Int64, UInt16) => {
-            cast_numeric_arrays::<Int64Type, UInt16Type>(array, cast_options)
-        }
-        (Int64, UInt32) => {
-            cast_numeric_arrays::<Int64Type, UInt32Type>(array, cast_options)
-        }
-        (Int64, UInt64) => {
-            cast_numeric_arrays::<Int64Type, UInt64Type>(array, cast_options)
-        }
+        (Int64, UInt8) => cast_numeric_arrays::<Int64Type, UInt8Type>(array, cast_options),
+        (Int64, UInt16) => cast_numeric_arrays::<Int64Type, UInt16Type>(array, cast_options),
+        (Int64, UInt32) => cast_numeric_arrays::<Int64Type, UInt32Type>(array, cast_options),
+        (Int64, UInt64) => cast_numeric_arrays::<Int64Type, UInt64Type>(array, cast_options),
         (Int64, Int8) => cast_numeric_arrays::<Int64Type, Int8Type>(array, cast_options),
-        (Int64, Int16) => {
-            cast_numeric_arrays::<Int64Type, Int16Type>(array, cast_options)
-        }
-        (Int64, Int32) => {
-            cast_numeric_arrays::<Int64Type, Int32Type>(array, cast_options)
-        }
-        (Int64, Float32) => {
-            cast_numeric_arrays::<Int64Type, Float32Type>(array, cast_options)
-        }
-        (Int64, Float64) => {
-            cast_numeric_arrays::<Int64Type, Float64Type>(array, cast_options)
-        }
+        (Int64, Int16) => cast_numeric_arrays::<Int64Type, Int16Type>(array, cast_options),
+        (Int64, Int32) => cast_numeric_arrays::<Int64Type, Int32Type>(array, cast_options),
+        (Int64, Float32) => cast_numeric_arrays::<Int64Type, Float32Type>(array, cast_options),
+        (Int64, Float64) => cast_numeric_arrays::<Int64Type, Float64Type>(array, cast_options),
 
-        (Float32, UInt8) => {
-            cast_numeric_arrays::<Float32Type, UInt8Type>(array, cast_options)
-        }
-        (Float32, UInt16) => {
-            cast_numeric_arrays::<Float32Type, UInt16Type>(array, cast_options)
-        }
-        (Float32, UInt32) => {
-            cast_numeric_arrays::<Float32Type, UInt32Type>(array, cast_options)
-        }
-        (Float32, UInt64) => {
-            cast_numeric_arrays::<Float32Type, UInt64Type>(array, cast_options)
-        }
-        (Float32, Int8) => {
-            cast_numeric_arrays::<Float32Type, Int8Type>(array, cast_options)
-        }
-        (Float32, Int16) => {
-            cast_numeric_arrays::<Float32Type, Int16Type>(array, cast_options)
-        }
-        (Float32, Int32) => {
-            cast_numeric_arrays::<Float32Type, Int32Type>(array, cast_options)
-        }
-        (Float32, Int64) => {
-            cast_numeric_arrays::<Float32Type, Int64Type>(array, cast_options)
-        }
-        (Float32, Float64) => {
-            cast_numeric_arrays::<Float32Type, Float64Type>(array, cast_options)
-        }
+        (Float32, UInt8) => cast_numeric_arrays::<Float32Type, UInt8Type>(array, cast_options),
+        (Float32, UInt16) => cast_numeric_arrays::<Float32Type, UInt16Type>(array, cast_options),
+        (Float32, UInt32) => cast_numeric_arrays::<Float32Type, UInt32Type>(array, cast_options),
+        (Float32, UInt64) => cast_numeric_arrays::<Float32Type, UInt64Type>(array, cast_options),
+        (Float32, Int8) => cast_numeric_arrays::<Float32Type, Int8Type>(array, cast_options),
+        (Float32, Int16) => cast_numeric_arrays::<Float32Type, Int16Type>(array, cast_options),
+        (Float32, Int32) => cast_numeric_arrays::<Float32Type, Int32Type>(array, cast_options),
+        (Float32, Int64) => cast_numeric_arrays::<Float32Type, Int64Type>(array, cast_options),
+        (Float32, Float64) => cast_numeric_arrays::<Float32Type, Float64Type>(array, cast_options),
 
-        (Float64, UInt8) => {
-            cast_numeric_arrays::<Float64Type, UInt8Type>(array, cast_options)
-        }
-        (Float64, UInt16) => {
-            cast_numeric_arrays::<Float64Type, UInt16Type>(array, cast_options)
-        }
-        (Float64, UInt32) => {
-            cast_numeric_arrays::<Float64Type, UInt32Type>(array, cast_options)
-        }
-        (Float64, UInt64) => {
-            cast_numeric_arrays::<Float64Type, UInt64Type>(array, cast_options)
-        }
-        (Float64, Int8) => {
-            cast_numeric_arrays::<Float64Type, Int8Type>(array, cast_options)
-        }
-        (Float64, Int16) => {
-            cast_numeric_arrays::<Float64Type, Int16Type>(array, cast_options)
-        }
-        (Float64, Int32) => {
-            cast_numeric_arrays::<Float64Type, Int32Type>(array, cast_options)
-        }
-        (Float64, Int64) => {
-            cast_numeric_arrays::<Float64Type, Int64Type>(array, cast_options)
-        }
-        (Float64, Float32) => {
-            cast_numeric_arrays::<Float64Type, Float32Type>(array, cast_options)
-        }
+        (Float64, UInt8) => cast_numeric_arrays::<Float64Type, UInt8Type>(array, cast_options),
+        (Float64, UInt16) => cast_numeric_arrays::<Float64Type, UInt16Type>(array, cast_options),
+        (Float64, UInt32) => cast_numeric_arrays::<Float64Type, UInt32Type>(array, cast_options),
+        (Float64, UInt64) => cast_numeric_arrays::<Float64Type, UInt64Type>(array, cast_options),
+        (Float64, Int8) => cast_numeric_arrays::<Float64Type, Int8Type>(array, cast_options),
+        (Float64, Int16) => cast_numeric_arrays::<Float64Type, Int16Type>(array, cast_options),
+        (Float64, Int32) => cast_numeric_arrays::<Float64Type, Int32Type>(array, cast_options),
+        (Float64, Int64) => cast_numeric_arrays::<Float64Type, Int64Type>(array, cast_options),
+        (Float64, Float32) => cast_numeric_arrays::<Float64Type, Float32Type>(array, cast_options),
         // end numeric casts
 
         // temporal casts
@@ -1181,26 +981,23 @@ pub fn cast_with_options(
         (Date32, Date64) => {
             let date_array = array.as_any().downcast_ref::<Date32Array>().unwrap();
 
-            let values =
-                unary::<_, _, Date64Type>(date_array, |x| x as i64 * MILLISECONDS_IN_DAY);
+            let values = unary::<_, _, Date64Type>(date_array, |x| x as i64 * MILLISECONDS_IN_DAY);
 
             Ok(Arc::new(values) as ArrayRef)
         }
         (Date64, Date32) => {
             let date_array = array.as_any().downcast_ref::<Date64Array>().unwrap();
 
-            let values = unary::<_, _, Date32Type>(date_array, |x| {
-                (x / MILLISECONDS_IN_DAY) as i32
-            });
+            let values =
+                unary::<_, _, Date32Type>(date_array, |x| (x / MILLISECONDS_IN_DAY) as i32);
 
             Ok(Arc::new(values) as ArrayRef)
         }
         (Time32(TimeUnit::Second), Time32(TimeUnit::Millisecond)) => {
             let time_array = array.as_any().downcast_ref::<Time32SecondArray>().unwrap();
 
-            let values = unary::<_, _, Time32MillisecondType>(time_array, |x| {
-                x * MILLISECONDS as i32
-            });
+            let values =
+                unary::<_, _, Time32MillisecondType>(time_array, |x| x * MILLISECONDS as i32);
 
             Ok(Arc::new(values) as ArrayRef)
         }
@@ -1210,9 +1007,7 @@ pub fn cast_with_options(
                 .downcast_ref::<Time32MillisecondArray>()
                 .unwrap();
 
-            let values = unary::<_, _, Time32SecondType>(time_array, |x| {
-                x / (MILLISECONDS as i32)
-            });
+            let values = unary::<_, _, Time32SecondType>(time_array, |x| x / (MILLISECONDS as i32));
 
             Ok(Arc::new(values) as ArrayRef)
         }
@@ -1229,14 +1024,12 @@ pub fn cast_with_options(
             let array_ref = Arc::new(converted) as ArrayRef;
             use TimeUnit::*;
             match to_unit {
-                Microsecond => cast_array_data::<TimestampMicrosecondType>(
-                    &array_ref,
-                    to_type.clone(),
-                ),
-                Nanosecond => cast_array_data::<TimestampNanosecondType>(
-                    &array_ref,
-                    to_type.clone(),
-                ),
+                Microsecond => {
+                    cast_array_data::<TimestampMicrosecondType>(&array_ref, to_type.clone())
+                }
+                Nanosecond => {
+                    cast_array_data::<TimestampNanosecondType>(&array_ref, to_type.clone())
+                }
                 _ => unreachable!("array type not supported"),
             }
         }
@@ -1246,8 +1039,7 @@ pub fn cast_with_options(
                 .downcast_ref::<Time64MicrosecondArray>()
                 .unwrap();
 
-            let values =
-                unary::<_, _, Time64NanosecondType>(time_array, |x| x * MILLISECONDS);
+            let values = unary::<_, _, Time64NanosecondType>(time_array, |x| x * MILLISECONDS);
             Ok(Arc::new(values) as ArrayRef)
         }
         (Time64(TimeUnit::Nanosecond), Time64(TimeUnit::Microsecond)) => {
@@ -1256,8 +1048,7 @@ pub fn cast_with_options(
                 .downcast_ref::<Time64NanosecondArray>()
                 .unwrap();
 
-            let values =
-                unary::<_, _, Time64MicrosecondType>(time_array, |x| x / MILLISECONDS);
+            let values = unary::<_, _, Time64MicrosecondType>(time_array, |x| x / MILLISECONDS);
             Ok(Arc::new(values) as ArrayRef)
         }
         (Time64(from_unit), Time32(to_unit)) => {
@@ -1286,15 +1077,9 @@ pub fn cast_with_options(
             use TimeUnit::*;
             match to_unit {
                 Second => cast_array_data::<TimestampSecondType>(array, to_type.clone()),
-                Millisecond => {
-                    cast_array_data::<TimestampMillisecondType>(array, to_type.clone())
-                }
-                Microsecond => {
-                    cast_array_data::<TimestampMicrosecondType>(array, to_type.clone())
-                }
-                Nanosecond => {
-                    cast_array_data::<TimestampNanosecondType>(array, to_type.clone())
-                }
+                Millisecond => cast_array_data::<TimestampMillisecondType>(array, to_type.clone()),
+                Microsecond => cast_array_data::<TimestampMicrosecondType>(array, to_type.clone()),
+                Nanosecond => cast_array_data::<TimestampNanosecondType>(array, to_type.clone()),
             }
         }
         (Timestamp(from_unit, _), Timestamp(to_unit, _)) => {
@@ -1314,21 +1099,16 @@ pub fn cast_with_options(
             let array_ref = Arc::new(converted) as ArrayRef;
             use TimeUnit::*;
             match to_unit {
-                Second => {
-                    cast_array_data::<TimestampSecondType>(&array_ref, to_type.clone())
+                Second => cast_array_data::<TimestampSecondType>(&array_ref, to_type.clone()),
+                Millisecond => {
+                    cast_array_data::<TimestampMillisecondType>(&array_ref, to_type.clone())
                 }
-                Millisecond => cast_array_data::<TimestampMillisecondType>(
-                    &array_ref,
-                    to_type.clone(),
-                ),
-                Microsecond => cast_array_data::<TimestampMicrosecondType>(
-                    &array_ref,
-                    to_type.clone(),
-                ),
-                Nanosecond => cast_array_data::<TimestampNanosecondType>(
-                    &array_ref,
-                    to_type.clone(),
-                ),
+                Microsecond => {
+                    cast_array_data::<TimestampMicrosecondType>(&array_ref, to_type.clone())
+                }
+                Nanosecond => {
+                    cast_array_data::<TimestampNanosecondType>(&array_ref, to_type.clone())
+                }
             }
         }
         (Timestamp(from_unit, _), Date32) => {
@@ -1364,9 +1144,7 @@ pub fn cast_with_options(
                         &Date64Array::from(vec![from_size / to_size; array.len()]),
                     )?) as ArrayRef)
                 }
-                std::cmp::Ordering::Equal => {
-                    cast_array_data::<Date64Type>(array, to_type.clone())
-                }
+                std::cmp::Ordering::Equal => cast_array_data::<Date64Type>(array, to_type.clone()),
                 std::cmp::Ordering::Greater => {
                     let time_array = Date64Array::from(array.data().clone());
                     Ok(Arc::new(multiply(
@@ -1381,23 +1159,16 @@ pub fn cast_with_options(
             use TimeUnit::*;
             match to_unit {
                 Second => cast_array_data::<DurationSecondType>(array, to_type.clone()),
-                Millisecond => {
-                    cast_array_data::<DurationMillisecondType>(array, to_type.clone())
-                }
-                Microsecond => {
-                    cast_array_data::<DurationMicrosecondType>(array, to_type.clone())
-                }
-                Nanosecond => {
-                    cast_array_data::<DurationNanosecondType>(array, to_type.clone())
-                }
+                Millisecond => cast_array_data::<DurationMillisecondType>(array, to_type.clone()),
+                Microsecond => cast_array_data::<DurationMicrosecondType>(array, to_type.clone()),
+                Nanosecond => cast_array_data::<DurationNanosecondType>(array, to_type.clone()),
             }
         }
         (Duration(_), Int64) => cast_array_data::<Int64Type>(array, to_type.clone()),
         (Interval(from_type), Int64) => match from_type {
-            IntervalUnit::YearMonth => cast_numeric_arrays::<
-                IntervalYearMonthType,
-                Int64Type,
-            >(array, cast_options),
+            IntervalUnit::YearMonth => {
+                cast_numeric_arrays::<IntervalYearMonthType, Int64Type>(array, cast_options)
+            }
             IntervalUnit::DayTime => cast_array_data::<Int64Type>(array, to_type.clone()),
             IntervalUnit::MonthDayNano => Err(ArrowError::CastError(format!(
                 "Casting from {:?} to {:?} not supported",
@@ -1511,11 +1282,13 @@ fn cast_decimal_to_decimal<const BYTE_WIDTH1: usize, const BYTE_WIDTH2: usize>(
                         if v.is_none() {
                             Ok(None)
                         } else {
-                            v.as_ref().and_then(|v| v.to_i128())
+                            v.as_ref()
+                                .and_then(|v| v.to_i128())
                                 .ok_or_else(|| {
-                                    ArrowError::InvalidArgumentError(
-                                        format!("{:?} cannot be casted to 128-bit integer for Decimal128", v),
-                                    )
+                                    ArrowError::InvalidArgumentError(format!(
+                                        "{:?} cannot be casted to 128-bit integer for Decimal128",
+                                        v
+                                    ))
                                 })
                                 .map(Some)
                         }
@@ -1566,11 +1339,13 @@ fn cast_decimal_to_decimal<const BYTE_WIDTH1: usize, const BYTE_WIDTH2: usize>(
                         if v.is_none() {
                             Ok(None)
                         } else {
-                            v.as_ref().and_then(|v| v.to_i128())
+                            v.as_ref()
+                                .and_then(|v| v.to_i128())
                                 .ok_or_else(|| {
-                                    ArrowError::InvalidArgumentError(
-                                        format!("{:?} cannot be casted to 128-bit integer for Decimal128", v),
-                                    )
+                                    ArrowError::InvalidArgumentError(format!(
+                                        "{:?} cannot be casted to 128-bit integer for Decimal128",
+                                        v
+                                    ))
                                 })
                                 .map(Some)
                         }
@@ -1622,10 +1397,7 @@ where
 }
 
 /// Convert Array into a PrimitiveArray of type, and apply numeric cast
-fn cast_numeric_arrays<FROM, TO>(
-    from: &ArrayRef,
-    cast_options: &CastOptions,
-) -> Result<ArrayRef>
+fn cast_numeric_arrays<FROM, TO>(from: &ArrayRef, cast_options: &CastOptions) -> Result<ArrayRef>
 where
     FROM: ArrowNumericType,
     TO: ArrowNumericType,
@@ -1733,9 +1505,7 @@ where
 }
 
 /// Cast date32 types to Utf8/LargeUtf8
-fn cast_date32_to_string<OffsetSize: OffsetSizeTrait>(
-    array: &ArrayRef,
-) -> Result<ArrayRef> {
+fn cast_date32_to_string<OffsetSize: OffsetSizeTrait>(array: &ArrayRef) -> Result<ArrayRef> {
     let array = array.as_any().downcast_ref::<Date32Array>().unwrap();
 
     Ok(Arc::new(
@@ -1752,9 +1522,7 @@ fn cast_date32_to_string<OffsetSize: OffsetSizeTrait>(
 }
 
 /// Cast date64 types to Utf8/LargeUtf8
-fn cast_date64_to_string<OffsetSize: OffsetSizeTrait>(
-    array: &ArrayRef,
-) -> Result<ArrayRef> {
+fn cast_date64_to_string<OffsetSize: OffsetSizeTrait>(array: &ArrayRef) -> Result<ArrayRef> {
     let array = array.as_any().downcast_ref::<Date64Array>().unwrap();
 
     Ok(Arc::new(
@@ -1785,9 +1553,7 @@ where
     )))
 }
 
-fn numeric_to_string_cast<T, OffsetSize>(
-    from: &PrimitiveArray<T>,
-) -> GenericStringArray<OffsetSize>
+fn numeric_to_string_cast<T, OffsetSize>(from: &PrimitiveArray<T>) -> GenericStringArray<OffsetSize>
 where
     T: ArrowPrimitiveType + ArrowNumericType,
     T::Native: lexical_core::ToLexical,
@@ -1981,8 +1747,7 @@ fn cast_string_to_time32second<Offset: OffsetSizeTrait>(
             v.and_then(|v| {
                 v.parse::<chrono::NaiveTime>()
                     .map(|time| {
-                        (time.num_seconds_from_midnight()
-                            + time.nanosecond() / NANOS_PER_SEC)
+                        (time.num_seconds_from_midnight() + time.nanosecond() / NANOS_PER_SEC)
                             as i32
                     })
                     .ok()
@@ -2001,8 +1766,7 @@ fn cast_string_to_time32second<Offset: OffsetSizeTrait>(
                 v.map(|v| {
                     v.parse::<chrono::NaiveTime>()
                         .map(|time| {
-                            (time.num_seconds_from_midnight()
-                                + time.nanosecond() / NANOS_PER_SEC)
+                            (time.num_seconds_from_midnight() + time.nanosecond() / NANOS_PER_SEC)
                                 as i32
                         })
                         .map_err(|_| {
@@ -2048,8 +1812,7 @@ fn cast_string_to_time32millisecond<Offset: OffsetSizeTrait>(
                 v.parse::<chrono::NaiveTime>()
                     .map(|time| {
                         (time.num_seconds_from_midnight() * MILLIS_PER_SEC
-                            + time.nanosecond() / NANOS_PER_MILLI)
-                            as i32
+                            + time.nanosecond() / NANOS_PER_MILLI) as i32
                     })
                     .ok()
             })
@@ -2262,11 +2025,10 @@ fn cast_utf8_to_boolean(from: &ArrayRef, cast_options: &CastOptions) -> Result<A
         .iter()
         .map(|value| match value {
             Some(value) => match value.to_ascii_lowercase().trim() {
-                "t" | "tr" | "tru" | "true" | "y" | "ye" | "yes" | "on" | "1" => {
-                    Ok(Some(true))
+                "t" | "tr" | "tru" | "true" | "y" | "ye" | "yes" | "on" | "1" => Ok(Some(true)),
+                "f" | "fa" | "fal" | "fals" | "false" | "n" | "no" | "of" | "off" | "0" => {
+                    Ok(Some(false))
                 }
-                "f" | "fa" | "fal" | "fals" | "false" | "n" | "no" | "of" | "off"
-                | "0" => Ok(Some(false)),
                 invalid_value => match cast_options.safe {
                     true => Ok(None),
                     false => Err(ArrowError::CastError(format!(
@@ -2319,10 +2081,7 @@ where
 /// Cast Boolean types to numeric
 ///
 /// `false` returns 0 while `true` returns 1
-fn cast_bool_to_numeric<TO>(
-    from: &ArrayRef,
-    cast_options: &CastOptions,
-) -> Result<ArrayRef>
+fn cast_bool_to_numeric<TO>(from: &ArrayRef, cast_options: &CastOptions) -> Result<ArrayRef>
 where
     TO: ArrowNumericType,
     TO::Native: num::cast::NumCast,
@@ -2333,10 +2092,7 @@ where
     )))
 }
 
-fn bool_to_numeric_cast<T>(
-    from: &BooleanArray,
-    _cast_options: &CastOptions,
-) -> PrimitiveArray<T>
+fn bool_to_numeric_cast<T>(from: &BooleanArray, _cast_options: &CastOptions) -> PrimitiveArray<T>
 where
     T: ArrowNumericType,
     T::Native: num::NumCast,
@@ -2384,8 +2140,7 @@ fn dictionary_cast<K: ArrowDictionaryKeyType>(
                 Arc::new(PrimitiveArray::<K>::from(dict_array.keys().data().clone()));
             let values_array = dict_array.values();
             let cast_keys = cast_with_options(&keys_array, to_index_type, cast_options)?;
-            let cast_values =
-                cast_with_options(values_array, to_value_type, cast_options)?;
+            let cast_values = cast_with_options(values_array, to_value_type, cast_options)?;
 
             // Failure to cast keys (because they don't fit in the
             // target type) results in NULL values;
@@ -2453,7 +2208,8 @@ where
         .downcast_ref::<DictionaryArray<K>>()
         .ok_or_else(|| {
             ArrowError::ComputeError(
-                "Internal Error: Cannot cast dictionary to DictionaryArray of expected type".to_string(),
+                "Internal Error: Cannot cast dictionary to DictionaryArray of expected type"
+                    .to_string(),
             )
         })?;
 
@@ -2465,15 +2221,14 @@ where
     let keys_array: ArrayRef =
         Arc::new(PrimitiveArray::<K>::from(dict_array.keys().data().clone()));
     let indices = cast_with_options(&keys_array, &DataType::UInt32, cast_options)?;
-    let u32_indices =
-        indices
-            .as_any()
-            .downcast_ref::<UInt32Array>()
-            .ok_or_else(|| {
-                ArrowError::ComputeError(
-                    "Internal Error: Cannot cast dict indices to UInt32".to_string(),
-                )
-            })?;
+    let u32_indices = indices
+        .as_any()
+        .downcast_ref::<UInt32Array>()
+        .ok_or_else(|| {
+            ArrowError::ComputeError(
+                "Internal Error: Cannot cast dict indices to UInt32".to_string(),
+            )
+        })?;
 
     take(cast_dict_values.as_ref(), u32_indices, None)
 }
@@ -2490,46 +2245,14 @@ fn cast_to_dictionary<K: ArrowDictionaryKeyType>(
     use DataType::*;
 
     match *dict_value_type {
-        Int8 => pack_numeric_to_dictionary::<K, Int8Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        Int16 => pack_numeric_to_dictionary::<K, Int16Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        Int32 => pack_numeric_to_dictionary::<K, Int32Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        Int64 => pack_numeric_to_dictionary::<K, Int64Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        UInt8 => pack_numeric_to_dictionary::<K, UInt8Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        UInt16 => pack_numeric_to_dictionary::<K, UInt16Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        UInt32 => pack_numeric_to_dictionary::<K, UInt32Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
-        UInt64 => pack_numeric_to_dictionary::<K, UInt64Type>(
-            array,
-            dict_value_type,
-            cast_options,
-        ),
+        Int8 => pack_numeric_to_dictionary::<K, Int8Type>(array, dict_value_type, cast_options),
+        Int16 => pack_numeric_to_dictionary::<K, Int16Type>(array, dict_value_type, cast_options),
+        Int32 => pack_numeric_to_dictionary::<K, Int32Type>(array, dict_value_type, cast_options),
+        Int64 => pack_numeric_to_dictionary::<K, Int64Type>(array, dict_value_type, cast_options),
+        UInt8 => pack_numeric_to_dictionary::<K, UInt8Type>(array, dict_value_type, cast_options),
+        UInt16 => pack_numeric_to_dictionary::<K, UInt16Type>(array, dict_value_type, cast_options),
+        UInt32 => pack_numeric_to_dictionary::<K, UInt32Type>(array, dict_value_type, cast_options),
+        UInt64 => pack_numeric_to_dictionary::<K, UInt64Type>(array, dict_value_type, cast_options),
         Utf8 => pack_string_to_dictionary::<K>(array, cast_options),
         _ => Err(ArrowError::CastError(format!(
             "Unsupported output type for dictionary packing: {:?}",
@@ -2556,8 +2279,7 @@ where
         .downcast_ref::<PrimitiveArray<V>>()
         .unwrap();
 
-    let mut b =
-        PrimitiveDictionaryBuilder::<K, V>::with_capacity(values.len(), values.len());
+    let mut b = PrimitiveDictionaryBuilder::<K, V>::with_capacity(values.len(), values.len());
 
     // copy each element one at a time
     for i in 0..values.len() {
@@ -2572,10 +2294,7 @@ where
 
 // Packs the data as a StringDictionaryArray, if possible, with the
 // key types of K
-fn pack_string_to_dictionary<K>(
-    array: &ArrayRef,
-    cast_options: &CastOptions,
-) -> Result<ArrayRef>
+fn pack_string_to_dictionary<K>(array: &ArrayRef, cast_options: &CastOptions) -> Result<ArrayRef>
 where
     K: ArrowDictionaryKeyType,
 {
@@ -2628,8 +2347,7 @@ fn cast_primitive_to_list<OffsetSize: OffsetSizeTrait + NumCast>(
             vec![cast_array.into_data()],
         )
     };
-    let list_array =
-        Arc::new(GenericListArray::<OffsetSize>::from(list_data)) as ArrayRef;
+    let list_array = Arc::new(GenericListArray::<OffsetSize>::from(list_data)) as ArrayRef;
 
     Ok(list_array)
 }
@@ -2679,9 +2397,7 @@ where
     let mut offset_builder = BufferBuilder::<OffsetSizeTo>::new(offsets.len());
     offsets.iter().try_for_each::<_, Result<_>>(|offset| {
         let offset = OffsetSizeTo::from(*offset).ok_or_else(|| {
-            ArrowError::ComputeError(
-                "large-utf8 array too large to cast to utf8-array".into(),
-            )
+            ArrowError::ComputeError("large-utf8 array too large to cast to utf8-array".into())
         })?;
         offset_builder.append(offset);
         Ok(())
@@ -2879,18 +2595,9 @@ mod tests {
             Decimal256Array,
             &output_type,
             vec![
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(11234560_i128), 20, 4)
-                        .unwrap()
-                ),
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(21234560_i128), 20, 4)
-                        .unwrap()
-                ),
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(31234560_i128), 20, 4)
-                        .unwrap()
-                ),
+                Some(Decimal256::from_big_int(&BigInt::from(11234560_i128), 20, 4).unwrap()),
+                Some(Decimal256::from_big_int(&BigInt::from(21234560_i128), 20, 4).unwrap()),
+                Some(Decimal256::from_big_int(&BigInt::from(31234560_i128), 20, 4).unwrap()),
                 None
             ]
         );
@@ -2940,18 +2647,9 @@ mod tests {
             Decimal256Array,
             &output_type,
             vec![
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(11234560_i128), 20, 4)
-                        .unwrap()
-                ),
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(21234560_i128), 20, 4)
-                        .unwrap()
-                ),
-                Some(
-                    Decimal256::from_big_int(&BigInt::from(31234560_i128), 20, 4)
-                        .unwrap()
-                ),
+                Some(Decimal256::from_big_int(&BigInt::from(11234560_i128), 20, 4).unwrap()),
+                Some(Decimal256::from_big_int(&BigInt::from(21234560_i128), 20, 4).unwrap()),
+                Some(Decimal256::from_big_int(&BigInt::from(31234560_i128), 20, 4).unwrap()),
                 None
             ]
         );
@@ -2962,8 +2660,7 @@ mod tests {
         let decimal_type = DataType::Decimal128(38, 2);
         // negative test
         assert!(!can_cast_types(&decimal_type, &DataType::UInt8));
-        let value_array: Vec<Option<i128>> =
-            vec![Some(125), Some(225), Some(325), None, Some(525)];
+        let value_array: Vec<Option<i128>> = vec![Some(125), Some(225), Some(325), None, Some(525)];
         let decimal_array = create_decimal_array(value_array, 38, 2).unwrap();
         let array = Arc::new(decimal_array) as ArrayRef;
         // i8
@@ -3355,15 +3052,13 @@ mod tests {
     fn test_cast_with_options_utf8_to_i32() {
         let a = StringArray::from(vec!["5", "6", "seven", "8", "9.1"]);
         let array = Arc::new(a) as ArrayRef;
-        let result =
-            cast_with_options(&array, &DataType::Int32, &CastOptions { safe: false });
+        let result = cast_with_options(&array, &DataType::Int32, &CastOptions { safe: false });
         match result {
             Ok(_) => panic!("expected error"),
             Err(e) => {
                 assert!(
-                    e.to_string().contains(
-                        "Cast error: Cannot cast string 'seven' to value of Int32 type",
-                    ),
+                    e.to_string()
+                        .contains("Cast error: Cannot cast string 'seven' to value of Int32 type",),
                     "Error: {}",
                     e
                 )
@@ -3377,8 +3072,7 @@ mod tests {
             "true", "false", "invalid", " Y ", "",
         ])) as ArrayRef;
         let casted = cast(&strings, &DataType::Boolean).unwrap();
-        let expected =
-            BooleanArray::from(vec![Some(true), Some(false), None, Some(true), None]);
+        let expected = BooleanArray::from(vec![Some(true), Some(false), None, Some(true), None]);
         assert_eq!(*as_boolean_array(&casted), expected);
     }
 
@@ -3387,14 +3081,13 @@ mod tests {
         let strings = Arc::new(StringArray::from(vec![
             "true", "false", "invalid", " Y ", "",
         ])) as ArrayRef;
-        let casted =
-            cast_with_options(&strings, &DataType::Boolean, &CastOptions { safe: false });
+        let casted = cast_with_options(&strings, &DataType::Boolean, &CastOptions { safe: false });
         match casted {
             Ok(_) => panic!("expected error"),
             Err(e) => {
-                assert!(e.to_string().contains(
-                    "Cast error: Cannot cast string 'invalid' to value of Boolean type"
-                ))
+                assert!(e
+                    .to_string()
+                    .contains("Cast error: Cannot cast string 'invalid' to value of Boolean type"))
             }
         }
     }
@@ -3422,9 +3115,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Casting from Int32 to Timestamp(Microsecond, None) not supported"
-    )]
+    #[should_panic(expected = "Casting from Int32 to Timestamp(Microsecond, None) not supported")]
     fn test_cast_int32_to_timestamp() {
         let a = Int32Array::from(vec![Some(2), Some(10), None]);
         let array = Arc::new(a) as ArrayRef;
@@ -3441,8 +3132,7 @@ mod tests {
 
         // Construct a list array from the above two
         // [[0,0,0], [-1, -2, -1], [2, 100000000]]
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -3493,9 +3183,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Casting from Int32 to Timestamp(Microsecond, None) not supported"
-    )]
+    #[should_panic(expected = "Casting from Int32 to Timestamp(Microsecond, None) not supported")]
     fn test_cast_list_i32_to_list_timestamp() {
         // Construct a value array
         let value_data = Int32Array::from(vec![0, 0, 0, -1, -2, -1, 2, 8, 100000000])
@@ -3505,8 +3193,7 @@ mod tests {
         let value_offsets = Buffer::from_slice_ref(&[0, 3, 6, 9]);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -3601,7 +3288,10 @@ mod tests {
 
             let options = CastOptions { safe: false };
             let err = cast_with_options(array, &to_type, &options).unwrap_err();
-            assert_eq!(err.to_string(), "Cast error: Cannot cast string 'Not a valid date' to value of Date32 type");
+            assert_eq!(
+                err.to_string(),
+                "Cast error: Cannot cast string 'Not a valid date' to value of Date32 type"
+            );
         }
     }
 
@@ -3743,7 +3433,10 @@ mod tests {
 
             let options = CastOptions { safe: false };
             let err = cast_with_options(array, &to_type, &options).unwrap_err();
-            assert_eq!(err.to_string(), "Cast error: Cannot cast string 'Not a valid date' to value of Date64 type");
+            assert_eq!(
+                err.to_string(),
+                "Cast error: Cannot cast string 'Not a valid date' to value of Date64 type"
+            );
         }
     }
 
@@ -4287,8 +3980,7 @@ mod tests {
         ];
         let u64_array: ArrayRef = Arc::new(UInt64Array::from(u64_values));
 
-        let f64_expected =
-            vec![0.0, 255.0, 65535.0, 4294967295.0, 18446744073709552000.0];
+        let f64_expected = vec![0.0, 255.0, 65535.0, 4294967295.0, 18446744073709552000.0];
         assert_eq!(
             f64_expected,
             get_cast_values::<Float64Type>(&u64_array, &DataType::Float64)
@@ -4297,8 +3989,7 @@ mod tests {
                 .collect::<Vec<f64>>()
         );
 
-        let f32_expected =
-            vec![0.0, 255.0, 65535.0, 4294967300.0, 18446744000000000000.0];
+        let f32_expected = vec![0.0, 255.0, 65535.0, 4294967300.0, 18446744000000000000.0];
         assert_eq!(
             f32_expected,
             get_cast_values::<Float32Type>(&u64_array, &DataType::Float32)
@@ -4331,8 +4022,7 @@ mod tests {
             get_cast_values::<Int8Type>(&u64_array, &DataType::Int8)
         );
 
-        let u64_expected =
-            vec!["0", "255", "65535", "4294967295", "18446744073709551615"];
+        let u64_expected = vec!["0", "255", "65535", "4294967295", "18446744073709551615"];
         assert_eq!(
             u64_expected,
             get_cast_values::<UInt64Type>(&u64_array, &DataType::UInt64)
@@ -4359,8 +4049,7 @@ mod tests {
 
     #[test]
     fn test_cast_from_uint32() {
-        let u32_values: Vec<u32> =
-            vec![0, u8::MAX as u32, u16::MAX as u32, u32::MAX as u32];
+        let u32_values: Vec<u32> = vec![0, u8::MAX as u32, u16::MAX as u32, u32::MAX as u32];
         let u32_array: ArrayRef = Arc::new(UInt32Array::from(u32_values));
 
         let f64_expected = vec!["0.0", "255.0", "65535.0", "4294967295.0"];
@@ -4764,15 +4453,13 @@ mod tests {
             get_cast_values::<Int8Type>(&i32_array, &DataType::Int8)
         );
 
-        let u64_expected =
-            vec!["null", "null", "null", "0", "127", "32767", "2147483647"];
+        let u64_expected = vec!["null", "null", "null", "0", "127", "32767", "2147483647"];
         assert_eq!(
             u64_expected,
             get_cast_values::<UInt64Type>(&i32_array, &DataType::UInt64)
         );
 
-        let u32_expected =
-            vec!["null", "null", "null", "0", "127", "32767", "2147483647"];
+        let u32_expected = vec!["null", "null", "null", "0", "127", "32767", "2147483647"];
         assert_eq!(
             u32_expected,
             get_cast_values::<UInt32Type>(&i32_array, &DataType::UInt32)
@@ -4808,8 +4495,7 @@ mod tests {
 
     #[test]
     fn test_cast_from_int16() {
-        let i16_values: Vec<i16> =
-            vec![i16::MIN, i8::MIN as i16, 0, i8::MAX as i16, i16::MAX];
+        let i16_values: Vec<i16> = vec![i16::MIN, i8::MIN as i16, 0, i8::MAX as i16, i16::MAX];
         let i16_array: ArrayRef = Arc::new(Int16Array::from(i16_values));
 
         let f64_expected = vec!["-32768.0", "-128.0", "0.0", "127.0", "32767.0"];
@@ -5154,8 +4840,7 @@ mod tests {
     fn test_cast_string_array_to_dict() {
         use DataType::*;
 
-        let array = Arc::new(StringArray::from(vec![Some("one"), None, Some("three")]))
-            as ArrayRef;
+        let array = Arc::new(StringArray::from(vec![Some("one"), None, Some("three")])) as ArrayRef;
 
         let expected = vec!["one", "null", "three"];
 
@@ -5255,16 +4940,12 @@ mod tests {
         cast_from_null_to_other(&data_type);
 
         // Cast null from and to list
-        let data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        cast_from_null_to_other(&data_type);
+        let data_type = DataType::LargeList(Box::new(Field::new("item", DataType::Int32, true)));
         cast_from_null_to_other(&data_type);
         let data_type =
-            DataType::LargeList(Box::new(Field::new("item", DataType::Int32, true)));
-        cast_from_null_to_other(&data_type);
-        let data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, true)),
-            4,
-        );
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, true)), 4);
         cast_from_null_to_other(&data_type);
 
         // Cast null from and to dictionary
@@ -5275,8 +4956,7 @@ mod tests {
         cast_from_null_to_other(&data_type);
 
         // Cast null from and to struct
-        let data_type =
-            DataType::Struct(vec![Field::new("data", DataType::Int64, false)]);
+        let data_type = DataType::Struct(vec![Field::new("data", DataType::Int64, false)]);
         cast_from_null_to_other(&data_type);
     }
 
@@ -5311,13 +4991,13 @@ mod tests {
         let c = b.as_any().downcast_ref::<Date32Array>().unwrap();
 
         // test valid inputs
-        let date_value = since(NaiveDate::from_ymd(2000, 1, 1), from_ymd(1970, 1, 1))
-            .num_days() as i32;
+        let date_value =
+            since(NaiveDate::from_ymd(2000, 1, 1), from_ymd(1970, 1, 1)).num_days() as i32;
         assert!(c.is_valid(0)); // "2000-01-01"
         assert_eq!(date_value, c.value(0));
 
-        let date_value = since(NaiveDate::from_ymd(2000, 2, 2), from_ymd(1970, 1, 1))
-            .num_days() as i32;
+        let date_value =
+            since(NaiveDate::from_ymd(2000, 2, 2), from_ymd(1970, 1, 1)).num_days() as i32;
         assert!(c.is_valid(1)); // "2000-2-2"
         assert_eq!(date_value, c.value(1));
 
@@ -5455,8 +5135,7 @@ mod tests {
             Arc::new(StructArray::from(vec![
                 (
                     Field::new("a", DataType::Boolean, false),
-                    Arc::new(BooleanArray::from(vec![false, false, true, true]))
-                        as Arc<dyn Array>,
+                    Arc::new(BooleanArray::from(vec![false, false, true, true])) as Arc<dyn Array>,
                 ),
                 (
                     Field::new("b", DataType::Int32, false),
@@ -5511,10 +5190,7 @@ mod tests {
             Arc::new(DurationMillisecondArray::from(vec![1000, 2000])),
             Arc::new(DurationMicrosecondArray::from(vec![1000, 2000])),
             Arc::new(DurationNanosecondArray::from(vec![1000, 2000])),
-            Arc::new(
-                create_decimal_array(vec![Some(1), Some(2), Some(3), None], 38, 0)
-                    .unwrap(),
-            ),
+            Arc::new(create_decimal_array(vec![Some(1), Some(2), Some(3), None], 38, 0).unwrap()),
         ]
     }
 
@@ -5531,8 +5207,7 @@ mod tests {
         let value_offsets = Buffer::from_slice_ref(&[0, 3, 6, 8]);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -5576,10 +5251,8 @@ mod tests {
             .unwrap();
 
         // Construct a fixed size list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::Int32, true)),
-            2,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::Int32, true)), 2);
         let list_data = ArrayData::builder(list_data_type)
             .len(5)
             .add_child_data(value_data)

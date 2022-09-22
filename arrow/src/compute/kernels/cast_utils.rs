@@ -210,9 +210,7 @@ mod tests {
         // naive_datetime_to_timestamp to compute the utc offset to
         // try and double check the logic
         let utc_offset_secs = match Local.offset_from_local_datetime(naive_datetime) {
-            LocalResult::Single(local_offset) => {
-                local_offset.fix().local_minus_utc() as i64
-            }
+            LocalResult::Single(local_offset) => local_offset.fix().local_minus_utc() as i64,
             _ => panic!("Unexpected failure converting to local datetime"),
         };
         let utc_offset_nanos = utc_offset_secs * 1_000_000_000;
@@ -291,9 +289,13 @@ mod tests {
                 expected_err, s, v
             ),
             Err(e) => {
-                assert!(e.to_string().contains(expected_err),
-                        "Can not find expected error '{}' while parsing '{}'. Actual error '{}'",
-                        expected_err, s, e);
+                assert!(
+                    e.to_string().contains(expected_err),
+                    "Can not find expected error '{}' while parsing '{}'. Actual error '{}'",
+                    expected_err,
+                    s,
+                    e
+                );
             }
         }
     }

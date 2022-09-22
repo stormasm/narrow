@@ -226,8 +226,7 @@ impl Field {
         self.fields()
             .into_iter()
             .filter(|&field| {
-                matches!(field.data_type(), DataType::Dictionary(_, _))
-                    && field.dict_id == id
+                matches!(field.data_type(), DataType::Dictionary(_, _)) && field.dict_id == id
             })
             .collect()
     }
@@ -272,8 +271,7 @@ impl Field {
         }
         if from.dict_is_ordered != self.dict_is_ordered {
             return Err(ArrowError::SchemaError(
-                "Fail to merge schema Field due to conflicting dict_is_ordered"
-                    .to_string(),
+                "Fail to merge schema Field due to conflicting dict_is_ordered".to_string(),
             ));
         }
         // merge metadata
@@ -313,8 +311,7 @@ impl Field {
                 }
                 _ => {
                     return Err(ArrowError::SchemaError(
-                        "Fail to merge schema Field due to conflicting datatype"
-                            .to_string(),
+                        "Fail to merge schema Field due to conflicting datatype".to_string(),
                     ));
                 }
             },
@@ -324,8 +321,7 @@ impl Field {
                         let mut is_new_field = true;
                         let field_type_id = from_type_ids.get(idx).unwrap();
 
-                        for (self_idx, self_field) in nested_fields.iter_mut().enumerate()
-                        {
+                        for (self_idx, self_field) in nested_fields.iter_mut().enumerate() {
                             if from_field == self_field {
                                 let self_type_id = type_ids.get(self_idx).unwrap();
 
@@ -351,8 +347,7 @@ impl Field {
                 }
                 _ => {
                     return Err(ArrowError::SchemaError(
-                        "Fail to merge schema Field due to conflicting datatype"
-                            .to_string(),
+                        "Fail to merge schema Field due to conflicting datatype".to_string(),
                     ));
                 }
             },
@@ -390,8 +385,7 @@ impl Field {
             | DataType::Decimal256(_, _) => {
                 if self.data_type != from.data_type {
                     return Err(ArrowError::SchemaError(
-                        "Fail to merge schema Field due to conflicting datatype"
-                            .to_string(),
+                        "Fail to merge schema Field due to conflicting datatype".to_string(),
                     ));
                 }
             }
@@ -590,8 +584,7 @@ mod test {
         let child_field1 = Field::new("child1", DataType::Float16, false);
         let child_field2 = Field::new("child2", DataType::Float16, false);
 
-        let field1 =
-            Field::new("field1", DataType::Struct(vec![child_field1.clone()]), true);
+        let field1 = Field::new("field1", DataType::Struct(vec![child_field1.clone()]), true);
         let field2 = Field::new(
             "field1",
             DataType::Struct(vec![child_field1, child_field2]),

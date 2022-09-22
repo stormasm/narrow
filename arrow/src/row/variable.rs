@@ -41,11 +41,7 @@ pub fn encoded_len(a: Option<&[u8]>) -> usize {
 /// - [`BLOCK_SIZE`] bytes of string data, padded with 0s
 /// - `0xFF_u8` if this is not the last block for this string
 /// - otherwise the length of the block as a `u8`
-pub fn encode<'a, I: Iterator<Item = Option<&'a [u8]>>>(
-    out: &mut Rows,
-    i: I,
-    opts: SortOptions,
-) {
+pub fn encode<'a, I: Iterator<Item = Option<&'a [u8]>>>(out: &mut Rows, i: I, opts: SortOptions) {
     for (offset, maybe_val) in out.offsets.iter_mut().skip(1).zip(i) {
         match maybe_val {
             Some(val) if val.is_empty() => {

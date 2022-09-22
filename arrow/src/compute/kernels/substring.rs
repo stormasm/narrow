@@ -225,11 +225,7 @@ pub fn substring_by_char<OffsetSize: OffsetSizeTrait>(
 /// * `length` - the char length of the substring
 ///
 /// Return the `start` and `end` offset (by byte) of the substring
-fn get_start_end_offset(
-    val: &str,
-    start: usize,
-    length: Option<usize>,
-) -> (usize, usize) {
+fn get_start_end_offset(val: &str, start: usize, length: Option<usize>) -> (usize, usize) {
     let len = val.len();
     let mut offset_char_iter = val.char_indices();
     let start_offset = offset_char_iter
@@ -258,8 +254,7 @@ fn binary_substring<OffsetSize: OffsetSizeTrait>(
     let zero = OffsetSize::zero();
 
     // start and end offsets of all substrings
-    let mut new_starts_ends: Vec<(OffsetSize, OffsetSize)> =
-        Vec::with_capacity(array.len());
+    let mut new_starts_ends: Vec<(OffsetSize, OffsetSize)> = Vec::with_capacity(array.len());
     let mut new_offsets: Vec<OffsetSize> = Vec::with_capacity(array.len() + 1);
     let mut len_so_far = zero;
     new_offsets.push(zero);
@@ -280,8 +275,7 @@ fn binary_substring<OffsetSize: OffsetSizeTrait>(
     });
 
     // concatenate substrings into a buffer
-    let mut new_values =
-        MutableBuffer::new(new_offsets.last().unwrap().to_usize().unwrap());
+    let mut new_values = MutableBuffer::new(new_offsets.last().unwrap().to_usize().unwrap());
 
     new_starts_ends
         .iter()
@@ -388,8 +382,7 @@ fn utf8_substring<OffsetSize: OffsetSizeTrait>(
     };
 
     // start and end offsets of all substrings
-    let mut new_starts_ends: Vec<(OffsetSize, OffsetSize)> =
-        Vec::with_capacity(array.len());
+    let mut new_starts_ends: Vec<(OffsetSize, OffsetSize)> = Vec::with_capacity(array.len());
     let mut new_offsets: Vec<OffsetSize> = Vec::with_capacity(array.len() + 1);
     let mut len_so_far = zero;
     new_offsets.push(zero);
@@ -411,8 +404,7 @@ fn utf8_substring<OffsetSize: OffsetSizeTrait>(
     })?;
 
     // concatenate substrings into a buffer
-    let mut new_values =
-        MutableBuffer::new(new_offsets.last().unwrap().to_usize().unwrap());
+    let mut new_values = MutableBuffer::new(new_offsets.last().unwrap().to_usize().unwrap());
 
     new_starts_ends
         .iter()
@@ -715,18 +707,16 @@ mod tests {
             .as_any()
             .downcast_ref::<FixedSizeBinaryArray>()
             .unwrap();
-        let expected = FixedSizeBinaryArray::try_from_sparse_iter(
-            vec![None, Some(b"rrow")].into_iter(),
-        )
-        .unwrap();
+        let expected =
+            FixedSizeBinaryArray::try_from_sparse_iter(vec![None, Some(b"rrow")].into_iter())
+                .unwrap();
         assert_eq!(result, &expected);
     }
 
     fn with_nulls_generic_string<O: OffsetSizeTrait>() {
         let input = vec![Some("hello"), None, Some("word")];
         // all-nulls array is always identical
-        let base_case =
-            gen_test_cases!(vec![None, None, None], (0, None, vec![None, None, None]));
+        let base_case = gen_test_cases!(vec![None, None, None], (0, None, vec![None, None, None]));
         let cases = gen_test_cases!(
             input,
             // identity
@@ -847,8 +837,7 @@ mod tests {
     fn with_nulls_generic_string_by_char<O: OffsetSizeTrait>() {
         let input = vec![Some("hello"), None, Some("Γ ⊢x:T")];
         // all-nulls array is always identical
-        let base_case =
-            gen_test_cases!(vec![None, None, None], (0, None, vec![None, None, None]));
+        let base_case = gen_test_cases!(vec![None, None, None], (0, None, vec![None, None, None]));
         let cases = gen_test_cases!(
             input,
             // identity
@@ -930,10 +919,8 @@ mod tests {
         let values = "S→T = Πx:S.T";
         let offsets = &[
             O::zero(),
-            O::from_usize(values.char_indices().nth(3).map(|(pos, _)| pos).unwrap())
-                .unwrap(),
-            O::from_usize(values.char_indices().nth(6).map(|(pos, _)| pos).unwrap())
-                .unwrap(),
+            O::from_usize(values.char_indices().nth(3).map(|(pos, _)| pos).unwrap()).unwrap(),
+            O::from_usize(values.char_indices().nth(6).map(|(pos, _)| pos).unwrap()).unwrap(),
             O::from_usize(values.len()).unwrap(),
         ];
         // set the first and third element to be valid
@@ -994,8 +981,7 @@ mod tests {
 
         let dict_array: DictionaryArray<K> = data.clone().into_iter().collect();
 
-        let expected: Vec<Option<&str>> =
-            data.iter().map(|opt| opt.map(|s| &s[1..3])).collect();
+        let expected: Vec<Option<&str>> = data.iter().map(|opt| opt.map(|s| &s[1..3])).collect();
 
         let res = substring(&dict_array, 1, Some(2)).unwrap();
         let actual = res.as_any().downcast_ref::<DictionaryArray<K>>().unwrap();

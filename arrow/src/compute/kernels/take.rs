@@ -20,9 +20,7 @@
 use std::{ops::AddAssign, sync::Arc};
 
 use crate::buffer::{Buffer, MutableBuffer};
-use crate::compute::util::{
-    take_value_indices_from_fixed_size_list, take_value_indices_from_list,
-};
+use crate::compute::util::{take_value_indices_from_fixed_size_list, take_value_indices_from_list};
 use crate::datatypes::*;
 use crate::error::{ArrowError, Result};
 use crate::util::bit_util;
@@ -98,25 +96,25 @@ where
         let len = values.len();
         if indices.null_count() > 0 {
             indices.iter().flatten().try_for_each(|index| {
-                let ix = ToPrimitive::to_usize(&index).ok_or_else(|| {
-                    ArrowError::ComputeError("Cast to usize failed".to_string())
-                })?;
+                let ix = ToPrimitive::to_usize(&index)
+                    .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
                 if ix >= len {
-                    return Err(ArrowError::ComputeError(
-                        format!("Array index out of bounds, cannot get item at index {} from {} entries", ix, len))
-                    );
+                    return Err(ArrowError::ComputeError(format!(
+                        "Array index out of bounds, cannot get item at index {} from {} entries",
+                        ix, len
+                    )));
                 }
                 Ok(())
             })?;
         } else {
             indices.values().iter().try_for_each(|index| {
-                let ix = ToPrimitive::to_usize(index).ok_or_else(|| {
-                    ArrowError::ComputeError("Cast to usize failed".to_string())
-                })?;
+                let ix = ToPrimitive::to_usize(index)
+                    .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
                 if ix >= len {
-                    return Err(ArrowError::ComputeError(
-                        format!("Array index out of bounds, cannot get item at index {} from {} entries", ix, len))
-                    );
+                    return Err(ArrowError::ComputeError(format!(
+                        "Array index out of bounds, cannot get item at index {} from {} entries",
+                        ix, len
+                    )));
                 }
                 Ok(())
             })?
@@ -439,9 +437,8 @@ where
             // Use type annotations below for readability (was blowing
             // my mind otherwise)
             let t: Option<Result<Option<_>>> = index.map(|index| {
-                let index = ToPrimitive::to_usize(&index).ok_or_else(|| {
-                    ArrowError::ComputeError("Cast to usize failed".to_string())
-                })?;
+                let index = ToPrimitive::to_usize(&index)
+                    .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
                 if decimal_values.is_null(index) {
                     Ok(None)
@@ -558,9 +555,8 @@ where
             .iter()
             .enumerate()
             .try_for_each::<_, Result<()>>(|(i, index)| {
-                let index = ToPrimitive::to_usize(index).ok_or_else(|| {
-                    ArrowError::ComputeError("Cast to usize failed".to_string())
-                })?;
+                let index = ToPrimitive::to_usize(index)
+                    .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
                 if bit_util::get_bit(values_slice, values_offset + index) {
                     bit_util::set_bit(output_slice, i);
@@ -582,9 +578,7 @@ where
 {
     let val_buf = take_bits(values.values(), values.offset(), indices)?;
     let null_buf = match values.data().null_buffer() {
-        Some(buf) if values.null_count() > 0 => {
-            Some(take_bits(buf, values.offset(), indices)?)
-        }
+        Some(buf) if values.null_count() > 0 => Some(take_bits(buf, values.offset(), indices)?),
         _ => indices
             .data()
             .null_buffer()
@@ -628,9 +622,8 @@ where
     let nulls;
     if array.null_count() == 0 && indices.null_count() == 0 {
         for (i, offset) in offsets.iter_mut().skip(1).enumerate() {
-            let index = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                ArrowError::ComputeError("Cast to usize failed".to_string())
-            })?;
+            let index = ToPrimitive::to_usize(&indices.value(i))
+                .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
             let s = array.value(index);
 
@@ -646,9 +639,8 @@ where
         let null_slice = null_buf.as_slice_mut();
 
         for (i, offset) in offsets.iter_mut().skip(1).enumerate() {
-            let index = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                ArrowError::ComputeError("Cast to usize failed".to_string())
-            })?;
+            let index = ToPrimitive::to_usize(&indices.value(i))
+                .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
             if array.is_valid(index) {
                 let s = array.value(index);
@@ -664,10 +656,8 @@ where
     } else if array.null_count() == 0 {
         for (i, offset) in offsets.iter_mut().skip(1).enumerate() {
             if indices.is_valid(i) {
-                let index =
-                    ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                        ArrowError::ComputeError("Cast to usize failed".to_string())
-                    })?;
+                let index = ToPrimitive::to_usize(&indices.value(i))
+                    .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
                 let s = array.value(index);
 
@@ -684,9 +674,8 @@ where
         let null_slice = null_buf.as_slice_mut();
 
         for (i, offset) in offsets.iter_mut().skip(1).enumerate() {
-            let index = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                ArrowError::ComputeError("Cast to usize failed".to_string())
-            })?;
+            let index = ToPrimitive::to_usize(&indices.value(i))
+                .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
 
             if array.is_valid(index) && indices.is_valid(i) {
                 let s = array.value(index);
@@ -701,9 +690,7 @@ where
         }
 
         nulls = match indices.data_ref().null_buffer() {
-            Some(buffer) => {
-                Some(buffer_bin_and(buffer, 0, &null_buf.into(), 0, data_len))
-            }
+            Some(buffer) => Some(buffer_bin_and(buffer, 0, &null_buf.into(), 0, data_len)),
             None => Some(null_buf.into()),
         };
     }
@@ -794,9 +781,8 @@ where
     let null_slice = null_buf.as_slice_mut();
 
     for i in 0..indices.len() {
-        let index = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-            ArrowError::ComputeError("Cast to usize failed".to_string())
-        })?;
+        let index = ToPrimitive::to_usize(&indices.value(i))
+            .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
         if !indices.is_valid(i) || values.is_null(index) {
             bit_util::unset_bit(null_slice, i);
         }
@@ -995,9 +981,7 @@ mod tests {
     }
 
     // create a simple struct for testing purposes
-    fn create_test_struct(
-        values: Vec<Option<(Option<bool>, Option<i32>)>>,
-    ) -> StructArray {
+    fn create_test_struct(values: Vec<Option<(Option<bool>, Option<i32>)>>) -> StructArray {
         let mut struct_builder = StructBuilder::new(
             vec![
                 Field::new("a", DataType::Boolean, true),
@@ -1093,8 +1077,7 @@ mod tests {
 
     #[test]
     fn test_take_primitive_nullable_indices_non_null_values_with_offset() {
-        let index =
-            UInt32Array::from(vec![Some(0), Some(1), Some(2), Some(3), None, None]);
+        let index = UInt32Array::from(vec![Some(0), Some(1), Some(2), Some(3), None, None]);
         let index = index.slice(2, 4);
         let index = index.as_any().downcast_ref::<UInt32Array>().unwrap();
 
@@ -1114,8 +1097,7 @@ mod tests {
 
     #[test]
     fn test_take_primitive_nullable_indices_nullable_values_with_offset() {
-        let index =
-            UInt32Array::from(vec![Some(0), Some(1), Some(2), Some(3), None, None]);
+        let index = UInt32Array::from(vec![Some(0), Some(1), Some(2), Some(3), None, None]);
         let index = index.slice(2, 4);
         let index = index.as_any().downcast_ref::<UInt32Array>().unwrap();
 
@@ -1442,8 +1424,7 @@ mod tests {
 
     #[test]
     fn test_take_bool_with_offset() {
-        let index =
-            UInt32Array::from(vec![Some(3), None, Some(1), Some(3), Some(2), None]);
+        let index = UInt32Array::from(vec![Some(3), None, Some(1), Some(3), Some(2), None]);
         let index = index.slice(2, 4);
         let index = index
             .as_any()
@@ -1477,8 +1458,7 @@ mod tests {
 
         let actual = actual.as_any().downcast_ref::<K>().unwrap();
 
-        let expected =
-            K::from(vec![Some("four"), None, None, Some("four"), Some("five")]);
+        let expected = K::from(vec![Some("four"), None, None, Some("four"), Some("five")]);
 
         assert_eq!(actual, &expected);
     }
@@ -1503,11 +1483,8 @@ mod tests {
             let value_offsets: [$offset_type; 4] = [0, 3, 6, 8];
             let value_offsets = Buffer::from_slice_ref(&value_offsets);
             // Construct a list array from the above two
-            let list_data_type = DataType::$list_data_type(Box::new(Field::new(
-                "item",
-                DataType::Int32,
-                false,
-            )));
+            let list_data_type =
+                DataType::$list_data_type(Box::new(Field::new("item", DataType::Int32, false)));
             let list_data = ArrayData::builder(list_data_type.clone())
                 .len(3)
                 .add_buffer(value_offsets)
@@ -1520,8 +1497,7 @@ mod tests {
             let index = UInt32Array::from(vec![Some(2), None, Some(1), Some(2), Some(0)]);
 
             let a = take(&list_array, &index, None).unwrap();
-            let a: &$list_array_type =
-                a.as_any().downcast_ref::<$list_array_type>().unwrap();
+            let a: &$list_array_type = a.as_any().downcast_ref::<$list_array_type>().unwrap();
 
             // construct a value array with expected results:
             // [[2,3], null, [-1,-2,-1], [2,3], [0,0,0]]
@@ -1577,11 +1553,8 @@ mod tests {
             let value_offsets: [$offset_type; 5] = [0, 3, 6, 7, 9];
             let value_offsets = Buffer::from_slice_ref(&value_offsets);
             // Construct a list array from the above two
-            let list_data_type = DataType::$list_data_type(Box::new(Field::new(
-                "item",
-                DataType::Int32,
-                false,
-            )));
+            let list_data_type =
+                DataType::$list_data_type(Box::new(Field::new("item", DataType::Int32, false)));
             let list_data = ArrayData::builder(list_data_type.clone())
                 .len(4)
                 .add_buffer(value_offsets)
@@ -1595,8 +1568,7 @@ mod tests {
             let index = UInt32Array::from(vec![Some(2), None, Some(1), Some(3), Some(0)]);
 
             let a = take(&list_array, &index, None).unwrap();
-            let a: &$list_array_type =
-                a.as_any().downcast_ref::<$list_array_type>().unwrap();
+            let a: &$list_array_type = a.as_any().downcast_ref::<$list_array_type>().unwrap();
 
             // construct a value array with expected results:
             // [[null], null, [-1,-2,3], [5,null], [0,null,0]]
@@ -1650,11 +1622,8 @@ mod tests {
             let value_offsets: [$offset_type; 5] = [0, 3, 6, 6, 8];
             let value_offsets = Buffer::from_slice_ref(&value_offsets);
             // Construct a list array from the above two
-            let list_data_type = DataType::$list_data_type(Box::new(Field::new(
-                "item",
-                DataType::Int32,
-                false,
-            )));
+            let list_data_type =
+                DataType::$list_data_type(Box::new(Field::new("item", DataType::Int32, false)));
             let list_data = ArrayData::builder(list_data_type.clone())
                 .len(4)
                 .add_buffer(value_offsets)
@@ -1668,8 +1637,7 @@ mod tests {
             let index = UInt32Array::from(vec![Some(2), None, Some(1), Some(3), Some(0)]);
 
             let a = take(&list_array, &index, None).unwrap();
-            let a: &$list_array_type =
-                a.as_any().downcast_ref::<$list_array_type>().unwrap();
+            let a: &$list_array_type = a.as_any().downcast_ref::<$list_array_type>().unwrap();
 
             // construct a value array with expected results:
             // [null, null, [-1,-2,3], [5,null], [0,null,0]]
@@ -1823,8 +1791,7 @@ mod tests {
         // Construct offsets
         let value_offsets = Buffer::from_slice_ref(&[0, 3, 6, 8]);
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -1878,8 +1845,7 @@ mod tests {
             None,
         ]);
 
-        let index =
-            UInt32Array::from(vec![None, Some(3), Some(1), None, Some(0), Some(4)]);
+        let index = UInt32Array::from(vec![None, Some(3), Some(1), None, Some(0), Some(4)]);
         let actual = take(&array, &index, None).unwrap();
         let actual: &StructArray = actual.as_any().downcast_ref::<StructArray>().unwrap();
         assert_eq!(index.len(), actual.len());

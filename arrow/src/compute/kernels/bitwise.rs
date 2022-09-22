@@ -126,8 +126,8 @@ where
 mod tests {
     use crate::array::{Int32Array, UInt64Array};
     use crate::compute::kernels::bitwise::{
-        bitwise_and, bitwise_and_scalar, bitwise_not, bitwise_or, bitwise_or_scalar,
-        bitwise_xor, bitwise_xor_scalar,
+        bitwise_and, bitwise_and_scalar, bitwise_not, bitwise_or, bitwise_or_scalar, bitwise_xor,
+        bitwise_xor_scalar,
     };
     use crate::error::Result;
 

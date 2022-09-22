@@ -109,10 +109,7 @@ pub(super) fn union_equal(
                     rhs_type_ids,
                 )
         }
-        (
-            DataType::Union(_, _, UnionMode::Sparse),
-            DataType::Union(_, _, UnionMode::Sparse),
-        ) => {
+        (DataType::Union(_, _, UnionMode::Sparse), DataType::Union(_, _, UnionMode::Sparse)) => {
             lhs_type_id_range == rhs_type_id_range
                 && equal_sparse(lhs, rhs, lhs_start, rhs_start, len)
         }

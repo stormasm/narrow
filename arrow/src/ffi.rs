@@ -590,8 +590,7 @@ unsafe fn create_buffer(
     assert!(index < array.n_buffers as usize);
     let ptr = *buffers.add(index);
 
-    NonNull::new(ptr as *mut u8)
-        .map(|ptr| Buffer::from_custom_allocation(ptr, len, owner))
+    NonNull::new(ptr as *mut u8).map(|ptr| Buffer::from_custom_allocation(ptr, len, owner))
 }
 
 fn create_child(
@@ -661,13 +660,14 @@ pub trait ArrowArrayRef {
 
                 let len = self.buffer_len(index)?;
 
-                unsafe { create_buffer(self.owner().clone(), self.array(), index, len) }
-                    .ok_or_else(|| {
+                unsafe { create_buffer(self.owner().clone(), self.array(), index, len) }.ok_or_else(
+                    || {
                         ArrowError::CDataInterface(format!(
                             "The external buffer at position {} is null.",
                             index - 1
                         ))
-                    })
+                    },
+                )
             })
             .collect()
     }
@@ -704,9 +704,8 @@ pub trait ArrowArrayRef {
                 // first buffer is the null buffer => add(1)
                 // we assume that pointer is aligned for `i32`, as Utf8 uses `i32` offsets.
                 #[allow(clippy::cast_ptr_alignment)]
-                let offset_buffer = unsafe {
-                    *(self.array().buffers as *mut *const u8).add(1) as *const i32
-                };
+                let offset_buffer =
+                    unsafe { *(self.array().buffers as *mut *const u8).add(1) as *const i32 };
                 // get last offset
                 (unsafe { *offset_buffer.add(len / size_of::<i32>() - 1) }) as usize
             }
@@ -716,9 +715,8 @@ pub trait ArrowArrayRef {
                 // first buffer is the null buffer => add(1)
                 // we assume that pointer is aligned for `i64`, as Large uses `i64` offsets.
                 #[allow(clippy::cast_ptr_alignment)]
-                let offset_buffer = unsafe {
-                    *(self.array().buffers as *mut *const u8).add(1) as *const i64
-                };
+                let offset_buffer =
+                    unsafe { *(self.array().buffers as *mut *const u8).add(1) as *const i64 };
                 // get last offset
                 (unsafe { *offset_buffer.add(len / size_of::<i64>() - 1) }) as usize
             }
@@ -750,8 +748,10 @@ pub trait ArrowArrayRef {
     fn data_type(&self) -> Result<DataType>;
     fn dictionary(&self) -> Option<ArrowArrayChild> {
         unsafe {
-            assert!(!(self.array().dictionary.is_null() ^ self.schema().dictionary.is_null()),
-                    "Dictionary should both be set or not set in FFI_ArrowArray and FFI_ArrowSchema");
+            assert!(
+                !(self.array().dictionary.is_null() ^ self.schema().dictionary.is_null()),
+                "Dictionary should both be set or not set in FFI_ArrowArray and FFI_ArrowSchema"
+            );
             if !self.array().dictionary.is_null() {
                 Some(ArrowArrayChild::from_raw(
                     &*self.array().dictionary,
@@ -862,8 +862,7 @@ impl ArrowArray {
     ) -> Result<Self> {
         if array.is_null() || schema.is_null() {
             return Err(ArrowError::MemoryError(
-                "At least one of the pointers passed to `try_from_raw` is null"
-                    .to_string(),
+                "At least one of the pointers passed to `try_from_raw` is null".to_string(),
             ));
         };
 
@@ -912,11 +911,10 @@ impl<'a> ArrowArrayChild<'a> {
 mod tests {
     use super::*;
     use crate::array::{
-        export_array_into_raw, make_array, Array, ArrayData, BooleanArray,
-        Decimal128Array, DictionaryArray, DurationSecondArray, FixedSizeBinaryArray,
-        FixedSizeListArray, GenericBinaryArray, GenericListArray, GenericStringArray,
-        Int32Array, MapArray, NullArray, OffsetSizeTrait, Time32MillisecondArray,
-        TimestampMillisecondArray, UInt32Array,
+        export_array_into_raw, make_array, Array, ArrayData, BooleanArray, Decimal128Array,
+        DictionaryArray, DurationSecondArray, FixedSizeBinaryArray, FixedSizeListArray,
+        GenericBinaryArray, GenericListArray, GenericStringArray, Int32Array, MapArray, NullArray,
+        OffsetSizeTrait, Time32MillisecondArray, TimestampMillisecondArray, UInt32Array,
     };
     use crate::compute::kernels;
     use crate::datatypes::{Field, Int8Type};
@@ -975,8 +973,7 @@ mod tests {
 
     fn test_generic_string<Offset: OffsetSizeTrait>() -> Result<()> {
         // create an array natively
-        let array =
-            GenericStringArray::<Offset>::from(vec![Some("a"), None, Some("aaa")]);
+        let array = GenericStringArray::<Offset>::from(vec![Some("a"), None, Some("aaa")]);
 
         // export it
         let array = ArrowArray::try_from(array.into_data())?;
@@ -1175,14 +1172,7 @@ mod tests {
         // verify
         assert_eq!(
             array,
-            &Time32MillisecondArray::from(vec![
-                None,
-                Some(1),
-                Some(2),
-                None,
-                Some(1),
-                Some(2)
-            ])
+            &Time32MillisecondArray::from(vec![None, Some(1), Some(2), None, Some(1), Some(2)])
         );
 
         // (drop/release)
@@ -1211,14 +1201,7 @@ mod tests {
         // verify
         assert_eq!(
             array,
-            &TimestampMillisecondArray::from(vec![
-                None,
-                Some(1),
-                Some(2),
-                None,
-                Some(1),
-                Some(2)
-            ])
+            &TimestampMillisecondArray::from(vec![None, Some(1), Some(2), None, Some(1), Some(2)])
         );
 
         // (drop/release)
@@ -1420,14 +1403,7 @@ mod tests {
         // verify
         assert_eq!(
             array,
-            &DurationSecondArray::from(vec![
-                None,
-                Some(1),
-                Some(2),
-                None,
-                Some(1),
-                Some(2)
-            ])
+            &DurationSecondArray::from(vec![None, Some(1), Some(2), None, Some(1), Some(2)])
         );
 
         // (drop/release)
@@ -1461,12 +1437,9 @@ mod tests {
         //  [[a, b, c], [d, e, f], [g, h]]
         let entry_offsets = [0, 3, 6, 8];
 
-        let map_array = MapArray::new_from_strings(
-            keys.clone().into_iter(),
-            &values_data,
-            &entry_offsets,
-        )
-        .unwrap();
+        let map_array =
+            MapArray::new_from_strings(keys.clone().into_iter(), &values_data, &entry_offsets)
+                .unwrap();
 
         // export it
         let array = ArrowArray::try_from(map_array.data().clone())?;

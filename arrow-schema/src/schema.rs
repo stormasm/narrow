@@ -80,10 +80,7 @@ impl Schema {
     /// let schema = Schema::new_with_metadata(vec![field_a, field_b], metadata);
     /// ```
     #[inline]
-    pub const fn new_with_metadata(
-        fields: Vec<Field>,
-        metadata: HashMap<String, String>,
-    ) -> Self {
+    pub const fn new_with_metadata(fields: Vec<Field>, metadata: HashMap<String, String>) -> Self {
         Self { fields, metadata }
     }
 
@@ -139,9 +136,7 @@ impl Schema {
     ///     ]),
     /// );
     /// ```
-    pub fn try_merge(
-        schemas: impl IntoIterator<Item = Self>,
-    ) -> Result<Self, ArrowError> {
+    pub fn try_merge(schemas: impl IntoIterator<Item = Self>) -> Result<Self, ArrowError> {
         schemas
             .into_iter()
             .try_fold(Self::empty(), |mut merged, schema| {
@@ -161,8 +156,7 @@ impl Schema {
                 }
                 // merge fields
                 for field in fields.into_iter() {
-                    let merged_field =
-                        merged.fields.iter_mut().find(|f| f.name() == field.name());
+                    let merged_field = merged.fields.iter_mut().find(|f| f.name() == field.name());
                     match merged_field {
                         Some(merged_field) => merged_field.try_merge(&field)?,
                         // found a new field, add to field list
@@ -305,8 +299,8 @@ mod tests {
         assert_eq!(schema, de_schema);
 
         // ser/de with non-empty metadata
-        let schema = schema
-            .with_metadata([("key".to_owned(), "val".to_owned())].into_iter().collect());
+        let schema =
+            schema.with_metadata([("key".to_owned(), "val".to_owned())].into_iter().collect());
         let json = serde_json::to_string(&schema).unwrap();
         let de_schema = serde_json::from_str(&json).unwrap();
 
@@ -521,8 +515,8 @@ mod tests {
     fn person_schema() -> Schema {
         let kv_array = [("k".to_string(), "v".to_string())];
         let field_metadata: BTreeMap<String, String> = kv_array.iter().cloned().collect();
-        let first_name = Field::new("first_name", DataType::Utf8, false)
-            .with_metadata(Some(field_metadata));
+        let first_name =
+            Field::new("first_name", DataType::Utf8, false).with_metadata(Some(field_metadata));
 
         Schema::new(vec![
             first_name,
@@ -548,36 +542,27 @@ mod tests {
     #[test]
     fn test_try_merge_field_with_metadata() {
         // 1. Different values for the same key should cause error.
-        let metadata1: BTreeMap<String, String> =
-            [("foo".to_string(), "bar".to_string())]
-                .iter()
-                .cloned()
-                .collect();
-        let f1 = Field::new("first_name", DataType::Utf8, false)
-            .with_metadata(Some(metadata1));
+        let metadata1: BTreeMap<String, String> = [("foo".to_string(), "bar".to_string())]
+            .iter()
+            .cloned()
+            .collect();
+        let f1 = Field::new("first_name", DataType::Utf8, false).with_metadata(Some(metadata1));
 
-        let metadata2: BTreeMap<String, String> =
-            [("foo".to_string(), "baz".to_string())]
-                .iter()
-                .cloned()
-                .collect();
-        let f2 = Field::new("first_name", DataType::Utf8, false)
-            .with_metadata(Some(metadata2));
+        let metadata2: BTreeMap<String, String> = [("foo".to_string(), "baz".to_string())]
+            .iter()
+            .cloned()
+            .collect();
+        let f2 = Field::new("first_name", DataType::Utf8, false).with_metadata(Some(metadata2));
 
-        assert!(
-            Schema::try_merge(vec![Schema::new(vec![f1]), Schema::new(vec![f2])])
-                .is_err()
-        );
+        assert!(Schema::try_merge(vec![Schema::new(vec![f1]), Schema::new(vec![f2])]).is_err());
 
         // 2. None + Some
         let mut f1 = Field::new("first_name", DataType::Utf8, false);
-        let metadata2: BTreeMap<String, String> =
-            [("missing".to_string(), "value".to_string())]
-                .iter()
-                .cloned()
-                .collect();
-        let f2 = Field::new("first_name", DataType::Utf8, false)
-            .with_metadata(Some(metadata2));
+        let metadata2: BTreeMap<String, String> = [("missing".to_string(), "value".to_string())]
+            .iter()
+            .cloned()
+            .collect();
+        let f2 = Field::new("first_name", DataType::Utf8, false).with_metadata(Some(metadata2));
 
         assert!(f1.try_merge(&f2).is_ok());
         assert!(f1.metadata().is_some());

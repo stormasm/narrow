@@ -89,8 +89,7 @@ fn exponential_search_next_partition_point(
 ) -> usize {
     let target = start;
     let mut bound = 1;
-    while bound + start < end
-        && comparator.compare(&(bound + start), &target) != Ordering::Greater
+    while bound + start < end && comparator.compare(&(bound + start), &target) != Ordering::Greater
     {
         bound *= 2;
     }
@@ -247,8 +246,7 @@ mod tests {
     #[test]
     fn test_lexicographical_partition_single_column() -> Result<()> {
         let input = vec![SortColumn {
-            values: Arc::new(Int64Array::from(vec![1, 2, 2, 2, 2, 2, 2, 2, 9]))
-                as ArrayRef,
+            values: Arc::new(Int64Array::from(vec![1, 2, 2, 2, 2, 2, 2, 2, 9])) as ArrayRef,
             options: Some(SortOptions {
                 descending: false,
                 nulls_first: true,
@@ -317,8 +315,7 @@ mod tests {
                 }),
             },
             SortColumn {
-                values: Arc::new(StringArray::from(vec![Some("foo"), Some("bar")]))
-                    as ArrayRef,
+                values: Arc::new(StringArray::from(vec![Some("foo"), Some("bar")])) as ArrayRef,
                 options: Some(SortOptions {
                     descending: true,
                     nulls_first: true,
@@ -339,8 +336,7 @@ mod tests {
     fn test_lexicographical_partition_unique_column_2() -> Result<()> {
         let input = vec![
             SortColumn {
-                values: Arc::new(Int64Array::from(vec![None, Some(-1), Some(-1)]))
-                    as ArrayRef,
+                values: Arc::new(Int64Array::from(vec![None, Some(-1), Some(-1)])) as ArrayRef,
                 options: Some(SortOptions {
                     descending: false,
                     nulls_first: true,
@@ -372,12 +368,8 @@ mod tests {
     fn test_lexicographical_partition_non_unique_column_1() -> Result<()> {
         let input = vec![
             SortColumn {
-                values: Arc::new(Int64Array::from(vec![
-                    None,
-                    Some(-1),
-                    Some(-1),
-                    Some(1),
-                ])) as ArrayRef,
+                values: Arc::new(Int64Array::from(vec![None, Some(-1), Some(-1), Some(1)]))
+                    as ArrayRef,
                 options: Some(SortOptions {
                     descending: false,
                     nulls_first: true,

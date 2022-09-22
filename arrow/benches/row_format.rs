@@ -45,8 +45,7 @@ fn row_bench(c: &mut Criterion) {
         });
     });
 
-    let cols =
-        vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 10)) as ArrayRef];
+    let cols = vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 10)) as ArrayRef];
 
     c.bench_function("row_batch 4096 string(10, 0)", |b| {
         b.iter(|| {
@@ -55,8 +54,7 @@ fn row_bench(c: &mut Criterion) {
         });
     });
 
-    let cols =
-        vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 30)) as ArrayRef];
+    let cols = vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 30)) as ArrayRef];
 
     c.bench_function("row_batch 4096 string(30, 0)", |b| {
         b.iter(|| {
@@ -65,8 +63,7 @@ fn row_bench(c: &mut Criterion) {
         });
     });
 
-    let cols =
-        vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 100)) as ArrayRef];
+    let cols = vec![Arc::new(create_string_array_with_len::<i32>(4096, 0., 100)) as ArrayRef];
 
     c.bench_function("row_batch 4096 string(100, 0)", |b| {
         b.iter(|| {
@@ -75,8 +72,7 @@ fn row_bench(c: &mut Criterion) {
         });
     });
 
-    let cols =
-        vec![Arc::new(create_string_array_with_len::<i32>(4096, 0.5, 100)) as ArrayRef];
+    let cols = vec![Arc::new(create_string_array_with_len::<i32>(4096, 0.5, 100)) as ArrayRef];
 
     c.bench_function("row_batch 4096 string(100, 0.5)", |b| {
         b.iter(|| {

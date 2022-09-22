@@ -52,11 +52,7 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
                 // this is safe due to how offset is built. See details on `get_last_offset`
                 let last_offset = unsafe { get_last_offset(offset_buffer) };
 
-                extend_offsets::<T>(
-                    offset_buffer,
-                    last_offset,
-                    &offsets[start..start + len + 1],
-                );
+                extend_offsets::<T>(offset_buffer, last_offset, &offsets[start..start + len + 1]);
                 // values
                 extend_offset_values::<T>(values_buffer, offsets, values, start, len);
             },
@@ -80,8 +76,8 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
                         last_offset += length;
 
                         // append value
-                        let bytes = &values[offsets[i].to_usize().unwrap()
-                            ..offsets[i + 1].to_usize().unwrap()];
+                        let bytes = &values
+                            [offsets[i].to_usize().unwrap()..offsets[i + 1].to_usize().unwrap()];
                         values_buffer.extend_from_slice(bytes);
                     }
                     // offsets are always present
@@ -92,10 +88,7 @@ pub(super) fn build_extend<T: OffsetSizeTrait>(array: &ArrayData) -> Extend {
     }
 }
 
-pub(super) fn extend_nulls<T: OffsetSizeTrait>(
-    mutable: &mut _MutableArrayData,
-    len: usize,
-) {
+pub(super) fn extend_nulls<T: OffsetSizeTrait>(mutable: &mut _MutableArrayData, len: usize) {
     let offset_buffer = &mut mutable.buffer1;
 
     // this is safe due to how offset is built. See details on `get_last_offset`

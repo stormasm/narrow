@@ -20,10 +20,9 @@
 //! depend on dynamic casting of `Array`.
 
 use super::{
-    Array, ArrayData, BooleanArray, Decimal128Array, DictionaryArray,
-    FixedSizeBinaryArray, FixedSizeListArray, GenericBinaryArray, GenericListArray,
-    GenericStringArray, MapArray, NullArray, OffsetSizeTrait, PrimitiveArray,
-    StructArray,
+    Array, ArrayData, BooleanArray, Decimal128Array, DictionaryArray, FixedSizeBinaryArray,
+    FixedSizeListArray, GenericBinaryArray, GenericListArray, GenericStringArray, MapArray,
+    NullArray, OffsetSizeTrait, PrimitiveArray, StructArray,
 };
 use crate::datatypes::{ArrowPrimitiveType, DataType, IntervalUnit};
 use half::f16;
@@ -163,18 +162,14 @@ fn equal_values(
         DataType::Int64 => primitive_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Float32 => primitive_equal::<f32>(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Float64 => primitive_equal::<f64>(lhs, rhs, lhs_start, rhs_start, len),
-        DataType::Date32
-        | DataType::Time32(_)
-        | DataType::Interval(IntervalUnit::YearMonth) => {
+        DataType::Date32 | DataType::Time32(_) | DataType::Interval(IntervalUnit::YearMonth) => {
             primitive_equal::<i32>(lhs, rhs, lhs_start, rhs_start, len)
         }
         DataType::Date64
         | DataType::Interval(IntervalUnit::DayTime)
         | DataType::Time64(_)
         | DataType::Timestamp(_, _)
-        | DataType::Duration(_) => {
-            primitive_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len)
-        }
+        | DataType::Duration(_) => primitive_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Interval(IntervalUnit::MonthDayNano) => {
             primitive_equal::<i128>(lhs, rhs, lhs_start, rhs_start, len)
         }
@@ -184,42 +179,24 @@ fn equal_values(
         DataType::LargeUtf8 | DataType::LargeBinary => {
             variable_sized_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len)
         }
-        DataType::FixedSizeBinary(_) => {
-            fixed_binary_equal(lhs, rhs, lhs_start, rhs_start, len)
-        }
+        DataType::FixedSizeBinary(_) => fixed_binary_equal(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Decimal128(_, _) | DataType::Decimal256(_, _) => {
             decimal_equal(lhs, rhs, lhs_start, rhs_start, len)
         }
         DataType::List(_) => list_equal::<i32>(lhs, rhs, lhs_start, rhs_start, len),
         DataType::LargeList(_) => list_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len),
-        DataType::FixedSizeList(_, _) => {
-            fixed_list_equal(lhs, rhs, lhs_start, rhs_start, len)
-        }
+        DataType::FixedSizeList(_, _) => fixed_list_equal(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Struct(_) => struct_equal(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Union(_, _, _) => union_equal(lhs, rhs, lhs_start, rhs_start, len),
         DataType::Dictionary(data_type, _) => match data_type.as_ref() {
             DataType::Int8 => dictionary_equal::<i8>(lhs, rhs, lhs_start, rhs_start, len),
-            DataType::Int16 => {
-                dictionary_equal::<i16>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::Int32 => {
-                dictionary_equal::<i32>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::Int64 => {
-                dictionary_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::UInt8 => {
-                dictionary_equal::<u8>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::UInt16 => {
-                dictionary_equal::<u16>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::UInt32 => {
-                dictionary_equal::<u32>(lhs, rhs, lhs_start, rhs_start, len)
-            }
-            DataType::UInt64 => {
-                dictionary_equal::<u64>(lhs, rhs, lhs_start, rhs_start, len)
-            }
+            DataType::Int16 => dictionary_equal::<i16>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::Int32 => dictionary_equal::<i32>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::Int64 => dictionary_equal::<i64>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::UInt8 => dictionary_equal::<u8>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::UInt16 => dictionary_equal::<u16>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::UInt32 => dictionary_equal::<u32>(lhs, rhs, lhs_start, rhs_start, len),
+            DataType::UInt64 => dictionary_equal::<u64>(lhs, rhs, lhs_start, rhs_start, len),
             _ => unreachable!(),
         },
         DataType::Float16 => primitive_equal::<f16>(lhs, rhs, lhs_start, rhs_start, len),
@@ -263,10 +240,9 @@ mod tests {
     use std::sync::Arc;
 
     use crate::array::{
-        array::Array, ArrayData, ArrayDataBuilder, ArrayRef, BooleanArray,
-        FixedSizeBinaryBuilder, FixedSizeListBuilder, GenericBinaryArray, Int32Builder,
-        ListBuilder, NullArray, StringArray, StringDictionaryBuilder, StructArray,
-        UnionBuilder,
+        array::Array, ArrayData, ArrayDataBuilder, ArrayRef, BooleanArray, FixedSizeBinaryBuilder,
+        FixedSizeListBuilder, GenericBinaryArray, Int32Builder, ListBuilder, NullArray,
+        StringArray, StringDictionaryBuilder, StructArray, UnionBuilder,
     };
     use crate::array::{GenericStringArray, Int32Array};
     use crate::buffer::Buffer;
@@ -331,8 +307,7 @@ mod tests {
     fn test_boolean_equal_offset() {
         let a = BooleanArray::from(vec![false, true, false, true, false, false, true]);
         let a = a.data();
-        let b =
-            BooleanArray::from(vec![true, false, false, false, true, false, true, true]);
+        let b = BooleanArray::from(vec![true, false, false, false, true, false, true, true]);
         let b = b.data();
         assert!(!equal(a, b));
         assert!(!equal(b, a));
@@ -686,10 +661,8 @@ mod tests {
     // Test the case where null_count > 0
     #[test]
     fn test_list_null() {
-        let a =
-            create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
-        let b =
-            create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
+        let a = create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
+        let b = create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
         test_equal(&a, &b, true);
 
         let b = create_list_array(&[
@@ -702,8 +675,7 @@ mod tests {
         ]);
         test_equal(&a, &b, false);
 
-        let b =
-            create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 5]), None, None]);
+        let b = create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 5]), None, None]);
         test_equal(&a, &b, false);
 
         // a list where the nullness of values is determined by the list's bitmap
@@ -747,10 +719,8 @@ mod tests {
     // Test the case where offset != 0
     #[test]
     fn test_list_offsets() {
-        let a =
-            create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
-        let b =
-            create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 5]), None, None]);
+        let a = create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 4]), None, None]);
+        let b = create_list_array(&[Some(&[1, 2]), None, None, Some(&[3, 5]), None, None]);
 
         let a_slice = a.slice(0, 3);
         let b_slice = b.slice(0, 3);
@@ -765,9 +735,7 @@ mod tests {
         test_equal(&a_slice, &b_slice, true);
     }
 
-    fn create_fixed_size_binary_array<U: AsRef<[u8]>, T: AsRef<[Option<U>]>>(
-        data: T,
-    ) -> ArrayData {
+    fn create_fixed_size_binary_array<U: AsRef<[u8]>, T: AsRef<[Option<U>]>>(data: T) -> ArrayData {
         let mut builder = FixedSizeBinaryBuilder::with_capacity(data.as_ref().len(), 5);
 
         for d in data.as_ref() {
@@ -862,18 +830,14 @@ mod tests {
     // Test the case where null_count > 0
     #[test]
     fn test_decimal_null() {
-        let a =
-            create_decimal_array(vec![Some(8_887_000_000), None, Some(-8_887_000_000)]);
-        let b =
-            create_decimal_array(vec![Some(8_887_000_000), None, Some(-8_887_000_000)]);
+        let a = create_decimal_array(vec![Some(8_887_000_000), None, Some(-8_887_000_000)]);
+        let b = create_decimal_array(vec![Some(8_887_000_000), None, Some(-8_887_000_000)]);
         test_equal(&a, &b, true);
 
-        let b =
-            create_decimal_array(vec![Some(8_887_000_000), Some(-8_887_000_000), None]);
+        let b = create_decimal_array(vec![Some(8_887_000_000), Some(-8_887_000_000), None]);
         test_equal(&a, &b, false);
 
-        let b =
-            create_decimal_array(vec![Some(15_887_000_000), None, Some(-8_887_000_000)]);
+        let b = create_decimal_array(vec![Some(15_887_000_000), None, Some(-8_887_000_000)]);
         test_equal(&a, &b, false);
     }
 
@@ -932,9 +896,7 @@ mod tests {
     }
 
     /// Create a fixed size list of 2 value lengths
-    fn create_fixed_size_list_array<U: AsRef<[i32]>, T: AsRef<[Option<U>]>>(
-        data: T,
-    ) -> ArrayData {
+    fn create_fixed_size_list_array<U: AsRef<[i32]>, T: AsRef<[Option<U>]>>(data: T) -> ArrayData {
         let mut builder = FixedSizeListBuilder::new(Int32Builder::with_capacity(10), 3);
 
         for d in data.as_ref() {
@@ -1058,9 +1020,7 @@ mod tests {
             Some(5),
         ]));
 
-        let a =
-            StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())])
-                .unwrap();
+        let a = StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())]).unwrap();
         let a = a.data();
 
         let b = StructArray::try_from(vec![("f1", strings), ("f2", ints)]).unwrap();
@@ -1245,11 +1205,8 @@ mod tests {
 
     fn create_dictionary_array(values: &[&str], keys: &[Option<&str>]) -> ArrayData {
         let values = StringArray::from(values.to_vec());
-        let mut builder = StringDictionaryBuilder::<Int16Type>::new_with_dictionary(
-            keys.len(),
-            &values,
-        )
-        .unwrap();
+        let mut builder =
+            StringDictionaryBuilder::<Int16Type>::new_with_dictionary(keys.len(), &values).unwrap();
         for key in keys {
             if let Some(v) = key {
                 builder.append(v).unwrap();
@@ -1275,8 +1232,7 @@ mod tests {
         test_equal(&a, &b, true);
 
         // different len
-        let b =
-            create_dictionary_array(&["a", "c", "b"], &[Some("a"), Some("b"), Some("a")]);
+        let b = create_dictionary_array(&["a", "c", "b"], &[Some("a"), Some("b"), Some("a")]);
         test_equal(&a, &b, false);
 
         // different key
@@ -1297,40 +1253,25 @@ mod tests {
     #[test]
     fn test_dictionary_equal_null() {
         // (a, b, c), (1, 2, 1, 3) => (a, b, a, c)
-        let a = create_dictionary_array(
-            &["a", "b", "c"],
-            &[Some("a"), None, Some("a"), Some("c")],
-        );
+        let a = create_dictionary_array(&["a", "b", "c"], &[Some("a"), None, Some("a"), Some("c")]);
 
         // equal to self
         test_equal(&a, &a, true);
 
         // different representation (values and keys are swapped), same result
-        let b = create_dictionary_array(
-            &["a", "c", "b"],
-            &[Some("a"), None, Some("a"), Some("c")],
-        );
+        let b = create_dictionary_array(&["a", "c", "b"], &[Some("a"), None, Some("a"), Some("c")]);
         test_equal(&a, &b, true);
 
         // different null position
-        let b = create_dictionary_array(
-            &["a", "c", "b"],
-            &[Some("a"), Some("b"), Some("a"), None],
-        );
+        let b = create_dictionary_array(&["a", "c", "b"], &[Some("a"), Some("b"), Some("a"), None]);
         test_equal(&a, &b, false);
 
         // different key
-        let b = create_dictionary_array(
-            &["a", "c", "b"],
-            &[Some("a"), None, Some("a"), Some("a")],
-        );
+        let b = create_dictionary_array(&["a", "c", "b"], &[Some("a"), None, Some("a"), Some("a")]);
         test_equal(&a, &b, false);
 
         // different values, same keys
-        let b = create_dictionary_array(
-            &["a", "b", "d"],
-            &[Some("a"), None, Some("a"), Some("d")],
-        );
+        let b = create_dictionary_array(&["a", "b", "d"], &[Some("a"), None, Some("a"), Some("d")]);
         test_equal(&a, &b, false);
     }
 

@@ -373,10 +373,7 @@ impl<'b> flatbuffers::Push for FieldNode {
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let src = unsafe {
-            ::std::slice::from_raw_parts(
-                self as *const FieldNode as *const u8,
-                Self::size(),
-            )
+            ::std::slice::from_raw_parts(self as *const FieldNode as *const u8, Self::size())
         };
         dst.copy_from_slice(src);
     }
@@ -387,10 +384,7 @@ impl<'b> flatbuffers::Push for &'b FieldNode {
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let src = unsafe {
-            ::std::slice::from_raw_parts(
-                *self as *const FieldNode as *const u8,
-                Self::size(),
-            )
+            ::std::slice::from_raw_parts(*self as *const FieldNode as *const u8, Self::size())
         };
         dst.copy_from_slice(src);
     }
@@ -512,10 +506,7 @@ impl<'a> BodyCompression<'a> {
     #[inline]
     pub fn codec(&self) -> CompressionType {
         self._tab
-            .get::<CompressionType>(
-                BodyCompression::VT_CODEC,
-                Some(CompressionType::LZ4_FRAME),
-            )
+            .get::<CompressionType>(BodyCompression::VT_CODEC, Some(CompressionType::LZ4_FRAME))
             .unwrap()
     }
     /// Indicates the way the record batch body was compressed
@@ -579,9 +570,7 @@ impl<'a: 'b, 'b> BodyCompressionBuilder<'a, 'b> {
         );
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> BodyCompressionBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> BodyCompressionBuilder<'a, 'b> {
         let start = _fbb.start_table();
         BodyCompressionBuilder {
             fbb_: _fbb,
@@ -689,10 +678,7 @@ impl<'a> RecordBatch<'a> {
     #[inline]
     pub fn compression(&self) -> Option<BodyCompression<'a>> {
         self._tab
-            .get::<flatbuffers::ForwardsUOffset<BodyCompression>>(
-                RecordBatch::VT_COMPRESSION,
-                None,
-            )
+            .get::<flatbuffers::ForwardsUOffset<BodyCompression>>(RecordBatch::VT_COMPRESSION, None)
     }
 }
 
@@ -704,11 +690,23 @@ impl flatbuffers::Verifiable for RecordBatch<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-     .visit_field::<i64>(&"length", Self::VT_LENGTH, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, FieldNode>>>(&"nodes", Self::VT_NODES, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, Buffer>>>(&"buffers", Self::VT_BUFFERS, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<BodyCompression>>(&"compression", Self::VT_COMPRESSION, false)?
-     .finish();
+            .visit_field::<i64>(&"length", Self::VT_LENGTH, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, FieldNode>>>(
+                &"nodes",
+                Self::VT_NODES,
+                false,
+            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, Buffer>>>(
+                &"buffers",
+                Self::VT_BUFFERS,
+                false,
+            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<BodyCompression>>(
+                &"compression",
+                Self::VT_COMPRESSION,
+                false,
+            )?
+            .finish();
         Ok(())
     }
 }
@@ -740,10 +738,7 @@ impl<'a: 'b, 'b> RecordBatchBuilder<'a, 'b> {
             .push_slot::<i64>(RecordBatch::VT_LENGTH, length, 0);
     }
     #[inline]
-    pub fn add_nodes(
-        &mut self,
-        nodes: flatbuffers::WIPOffset<flatbuffers::Vector<'b, FieldNode>>,
-    ) {
+    pub fn add_nodes(&mut self, nodes: flatbuffers::WIPOffset<flatbuffers::Vector<'b, FieldNode>>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(RecordBatch::VT_NODES, nodes);
     }
@@ -752,16 +747,11 @@ impl<'a: 'b, 'b> RecordBatchBuilder<'a, 'b> {
         &mut self,
         buffers: flatbuffers::WIPOffset<flatbuffers::Vector<'b, Buffer>>,
     ) {
-        self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>(
-            RecordBatch::VT_BUFFERS,
-            buffers,
-        );
+        self.fbb_
+            .push_slot_always::<flatbuffers::WIPOffset<_>>(RecordBatch::VT_BUFFERS, buffers);
     }
     #[inline]
-    pub fn add_compression(
-        &mut self,
-        compression: flatbuffers::WIPOffset<BodyCompression<'b>>,
-    ) {
+    pub fn add_compression(&mut self, compression: flatbuffers::WIPOffset<BodyCompression<'b>>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<BodyCompression>>(
                 RecordBatch::VT_COMPRESSION,
@@ -769,9 +759,7 @@ impl<'a: 'b, 'b> RecordBatchBuilder<'a, 'b> {
             );
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> RecordBatchBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> RecordBatchBuilder<'a, 'b> {
         let start = _fbb.start_table();
         RecordBatchBuilder {
             fbb_: _fbb,
@@ -849,10 +837,8 @@ impl<'a> DictionaryBatch<'a> {
     }
     #[inline]
     pub fn data(&self) -> Option<RecordBatch<'a>> {
-        self._tab.get::<flatbuffers::ForwardsUOffset<RecordBatch>>(
-            DictionaryBatch::VT_DATA,
-            None,
-        )
+        self._tab
+            .get::<flatbuffers::ForwardsUOffset<RecordBatch>>(DictionaryBatch::VT_DATA, None)
     }
     /// If isDelta is true the values in the dictionary are to be appended to a
     /// dictionary with the indicated id. If isDelta is false this dictionary
@@ -922,9 +908,7 @@ impl<'a: 'b, 'b> DictionaryBatchBuilder<'a, 'b> {
             .push_slot::<bool>(DictionaryBatch::VT_ISDELTA, isDelta, false);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> DictionaryBatchBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> DictionaryBatchBuilder<'a, 'b> {
         let start = _fbb.start_table();
         DictionaryBatchBuilder {
             fbb_: _fbb,
@@ -1008,10 +992,7 @@ impl<'a> Message<'a> {
     #[inline]
     pub fn header(&self) -> Option<flatbuffers::Table<'a>> {
         self._tab
-            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(
-                Message::VT_HEADER,
-                None,
-            )
+            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(Message::VT_HEADER, None)
     }
     #[inline]
     pub fn bodyLength(&self) -> i64 {
@@ -1086,20 +1067,47 @@ impl flatbuffers::Verifiable for Message<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-     .visit_field::<MetadataVersion>(&"version", Self::VT_VERSION, false)?
-     .visit_union::<MessageHeader, _>(&"header_type", Self::VT_HEADER_TYPE, &"header", Self::VT_HEADER, false, |key, v, pos| {
-        match key {
-          MessageHeader::Schema => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Schema>>("MessageHeader::Schema", pos),
-          MessageHeader::DictionaryBatch => v.verify_union_variant::<flatbuffers::ForwardsUOffset<DictionaryBatch>>("MessageHeader::DictionaryBatch", pos),
-          MessageHeader::RecordBatch => v.verify_union_variant::<flatbuffers::ForwardsUOffset<RecordBatch>>("MessageHeader::RecordBatch", pos),
-          MessageHeader::Tensor => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Tensor>>("MessageHeader::Tensor", pos),
-          MessageHeader::SparseTensor => v.verify_union_variant::<flatbuffers::ForwardsUOffset<SparseTensor>>("MessageHeader::SparseTensor", pos),
-          _ => Ok(()),
-        }
-     })?
-     .visit_field::<i64>(&"bodyLength", Self::VT_BODYLENGTH, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>>>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
-     .finish();
+            .visit_field::<MetadataVersion>(&"version", Self::VT_VERSION, false)?
+            .visit_union::<MessageHeader, _>(
+                &"header_type",
+                Self::VT_HEADER_TYPE,
+                &"header",
+                Self::VT_HEADER,
+                false,
+                |key, v, pos| match key {
+                    MessageHeader::Schema => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Schema>>(
+                            "MessageHeader::Schema",
+                            pos,
+                        ),
+                    MessageHeader::DictionaryBatch => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<DictionaryBatch>>(
+                            "MessageHeader::DictionaryBatch",
+                            pos,
+                        ),
+                    MessageHeader::RecordBatch => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<RecordBatch>>(
+                            "MessageHeader::RecordBatch",
+                            pos,
+                        ),
+                    MessageHeader::Tensor => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Tensor>>(
+                            "MessageHeader::Tensor",
+                            pos,
+                        ),
+                    MessageHeader::SparseTensor => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<SparseTensor>>(
+                            "MessageHeader::SparseTensor",
+                            pos,
+                        ),
+                    _ => Ok(()),
+                },
+            )?
+            .visit_field::<i64>(&"bodyLength", Self::VT_BODYLENGTH, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>,
+            >>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
+            .finish();
         Ok(())
     }
 }
@@ -1109,9 +1117,7 @@ pub struct MessageArgs<'a> {
     pub header: Option<flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>>,
     pub bodyLength: i64,
     pub custom_metadata: Option<
-        flatbuffers::WIPOffset<
-            flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>,
-        >,
+        flatbuffers::WIPOffset<flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>>,
     >,
 }
 impl<'a> Default for MessageArgs<'a> {
@@ -1133,11 +1139,8 @@ pub struct MessageBuilder<'a: 'b, 'b> {
 impl<'a: 'b, 'b> MessageBuilder<'a, 'b> {
     #[inline]
     pub fn add_version(&mut self, version: MetadataVersion) {
-        self.fbb_.push_slot::<MetadataVersion>(
-            Message::VT_VERSION,
-            version,
-            MetadataVersion::V1,
-        );
+        self.fbb_
+            .push_slot::<MetadataVersion>(Message::VT_VERSION, version, MetadataVersion::V1);
     }
     #[inline]
     pub fn add_header_type(&mut self, header_type: MessageHeader) {
@@ -1148,10 +1151,7 @@ impl<'a: 'b, 'b> MessageBuilder<'a, 'b> {
         );
     }
     #[inline]
-    pub fn add_header(
-        &mut self,
-        header: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>,
-    ) {
+    pub fn add_header(&mut self, header: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Message::VT_HEADER, header);
     }
@@ -1173,9 +1173,7 @@ impl<'a: 'b, 'b> MessageBuilder<'a, 'b> {
         );
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> MessageBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MessageBuilder<'a, 'b> {
         let start = _fbb.start_table();
         MessageBuilder {
             fbb_: _fbb,

@@ -86,11 +86,7 @@ impl flatbuffers::Verifiable for TensorDim<'_> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
             .visit_field::<i64>(&"size_", Self::VT_SIZE_, false)?
-            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(
-                &"name",
-                Self::VT_NAME,
-                false,
-            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(&"name", Self::VT_NAME, false)?
             .finish();
         Ok(())
     }
@@ -123,9 +119,7 @@ impl<'a: 'b, 'b> TensorDimBuilder<'a, 'b> {
             .push_slot_always::<flatbuffers::WIPOffset<_>>(TensorDim::VT_NAME, name);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> TensorDimBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TensorDimBuilder<'a, 'b> {
         let start = _fbb.start_table();
         TensorDimBuilder {
             fbb_: _fbb,
@@ -208,17 +202,12 @@ impl<'a> Tensor<'a> {
     #[inline]
     pub fn type_(&self) -> flatbuffers::Table<'a> {
         self._tab
-            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(
-                Tensor::VT_TYPE_,
-                None,
-            )
+            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(Tensor::VT_TYPE_, None)
             .unwrap()
     }
     /// The dimensions of the tensor, optionally named
     #[inline]
-    pub fn shape(
-        &self,
-    ) -> flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<TensorDim<'a>>> {
+    pub fn shape(&self) -> flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<TensorDim<'a>>> {
         self._tab
             .get::<flatbuffers::ForwardsUOffset<
                 flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<TensorDim>>,
@@ -480,36 +469,121 @@ impl flatbuffers::Verifiable for Tensor<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-     .visit_union::<Type, _>(&"type_type", Self::VT_TYPE_TYPE, &"type_", Self::VT_TYPE_, true, |key, v, pos| {
-        match key {
-          Type::Null => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Null>>("Type::Null", pos),
-          Type::Int => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Int>>("Type::Int", pos),
-          Type::FloatingPoint => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FloatingPoint>>("Type::FloatingPoint", pos),
-          Type::Binary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Binary>>("Type::Binary", pos),
-          Type::Utf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Utf8>>("Type::Utf8", pos),
-          Type::Bool => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Bool>>("Type::Bool", pos),
-          Type::Decimal => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Decimal>>("Type::Decimal", pos),
-          Type::Date => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Date>>("Type::Date", pos),
-          Type::Time => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Time>>("Type::Time", pos),
-          Type::Timestamp => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Timestamp>>("Type::Timestamp", pos),
-          Type::Interval => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Interval>>("Type::Interval", pos),
-          Type::List => v.verify_union_variant::<flatbuffers::ForwardsUOffset<List>>("Type::List", pos),
-          Type::Struct_ => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Struct_>>("Type::Struct_", pos),
-          Type::Union => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Union>>("Type::Union", pos),
-          Type::FixedSizeBinary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeBinary>>("Type::FixedSizeBinary", pos),
-          Type::FixedSizeList => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeList>>("Type::FixedSizeList", pos),
-          Type::Map => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Map>>("Type::Map", pos),
-          Type::Duration => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Duration>>("Type::Duration", pos),
-          Type::LargeBinary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeBinary>>("Type::LargeBinary", pos),
-          Type::LargeUtf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeUtf8>>("Type::LargeUtf8", pos),
-          Type::LargeList => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeList>>("Type::LargeList", pos),
-          _ => Ok(()),
-        }
-     })?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<TensorDim>>>>(&"shape", Self::VT_SHAPE, true)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, i64>>>(&"strides", Self::VT_STRIDES, false)?
-     .visit_field::<Buffer>(&"data", Self::VT_DATA, true)?
-     .finish();
+            .visit_union::<Type, _>(
+                &"type_type",
+                Self::VT_TYPE_TYPE,
+                &"type_",
+                Self::VT_TYPE_,
+                true,
+                |key, v, pos| match key {
+                    Type::Null => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Null>>(
+                        "Type::Null",
+                        pos,
+                    ),
+                    Type::Int => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Int>>(
+                        "Type::Int",
+                        pos,
+                    ),
+                    Type::FloatingPoint => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FloatingPoint>>(
+                            "Type::FloatingPoint",
+                            pos,
+                        ),
+                    Type::Binary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Binary>>(
+                        "Type::Binary",
+                        pos,
+                    ),
+                    Type::Utf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Utf8>>(
+                        "Type::Utf8",
+                        pos,
+                    ),
+                    Type::Bool => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Bool>>(
+                        "Type::Bool",
+                        pos,
+                    ),
+                    Type::Decimal => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Decimal>>(
+                            "Type::Decimal",
+                            pos,
+                        ),
+                    Type::Date => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Date>>(
+                        "Type::Date",
+                        pos,
+                    ),
+                    Type::Time => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Time>>(
+                        "Type::Time",
+                        pos,
+                    ),
+                    Type::Timestamp => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Timestamp>>(
+                            "Type::Timestamp",
+                            pos,
+                        ),
+                    Type::Interval => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Interval>>(
+                            "Type::Interval",
+                            pos,
+                        ),
+                    Type::List => v.verify_union_variant::<flatbuffers::ForwardsUOffset<List>>(
+                        "Type::List",
+                        pos,
+                    ),
+                    Type::Struct_ => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Struct_>>(
+                            "Type::Struct_",
+                            pos,
+                        ),
+                    Type::Union => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Union>>(
+                        "Type::Union",
+                        pos,
+                    ),
+                    Type::FixedSizeBinary => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeBinary>>(
+                            "Type::FixedSizeBinary",
+                            pos,
+                        ),
+                    Type::FixedSizeList => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeList>>(
+                            "Type::FixedSizeList",
+                            pos,
+                        ),
+                    Type::Map => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Map>>(
+                        "Type::Map",
+                        pos,
+                    ),
+                    Type::Duration => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Duration>>(
+                            "Type::Duration",
+                            pos,
+                        ),
+                    Type::LargeBinary => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeBinary>>(
+                            "Type::LargeBinary",
+                            pos,
+                        ),
+                    Type::LargeUtf8 => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeUtf8>>(
+                            "Type::LargeUtf8",
+                            pos,
+                        ),
+                    Type::LargeList => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeList>>(
+                            "Type::LargeList",
+                            pos,
+                        ),
+                    _ => Ok(()),
+                },
+            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<TensorDim>>,
+            >>(&"shape", Self::VT_SHAPE, true)?
+            .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, i64>>>(
+                &"strides",
+                Self::VT_STRIDES,
+                false,
+            )?
+            .visit_field::<Buffer>(&"data", Self::VT_DATA, true)?
+            .finish();
         Ok(())
     }
 }
@@ -547,10 +621,7 @@ impl<'a: 'b, 'b> TensorBuilder<'a, 'b> {
             .push_slot::<Type>(Tensor::VT_TYPE_TYPE, type_type, Type::NONE);
     }
     #[inline]
-    pub fn add_type_(
-        &mut self,
-        type_: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>,
-    ) {
+    pub fn add_type_(&mut self, type_: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Tensor::VT_TYPE_, type_);
     }
@@ -565,10 +636,7 @@ impl<'a: 'b, 'b> TensorBuilder<'a, 'b> {
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Tensor::VT_SHAPE, shape);
     }
     #[inline]
-    pub fn add_strides(
-        &mut self,
-        strides: flatbuffers::WIPOffset<flatbuffers::Vector<'b, i64>>,
-    ) {
+    pub fn add_strides(&mut self, strides: flatbuffers::WIPOffset<flatbuffers::Vector<'b, i64>>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Tensor::VT_STRIDES, strides);
     }
@@ -577,9 +645,7 @@ impl<'a: 'b, 'b> TensorBuilder<'a, 'b> {
         self.fbb_.push_slot_always::<&Buffer>(Tensor::VT_DATA, data);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> TensorBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TensorBuilder<'a, 'b> {
         let start = _fbb.start_table();
         TensorBuilder {
             fbb_: _fbb,
@@ -851,9 +917,7 @@ pub fn root_as_tensor(buf: &[u8]) -> Result<Tensor, flatbuffers::InvalidFlatbuff
 /// catch every error, or be maximally performant. For the
 /// previous, unchecked, behavior use
 /// `size_prefixed_root_as_tensor_unchecked`.
-pub fn size_prefixed_root_as_tensor(
-    buf: &[u8],
-) -> Result<Tensor, flatbuffers::InvalidFlatbuffer> {
+pub fn size_prefixed_root_as_tensor(buf: &[u8]) -> Result<Tensor, flatbuffers::InvalidFlatbuffer> {
     flatbuffers::size_prefixed_root::<Tensor>(buf)
 }
 #[inline]

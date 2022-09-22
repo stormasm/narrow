@@ -111,9 +111,9 @@ pub fn make_builder(datatype: &DataType, capacity: usize) -> Box<dyn ArrayBuilde
         DataType::FixedSizeBinary(len) => {
             Box::new(FixedSizeBinaryBuilder::with_capacity(capacity, *len))
         }
-        DataType::Decimal128(precision, scale) => Box::new(
-            Decimal128Builder::with_capacity(capacity, *precision, *scale),
-        ),
+        DataType::Decimal128(precision, scale) => Box::new(Decimal128Builder::with_capacity(
+            capacity, *precision, *scale,
+        )),
         DataType::Utf8 => Box::new(StringBuilder::with_capacity(1024, capacity)),
         DataType::Date32 => Box::new(Date32Builder::with_capacity(capacity)),
         DataType::Date64 => Box::new(Date64Builder::with_capacity(capacity)),
@@ -162,9 +162,7 @@ pub fn make_builder(datatype: &DataType, capacity: usize) -> Box<dyn ArrayBuilde
         DataType::Duration(TimeUnit::Nanosecond) => {
             Box::new(DurationNanosecondBuilder::with_capacity(capacity))
         }
-        DataType::Struct(fields) => {
-            Box::new(StructBuilder::from_fields(fields.clone(), capacity))
-        }
+        DataType::Struct(fields) => Box::new(StructBuilder::from_fields(fields.clone(), capacity)),
         t => panic!("Data type {:?} is not currently supported", t),
     }
 }
@@ -402,8 +400,7 @@ mod tests {
     )]
     fn test_struct_array_builder_from_schema_unsupported_type() {
         let mut fields = vec![Field::new("f1", DataType::Int16, false)];
-        let list_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int64, true)));
+        let list_type = DataType::List(Box::new(Field::new("item", DataType::Int64, true)));
         fields.push(Field::new("f2", list_type, false));
 
         let _ = StructBuilder::from_fields(fields, 5);
@@ -446,9 +443,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Number of fields is not equal to the number of field_builders."
-    )]
+    #[should_panic(expected = "Number of fields is not equal to the number of field_builders.")]
     fn test_struct_array_builder_unequal_field_field_builders() {
         let int_builder = Int32Builder::with_capacity(10);
 

@@ -132,12 +132,7 @@ impl<W: Write> Writer<W> {
     }
 
     /// Convert a record to a string vector
-    fn convert(
-        &self,
-        batch: &[ArrayRef],
-        row_index: usize,
-        buffer: &mut [String],
-    ) -> Result<()> {
+    fn convert(&self, batch: &[ArrayRef], row_index: usize, buffer: &mut [String]) -> Result<()> {
         // TODO: it'd be more efficient if we could create `record: Vec<&[u8]>
         for (col_index, item) in buffer.iter_mut().enumerate() {
             let col = &batch[col_index];
@@ -534,11 +529,8 @@ mod tests {
             "consectetur adipiscing elit",
             "sed do eiusmod tempor",
         ]);
-        let c2 = PrimitiveArray::<Float64Type>::from(vec![
-            Some(123.564532),
-            None,
-            Some(-556132.25),
-        ]);
+        let c2 =
+            PrimitiveArray::<Float64Type>::from(vec![Some(123.564532), None, Some(-556132.25)]);
         let c3 = PrimitiveArray::<UInt32Type>::from(vec![3, 2, 1]);
         let c4 = BooleanArray::from(vec![Some(true), Some(false), None]);
         let c5 = TimestampMillisecondArray::from_opt_vec(
@@ -612,11 +604,8 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
             "consectetur adipiscing elit",
             "sed do eiusmod tempor",
         ]);
-        let c2 = PrimitiveArray::<Float64Type>::from(vec![
-            Some(123.564532),
-            None,
-            Some(-556132.25),
-        ]);
+        let c2 =
+            PrimitiveArray::<Float64Type>::from(vec![Some(123.564532), None, Some(-556132.25)]);
         let c3 = PrimitiveArray::<UInt32Type>::from(vec![3, 2, 1]);
         let c4 = BooleanArray::from(vec![Some(true), Some(false), None]);
         let c6 = Time32SecondArray::from(vec![1234, 24680, 85563]);
@@ -663,10 +652,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         let schema = Schema::new(vec![
             Field::new(
                 "c1",
-                DataType::Timestamp(
-                    TimeUnit::Millisecond,
-                    Some("Australia/Sydney".to_string()),
-                ),
+                DataType::Timestamp(TimeUnit::Millisecond, Some("Australia/Sydney".to_string())),
                 true,
             ),
             Field::new("c2", DataType::Timestamp(TimeUnit::Millisecond, None), true),
@@ -686,8 +672,7 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
             None,
         );
         let batch =
-            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(c1), Arc::new(c2)])
-                .unwrap();
+            RecordBatch::try_new(Arc::new(schema), vec![Arc::new(c1), Arc::new(c2)]).unwrap();
 
         let sw = StringWriter::new();
         let mut writer = Writer::new(sw);
@@ -716,11 +701,9 @@ sed do eiusmod tempor,-556132.25,1,,2019-04-18T02:45:55.555000000,23:46:03,foo
         let c1 = Date32Array::from(vec![3, 2, 1]);
         let c2 = Date64Array::from(vec![3, 2, 1]);
 
-        let batch = RecordBatch::try_new(
-            Arc::new(schema.clone()),
-            vec![Arc::new(c1), Arc::new(c2)],
-        )
-        .unwrap();
+        let batch =
+            RecordBatch::try_new(Arc::new(schema.clone()), vec![Arc::new(c1), Arc::new(c2)])
+                .unwrap();
 
         let builder = WriterBuilder::new().has_headers(false);
 

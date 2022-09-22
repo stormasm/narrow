@@ -45,11 +45,7 @@ impl TryFrom<CompressionType> for CompressionCodec {
 
 impl CompressionCodec {
     #[allow(clippy::ptr_arg)]
-    pub(crate) fn compress_to_vec(
-        &self,
-        _input: &[u8],
-        _output: &mut Vec<u8>,
-    ) -> Result<usize> {
+    pub(crate) fn compress_to_vec(&self, _input: &[u8], _output: &mut Vec<u8>) -> Result<usize> {
         Err(ArrowError::InvalidArgumentError(
             "compression not supported because arrow was not compiled with the ipc_compression feature".to_string()
         ))

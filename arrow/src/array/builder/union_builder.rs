@@ -73,11 +73,7 @@ impl<T: ArrowNativeType> FieldDataValues for BufferBuilder<T> {
 
 impl FieldData {
     /// Creates a new `FieldData`.
-    fn new<T: ArrowPrimitiveType>(
-        type_id: i8,
-        data_type: DataType,
-        capacity: usize,
-    ) -> Self {
+    fn new<T: ArrowPrimitiveType>(type_id: i8, data_type: DataType, capacity: usize) -> Self {
         Self {
             type_id,
             data_type,
@@ -209,11 +205,7 @@ impl UnionBuilder {
 
     /// Appends a value to this builder.
     #[inline]
-    pub fn append<T: ArrowPrimitiveType>(
-        &mut self,
-        type_name: &str,
-        v: T::Native,
-    ) -> Result<()> {
+    pub fn append<T: ArrowPrimitiveType>(&mut self, type_name: &str, v: T::Native) -> Result<()> {
         self.append_option::<T>(type_name, Some(v))
     }
 
@@ -227,7 +219,12 @@ impl UnionBuilder {
         let mut field_data = match self.fields.remove(&type_name) {
             Some(data) => {
                 if data.data_type != T::DATA_TYPE {
-                    return Err(ArrowError::InvalidArgumentError(format!("Attempt to write col \"{}\" with type {} doesn't match existing type {}", type_name, T::DATA_TYPE, data.data_type)));
+                    return Err(ArrowError::InvalidArgumentError(format!(
+                        "Attempt to write col \"{}\" with type {} doesn't match existing type {}",
+                        type_name,
+                        T::DATA_TYPE,
+                        data.data_type
+                    )));
                 }
                 data
             }

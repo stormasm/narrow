@@ -69,11 +69,7 @@ where
 }
 
 /// Creates an random (but fixed-seeded) array of a given size and null density
-pub fn create_boolean_array(
-    size: usize,
-    null_density: f32,
-    true_density: f32,
-) -> BooleanArray
+pub fn create_boolean_array(size: usize, null_density: f32, true_density: f32) -> BooleanArray
 where
     Standard: Distribution<bool>,
 {
@@ -167,11 +163,7 @@ pub fn create_binary_array<Offset: OffsetSizeTrait>(
 }
 
 /// Creates an random (but fixed-seeded) array of a given size and null density
-pub fn create_fsb_array(
-    size: usize,
-    null_density: f32,
-    value_len: usize,
-) -> FixedSizeBinaryArray {
+pub fn create_fsb_array(size: usize, null_density: f32, value_len: usize) -> FixedSizeBinaryArray {
     let rng = &mut seedable_rng();
 
     FixedSizeBinaryArray::try_from_sparse_iter((0..size).map(|_| {

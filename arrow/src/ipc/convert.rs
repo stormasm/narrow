@@ -21,9 +21,7 @@ use crate::datatypes::{DataType, Field, IntervalUnit, Schema, TimeUnit, UnionMod
 use crate::error::{ArrowError, Result};
 use crate::ipc;
 
-use flatbuffers::{
-    FlatBufferBuilder, ForwardsUOffset, UnionWIPOffset, Vector, WIPOffset,
-};
+use flatbuffers::{FlatBufferBuilder, ForwardsUOffset, UnionWIPOffset, Vector, WIPOffset};
 use std::collections::{BTreeMap, HashMap};
 
 use crate::ipc::{size_prefixed_root_as_message, CONTINUATION_MARKER};
@@ -179,17 +177,14 @@ pub fn try_schema_from_ipc_buffer(buffer: &[u8]) -> Result<Schema> {
             // buffer
             0
         };
-        let msg =
-            size_prefixed_root_as_message(&buffer[begin_offset..]).map_err(|err| {
-                ArrowError::ParseError(format!(
-                    "Unable to convert flight info to a message: {}",
-                    err
-                ))
-            })?;
+        let msg = size_prefixed_root_as_message(&buffer[begin_offset..]).map_err(|err| {
+            ArrowError::ParseError(format!(
+                "Unable to convert flight info to a message: {}",
+                err
+            ))
+        })?;
         let ipc_schema = msg.header_as_schema().ok_or_else(|| {
-            ArrowError::ParseError(
-                "Unable to convert flight info to a schema".to_string(),
-            )
+            ArrowError::ParseError("Unable to convert flight info to a schema".to_string())
         })?;
         Ok(fb_to_schema(ipc_schema))
     } else {
@@ -271,12 +266,8 @@ pub(crate) fn get_data_type(field: ipc::Field, may_be_dictionary: bool) -> DataT
             let time = field.type_as_time().unwrap();
             match (time.bitWidth(), time.unit()) {
                 (32, ipc::TimeUnit::SECOND) => DataType::Time32(TimeUnit::Second),
-                (32, ipc::TimeUnit::MILLISECOND) => {
-                    DataType::Time32(TimeUnit::Millisecond)
-                }
-                (64, ipc::TimeUnit::MICROSECOND) => {
-                    DataType::Time64(TimeUnit::Microsecond)
-                }
+                (32, ipc::TimeUnit::MILLISECOND) => DataType::Time32(TimeUnit::Millisecond),
+                (64, ipc::TimeUnit::MICROSECOND) => DataType::Time64(TimeUnit::Microsecond),
                 (64, ipc::TimeUnit::NANOSECOND) => DataType::Time64(TimeUnit::Nanosecond),
                 z => panic!(
                     "Time type with bit width of {} and unit of {:?} not supported",
@@ -289,28 +280,18 @@ pub(crate) fn get_data_type(field: ipc::Field, may_be_dictionary: bool) -> DataT
             let timezone: Option<String> = timestamp.timezone().map(|tz| tz.to_string());
             match timestamp.unit() {
                 ipc::TimeUnit::SECOND => DataType::Timestamp(TimeUnit::Second, timezone),
-                ipc::TimeUnit::MILLISECOND => {
-                    DataType::Timestamp(TimeUnit::Millisecond, timezone)
-                }
-                ipc::TimeUnit::MICROSECOND => {
-                    DataType::Timestamp(TimeUnit::Microsecond, timezone)
-                }
-                ipc::TimeUnit::NANOSECOND => {
-                    DataType::Timestamp(TimeUnit::Nanosecond, timezone)
-                }
+                ipc::TimeUnit::MILLISECOND => DataType::Timestamp(TimeUnit::Millisecond, timezone),
+                ipc::TimeUnit::MICROSECOND => DataType::Timestamp(TimeUnit::Microsecond, timezone),
+                ipc::TimeUnit::NANOSECOND => DataType::Timestamp(TimeUnit::Nanosecond, timezone),
                 z => panic!("Timestamp type with unit of {:?} not supported", z),
             }
         }
         ipc::Type::Interval => {
             let interval = field.type_as_interval().unwrap();
             match interval.unit() {
-                ipc::IntervalUnit::YEAR_MONTH => {
-                    DataType::Interval(IntervalUnit::YearMonth)
-                }
+                ipc::IntervalUnit::YEAR_MONTH => DataType::Interval(IntervalUnit::YearMonth),
                 ipc::IntervalUnit::DAY_TIME => DataType::Interval(IntervalUnit::DayTime),
-                ipc::IntervalUnit::MONTH_DAY_NANO => {
-                    DataType::Interval(IntervalUnit::MonthDayNano)
-                }
+                ipc::IntervalUnit::MONTH_DAY_NANO => DataType::Interval(IntervalUnit::MonthDayNano),
                 z => panic!("Interval type with unit of {:?} unsupported", z),
             }
         }
@@ -752,8 +733,8 @@ pub(crate) fn get_fb_field_type<'a>(
                 UnionMode::Dense => ipc::UnionMode::Dense,
             };
 
-            let fbb_type_ids = fbb
-                .create_vector(&type_ids.iter().map(|t| *t as i32).collect::<Vec<_>>());
+            let fbb_type_ids =
+                fbb.create_vector(&type_ids.iter().map(|t| *t as i32).collect::<Vec<_>>());
             let mut builder = ipc::UnionBuilder::new(fbb);
             builder.add_mode(union_mode);
             builder.add_typeIds(fbb_type_ids);
@@ -900,10 +881,7 @@ mod tests {
                     "struct<dictionary<int32, utf8>>",
                     DataType::Struct(vec![Field::new(
                         "dictionary<int32, utf8>",
-                        DataType::Dictionary(
-                            Box::new(DataType::Int32),
-                            Box::new(DataType::Utf8),
-                        ),
+                        DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
                         false,
                     )]),
                     false,
@@ -999,20 +977,14 @@ mod tests {
                 ),
                 Field::new_dict(
                     "dictionary<int32, utf8>",
-                    DataType::Dictionary(
-                        Box::new(DataType::Int32),
-                        Box::new(DataType::Utf8),
-                    ),
+                    DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
                     true,
                     123,
                     true,
                 ),
                 Field::new_dict(
                     "dictionary<uint8, uint32>",
-                    DataType::Dictionary(
-                        Box::new(DataType::UInt8),
-                        Box::new(DataType::UInt32),
-                    ),
+                    DataType::Dictionary(Box::new(DataType::UInt8), Box::new(DataType::UInt32)),
                     true,
                     123,
                     true,
@@ -1035,24 +1007,22 @@ mod tests {
         // bytes of a schema generated from python (0.14.0), saved as an `ipc::Message`.
         // the schema is: Field("field1", DataType::UInt32, false)
         let bytes: Vec<u8> = vec![
-            16, 0, 0, 0, 0, 0, 10, 0, 12, 0, 6, 0, 5, 0, 8, 0, 10, 0, 0, 0, 0, 1, 3, 0,
-            12, 0, 0, 0, 8, 0, 8, 0, 0, 0, 4, 0, 8, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0, 20,
-            0, 0, 0, 16, 0, 20, 0, 8, 0, 0, 0, 7, 0, 12, 0, 0, 0, 16, 0, 16, 0, 0, 0, 0,
-            0, 0, 2, 32, 0, 0, 0, 20, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 8, 0,
-            4, 0, 6, 0, 0, 0, 32, 0, 0, 0, 6, 0, 0, 0, 102, 105, 101, 108, 100, 49, 0, 0,
-            0, 0, 0, 0,
+            16, 0, 0, 0, 0, 0, 10, 0, 12, 0, 6, 0, 5, 0, 8, 0, 10, 0, 0, 0, 0, 1, 3, 0, 12, 0, 0,
+            0, 8, 0, 8, 0, 0, 0, 4, 0, 8, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0, 20, 0, 0, 0, 16, 0, 20,
+            0, 8, 0, 0, 0, 7, 0, 12, 0, 0, 0, 16, 0, 16, 0, 0, 0, 0, 0, 0, 2, 32, 0, 0, 0, 20, 0,
+            0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 8, 0, 4, 0, 6, 0, 0, 0, 32, 0, 0, 0, 6, 0, 0,
+            0, 102, 105, 101, 108, 100, 49, 0, 0, 0, 0, 0, 0,
         ];
         let ipc = ipc::root_as_message(&bytes[..]).unwrap();
         let schema = ipc.header_as_schema().unwrap();
 
         // a message generated from Rust, same as the Python one
         let bytes: Vec<u8> = vec![
-            16, 0, 0, 0, 0, 0, 10, 0, 14, 0, 12, 0, 11, 0, 4, 0, 10, 0, 0, 0, 20, 0, 0,
-            0, 0, 0, 0, 1, 3, 0, 10, 0, 12, 0, 0, 0, 8, 0, 4, 0, 10, 0, 0, 0, 8, 0, 0, 0,
-            8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 16, 0, 0, 0, 12, 0, 18, 0, 12, 0, 0, 0,
-            11, 0, 4, 0, 12, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 2, 20, 0, 0, 0, 0, 0, 6, 0,
-            8, 0, 4, 0, 6, 0, 0, 0, 32, 0, 0, 0, 6, 0, 0, 0, 102, 105, 101, 108, 100, 49,
-            0, 0,
+            16, 0, 0, 0, 0, 0, 10, 0, 14, 0, 12, 0, 11, 0, 4, 0, 10, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0,
+            1, 3, 0, 10, 0, 12, 0, 0, 0, 8, 0, 4, 0, 10, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 16, 0, 0, 0, 12, 0, 18, 0, 12, 0, 0, 0, 11, 0, 4, 0, 12, 0, 0, 0, 20, 0,
+            0, 0, 0, 0, 0, 2, 20, 0, 0, 0, 0, 0, 6, 0, 8, 0, 4, 0, 6, 0, 0, 0, 32, 0, 0, 0, 6, 0,
+            0, 0, 102, 105, 101, 108, 100, 49, 0, 0,
         ];
         let ipc2 = ipc::root_as_message(&bytes[..]).unwrap();
         let schema2 = ipc.header_as_schema().unwrap();

@@ -18,8 +18,8 @@
 use super::{ArrowPrimitiveType, DataType, IntervalUnit, TimeUnit};
 use crate::datatypes::delta::shift_months;
 use crate::datatypes::{
-    DECIMAL128_MAX_PRECISION, DECIMAL128_MAX_SCALE, DECIMAL256_MAX_PRECISION,
-    DECIMAL256_MAX_SCALE, DECIMAL_DEFAULT_SCALE,
+    DECIMAL128_MAX_PRECISION, DECIMAL128_MAX_SCALE, DECIMAL256_MAX_PRECISION, DECIMAL256_MAX_SCALE,
+    DECIMAL_DEFAULT_SCALE,
 };
 use chrono::{Duration, NaiveDate};
 use half::f16;
@@ -258,9 +258,7 @@ impl IntervalDayTimeType {
     /// # Arguments
     ///
     /// * `i` - The IntervalDayTimeType to convert
-    pub fn to_parts(
-        i: <IntervalDayTimeType as ArrowPrimitiveType>::Native,
-    ) -> (i32, i32) {
+    pub fn to_parts(i: <IntervalDayTimeType as ArrowPrimitiveType>::Native) -> (i32, i32) {
         let days = (i >> 32) as i32;
         let ms = i as i32;
         (days, ms)

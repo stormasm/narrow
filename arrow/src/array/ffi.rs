@@ -87,8 +87,8 @@ mod tests {
     use crate::util::bit_util;
     use crate::{
         array::{
-            Array, ArrayData, BooleanArray, FixedSizeBinaryArray, Int64Array,
-            StructArray, UInt32Array, UInt64Array,
+            Array, ArrayData, BooleanArray, FixedSizeBinaryArray, Int64Array, StructArray,
+            UInt32Array, UInt64Array,
         },
         datatypes::{DataType, Field},
         ffi::ArrowArray,
@@ -144,8 +144,7 @@ mod tests {
         let inner = StructArray::from(vec![
             (
                 Field::new("a1", DataType::Boolean, false),
-                Arc::new(BooleanArray::from(vec![true, true, false, false]))
-                    as Arc<dyn Array>,
+                Arc::new(BooleanArray::from(vec![true, true, false, false])) as Arc<dyn Array>,
             ),
             (
                 Field::new("a2", DataType::UInt32, false),
@@ -160,8 +159,7 @@ mod tests {
             ),
             (
                 Field::new("b", DataType::Boolean, false),
-                Arc::new(BooleanArray::from(vec![false, false, true, true]))
-                    as Arc<dyn Array>,
+                Arc::new(BooleanArray::from(vec![false, false, true, true])) as Arc<dyn Array>,
             ),
             (
                 Field::new("c", DataType::UInt32, false),
@@ -285,10 +283,8 @@ mod tests {
         let mut validity_bits: [u8; 1] = [0; 1];
         bit_util::set_bit(&mut validity_bits, 2);
 
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("f", inner_list_data_type, false)),
-            2,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("f", inner_list_data_type, false)), 2);
         let list_data = ArrayData::builder(list_data_type)
             .len(4)
             .null_bit_buffer(Some(Buffer::from(validity_bits)))

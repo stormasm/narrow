@@ -148,52 +148,22 @@ pub fn sort_to_indices(
     Ok(match values.data_type() {
         DataType::Decimal128(_, _) => sort_decimal(values, v, n, cmp, &options, limit),
         DataType::Boolean => sort_boolean(values, v, n, &options, limit),
-        DataType::Int8 => {
-            sort_primitive::<Int8Type, _>(values, v, n, cmp, &options, limit)
+        DataType::Int8 => sort_primitive::<Int8Type, _>(values, v, n, cmp, &options, limit),
+        DataType::Int16 => sort_primitive::<Int16Type, _>(values, v, n, cmp, &options, limit),
+        DataType::Int32 => sort_primitive::<Int32Type, _>(values, v, n, cmp, &options, limit),
+        DataType::Int64 => sort_primitive::<Int64Type, _>(values, v, n, cmp, &options, limit),
+        DataType::UInt8 => sort_primitive::<UInt8Type, _>(values, v, n, cmp, &options, limit),
+        DataType::UInt16 => sort_primitive::<UInt16Type, _>(values, v, n, cmp, &options, limit),
+        DataType::UInt32 => sort_primitive::<UInt32Type, _>(values, v, n, cmp, &options, limit),
+        DataType::UInt64 => sort_primitive::<UInt64Type, _>(values, v, n, cmp, &options, limit),
+        DataType::Float32 => {
+            sort_primitive::<Float32Type, _>(values, v, n, |x, y| x.total_cmp(&y), &options, limit)
         }
-        DataType::Int16 => {
-            sort_primitive::<Int16Type, _>(values, v, n, cmp, &options, limit)
+        DataType::Float64 => {
+            sort_primitive::<Float64Type, _>(values, v, n, |x, y| x.total_cmp(&y), &options, limit)
         }
-        DataType::Int32 => {
-            sort_primitive::<Int32Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::Int64 => {
-            sort_primitive::<Int64Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::UInt8 => {
-            sort_primitive::<UInt8Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::UInt16 => {
-            sort_primitive::<UInt16Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::UInt32 => {
-            sort_primitive::<UInt32Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::UInt64 => {
-            sort_primitive::<UInt64Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::Float32 => sort_primitive::<Float32Type, _>(
-            values,
-            v,
-            n,
-            |x, y| x.total_cmp(&y),
-            &options,
-            limit,
-        ),
-        DataType::Float64 => sort_primitive::<Float64Type, _>(
-            values,
-            v,
-            n,
-            |x, y| x.total_cmp(&y),
-            &options,
-            limit,
-        ),
-        DataType::Date32 => {
-            sort_primitive::<Date32Type, _>(values, v, n, cmp, &options, limit)
-        }
-        DataType::Date64 => {
-            sort_primitive::<Date64Type, _>(values, v, n, cmp, &options, limit)
-        }
+        DataType::Date32 => sort_primitive::<Date32Type, _>(values, v, n, cmp, &options, limit),
+        DataType::Date64 => sort_primitive::<Date64Type, _>(values, v, n, cmp, &options, limit),
         DataType::Time32(Second) => {
             sort_primitive::<Time32SecondType, _>(values, v, n, cmp, &options, limit)
         }
@@ -210,19 +180,13 @@ pub fn sort_to_indices(
             sort_primitive::<TimestampSecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Timestamp(Millisecond, _) => {
-            sort_primitive::<TimestampMillisecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<TimestampMillisecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Timestamp(Microsecond, _) => {
-            sort_primitive::<TimestampMicrosecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<TimestampMicrosecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Timestamp(Nanosecond, _) => {
-            sort_primitive::<TimestampNanosecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<TimestampNanosecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Interval(IntervalUnit::YearMonth) => {
             sort_primitive::<IntervalYearMonthType, _>(values, v, n, cmp, &options, limit)
@@ -231,53 +195,33 @@ pub fn sort_to_indices(
             sort_primitive::<IntervalDayTimeType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Interval(IntervalUnit::MonthDayNano) => {
-            sort_primitive::<IntervalMonthDayNanoType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<IntervalMonthDayNanoType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Duration(TimeUnit::Second) => {
             sort_primitive::<DurationSecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Duration(TimeUnit::Millisecond) => {
-            sort_primitive::<DurationMillisecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<DurationMillisecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Duration(TimeUnit::Microsecond) => {
-            sort_primitive::<DurationMicrosecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<DurationMicrosecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Duration(TimeUnit::Nanosecond) => {
-            sort_primitive::<DurationNanosecondType, _>(
-                values, v, n, cmp, &options, limit,
-            )
+            sort_primitive::<DurationNanosecondType, _>(values, v, n, cmp, &options, limit)
         }
         DataType::Utf8 => sort_string::<i32>(values, v, n, &options, limit),
         DataType::LargeUtf8 => sort_string::<i64>(values, v, n, &options, limit),
-        DataType::List(field) | DataType::FixedSizeList(field, _) => match field
-            .data_type()
-        {
+        DataType::List(field) | DataType::FixedSizeList(field, _) => match field.data_type() {
             DataType::Int8 => sort_list::<i32, Int8Type>(values, v, n, &options, limit),
             DataType::Int16 => sort_list::<i32, Int16Type>(values, v, n, &options, limit),
             DataType::Int32 => sort_list::<i32, Int32Type>(values, v, n, &options, limit),
             DataType::Int64 => sort_list::<i32, Int64Type>(values, v, n, &options, limit),
             DataType::UInt8 => sort_list::<i32, UInt8Type>(values, v, n, &options, limit),
-            DataType::UInt16 => {
-                sort_list::<i32, UInt16Type>(values, v, n, &options, limit)
-            }
-            DataType::UInt32 => {
-                sort_list::<i32, UInt32Type>(values, v, n, &options, limit)
-            }
-            DataType::UInt64 => {
-                sort_list::<i32, UInt64Type>(values, v, n, &options, limit)
-            }
-            DataType::Float32 => {
-                sort_list::<i32, Float32Type>(values, v, n, &options, limit)
-            }
-            DataType::Float64 => {
-                sort_list::<i32, Float64Type>(values, v, n, &options, limit)
-            }
+            DataType::UInt16 => sort_list::<i32, UInt16Type>(values, v, n, &options, limit),
+            DataType::UInt32 => sort_list::<i32, UInt32Type>(values, v, n, &options, limit),
+            DataType::UInt64 => sort_list::<i32, UInt64Type>(values, v, n, &options, limit),
+            DataType::Float32 => sort_list::<i32, Float32Type>(values, v, n, &options, limit),
+            DataType::Float64 => sort_list::<i32, Float64Type>(values, v, n, &options, limit),
             t => {
                 return Err(ArrowError::ComputeError(format!(
                     "Sort not supported for list type {:?}",
@@ -291,21 +235,11 @@ pub fn sort_to_indices(
             DataType::Int32 => sort_list::<i64, Int32Type>(values, v, n, &options, limit),
             DataType::Int64 => sort_list::<i64, Int64Type>(values, v, n, &options, limit),
             DataType::UInt8 => sort_list::<i64, UInt8Type>(values, v, n, &options, limit),
-            DataType::UInt16 => {
-                sort_list::<i64, UInt16Type>(values, v, n, &options, limit)
-            }
-            DataType::UInt32 => {
-                sort_list::<i64, UInt32Type>(values, v, n, &options, limit)
-            }
-            DataType::UInt64 => {
-                sort_list::<i64, UInt64Type>(values, v, n, &options, limit)
-            }
-            DataType::Float32 => {
-                sort_list::<i64, Float32Type>(values, v, n, &options, limit)
-            }
-            DataType::Float64 => {
-                sort_list::<i64, Float64Type>(values, v, n, &options, limit)
-            }
+            DataType::UInt16 => sort_list::<i64, UInt16Type>(values, v, n, &options, limit),
+            DataType::UInt32 => sort_list::<i64, UInt32Type>(values, v, n, &options, limit),
+            DataType::UInt64 => sort_list::<i64, UInt64Type>(values, v, n, &options, limit),
+            DataType::Float32 => sort_list::<i64, Float32Type>(values, v, n, &options, limit),
+            DataType::Float64 => sort_list::<i64, Float64Type>(values, v, n, &options, limit),
             t => {
                 return Err(ArrowError::ComputeError(format!(
                     "Sort not supported for list type {:?}",
@@ -933,10 +867,7 @@ pub fn lexsort(columns: &[SortColumn], limit: Option<usize>) -> Result<Vec<Array
 
 /// Sort elements lexicographically from a list of `ArrayRef` into an unsigned integer
 /// (`UInt32Array`) of indices.
-pub fn lexsort_to_indices(
-    columns: &[SortColumn],
-    limit: Option<usize>,
-) -> Result<UInt32Array> {
+pub fn lexsort_to_indices(columns: &[SortColumn], limit: Option<usize>) -> Result<UInt32Array> {
     if columns.is_empty() {
         return Err(ArrowError::InvalidArgumentError(
             "Sort requires at least one column".to_string(),
@@ -999,11 +930,7 @@ pub(crate) struct LexicographicalComparator<'a> {
 
 impl LexicographicalComparator<'_> {
     /// lexicographically compare values at the wrapped columns with given indices.
-    pub(crate) fn compare<'a, 'b>(
-        &'a self,
-        a_idx: &'b usize,
-        b_idx: &'b usize,
-    ) -> Ordering {
+    pub(crate) fn compare<'a, 'b>(&'a self, a_idx: &'b usize, b_idx: &'b usize) -> Ordering {
         for (data, comparator, sort_option) in &self.compare_items {
             match (data.is_valid(*a_idx), data.is_valid(*b_idx)) {
                 (true, true) => {
@@ -1043,9 +970,7 @@ impl LexicographicalComparator<'_> {
 
     /// Create a new lex comparator that will wrap the given sort columns and give comparison
     /// results with two indices.
-    pub(crate) fn try_new(
-        columns: &[SortColumn],
-    ) -> Result<LexicographicalComparator<'_>> {
+    pub(crate) fn try_new(columns: &[SortColumn]) -> Result<LexicographicalComparator<'_>> {
         let compare_items = columns
             .iter()
             .map(|column| {
@@ -1129,8 +1054,7 @@ mod tests {
     ) {
         let output = create_decimal_array(data);
         let expected = UInt32Array::from(expected_data);
-        let output =
-            sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
+        let output = sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
         assert_eq!(output, expected)
     }
 
@@ -1143,9 +1067,7 @@ mod tests {
         let output = create_decimal_array(data);
         let expected = Arc::new(create_decimal_array(expected_data)) as ArrayRef;
         let output = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(output) as ArrayRef), options).unwrap(),
         };
         assert_eq!(&output, &expected)
@@ -1159,8 +1081,7 @@ mod tests {
     ) {
         let output = BooleanArray::from(data);
         let expected = UInt32Array::from(expected_data);
-        let output =
-            sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
+        let output = sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
         assert_eq!(output, expected)
     }
 
@@ -1175,8 +1096,7 @@ mod tests {
     {
         let output = PrimitiveArray::<T>::from(data);
         let expected = UInt32Array::from(expected_data);
-        let output =
-            sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
+        let output = sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
         assert_eq!(output, expected)
     }
 
@@ -1192,9 +1112,7 @@ mod tests {
         let output = PrimitiveArray::<T>::from(data);
         let expected = Arc::new(PrimitiveArray::<T>::from(expected_data)) as ArrayRef;
         let output = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(output) as ArrayRef), options).unwrap(),
         };
         assert_eq!(&output, &expected)
@@ -1208,8 +1126,7 @@ mod tests {
     ) {
         let output = StringArray::from(data);
         let expected = UInt32Array::from(expected_data);
-        let output =
-            sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
+        let output = sort_to_indices(&(Arc::new(output) as ArrayRef), options, limit).unwrap();
         assert_eq!(output, expected)
     }
 
@@ -1223,9 +1140,7 @@ mod tests {
         let output = StringArray::from(data.clone());
         let expected = Arc::new(StringArray::from(expected_data.clone())) as ArrayRef;
         let output = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(output) as ArrayRef), options).unwrap(),
         };
         assert_eq!(&output, &expected);
@@ -1233,9 +1148,7 @@ mod tests {
         let output = LargeStringArray::from(data);
         let expected = Arc::new(LargeStringArray::from(expected_data)) as ArrayRef;
         let output = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(output) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(output) as ArrayRef), options).unwrap(),
         };
         assert_eq!(&output, &expected)
@@ -1255,9 +1168,7 @@ mod tests {
             .expect("Unable to get dictionary values");
 
         let sorted = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(array) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(array) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(array) as ArrayRef), options).unwrap(),
         };
         let sorted = sorted
@@ -1285,8 +1196,7 @@ mod tests {
                 .collect::<Vec<Option<&str>>>(),
         )
         .expect("Unable to create string array from dictionary");
-        let expected =
-            StringArray::try_from(expected_data).expect("Unable to create string array");
+        let expected = StringArray::try_from(expected_data).expect("Unable to create string array");
 
         assert_eq!(sorted_strings, expected)
     }
@@ -1308,9 +1218,7 @@ mod tests {
             .expect("Unable to get dictionary values");
 
         let sorted = match limit {
-            Some(_) => {
-                sort_limit(&(Arc::new(array) as ArrayRef), options, limit).unwrap()
-            }
+            Some(_) => sort_limit(&(Arc::new(array) as ArrayRef), options, limit).unwrap(),
             _ => sort(&(Arc::new(array) as ArrayRef), options).unwrap(),
         };
         let sorted = sorted
@@ -1338,8 +1246,7 @@ mod tests {
                 })
                 .collect::<Vec<Option<T::Native>>>(),
         );
-        let expected: PrimitiveArray<T> =
-            From::<Vec<Option<T::Native>>>::from(expected_data);
+        let expected: PrimitiveArray<T> = From::<Vec<Option<T::Native>>>::from(expected_data);
 
         assert_eq!(sorted_values, expected)
     }
@@ -1376,8 +1283,7 @@ mod tests {
             _ => sort(&(input as ArrayRef), options).unwrap(),
         };
         let expected =
-            Arc::new(build_generic_list_nullable::<i32, T>(expected_data.clone()))
-                as ArrayRef;
+            Arc::new(build_generic_list_nullable::<i32, T>(expected_data.clone())) as ArrayRef;
 
         assert_eq!(&sorted, &expected);
 
@@ -1387,8 +1293,7 @@ mod tests {
             Some(_) => sort_limit(&(input as ArrayRef), options, limit).unwrap(),
             _ => sort(&(input as ArrayRef), options).unwrap(),
         };
-        let expected =
-            Arc::new(build_generic_list_nullable::<i64, T>(expected_data)) as ArrayRef;
+        let expected = Arc::new(build_generic_list_nullable::<i64, T>(expected_data)) as ArrayRef;
 
         assert_eq!(&sorted, &expected);
     }
@@ -1414,16 +1319,14 @@ mod tests {
     ) {
         // Fixed size binary array
         if fixed_length.is_some() {
-            let input = Arc::new(
-                FixedSizeBinaryArray::try_from_sparse_iter(data.iter().cloned()).unwrap(),
-            );
+            let input =
+                Arc::new(FixedSizeBinaryArray::try_from_sparse_iter(data.iter().cloned()).unwrap());
             let sorted = match limit {
                 Some(_) => sort_limit(&(input as ArrayRef), options, limit).unwrap(),
                 None => sort(&(input as ArrayRef), options).unwrap(),
             };
             let expected = Arc::new(
-                FixedSizeBinaryArray::try_from_sparse_iter(expected_data.iter().cloned())
-                    .unwrap(),
+                FixedSizeBinaryArray::try_from_sparse_iter(expected_data.iter().cloned()).unwrap(),
             ) as ArrayRef;
 
             assert_eq!(&sorted, &expected);
@@ -3330,8 +3233,7 @@ mod tests {
 
     #[test]
     fn test_sort_int8_dicts() {
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Int8Array::from(vec![1, 3, 5]);
         test_sort_primitive_dict_arrays::<Int8Type, Int8Type>(
             keys,
@@ -3341,8 +3243,7 @@ mod tests {
             vec![None, None, Some(1), Some(3), Some(5), Some(5)],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Int8Array::from(vec![1, 3, 5]);
         test_sort_primitive_dict_arrays::<Int8Type, Int8Type>(
             keys,
@@ -3355,8 +3256,7 @@ mod tests {
             vec![Some(5), Some(5), Some(3), Some(1), None, None],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Int8Array::from(vec![1, 3, 5]);
         test_sort_primitive_dict_arrays::<Int8Type, Int8Type>(
             keys,
@@ -3369,8 +3269,7 @@ mod tests {
             vec![Some(1), Some(3), Some(5), Some(5), None, None],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Int8Array::from(vec![1, 3, 5]);
         test_sort_primitive_dict_arrays::<Int8Type, Int8Type>(
             keys,
@@ -3468,8 +3367,7 @@ mod tests {
 
     #[test]
     fn test_sort_f32_dicts() {
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Float32Array::from(vec![1.2, 3.0, 5.1]);
         test_sort_primitive_dict_arrays::<Int8Type, Float32Type>(
             keys,
@@ -3479,8 +3377,7 @@ mod tests {
             vec![None, None, Some(1.2), Some(3.0), Some(5.1), Some(5.1)],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Float32Array::from(vec![1.2, 3.0, 5.1]);
         test_sort_primitive_dict_arrays::<Int8Type, Float32Type>(
             keys,
@@ -3493,8 +3390,7 @@ mod tests {
             vec![Some(5.1), Some(5.1), Some(3.0), Some(1.2), None, None],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Float32Array::from(vec![1.2, 3.0, 5.1]);
         test_sort_primitive_dict_arrays::<Int8Type, Float32Type>(
             keys,
@@ -3507,8 +3403,7 @@ mod tests {
             vec![Some(1.2), Some(3.0), Some(5.1), Some(5.1), None, None],
         );
 
-        let keys =
-            Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
+        let keys = Int8Array::from(vec![Some(1_i8), None, Some(2), None, Some(2), Some(0)]);
         let values = Float32Array::from(vec![1.2, 3.0, 5.1]);
         test_sort_primitive_dict_arrays::<Int8Type, Float32Type>(
             keys,

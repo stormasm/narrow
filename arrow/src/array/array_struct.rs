@@ -146,10 +146,11 @@ impl TryFrom<Vec<(&str, ArrayRef)>> for StructArray {
             let child_datum_len = child_datum.len();
             if let Some(len) = len {
                 if len != child_datum_len {
-                    return Err(ArrowError::InvalidArgumentError(
-                        format!("Array of field \"{}\" has length {}, but previous elements have length {}.
-                        All arrays in every entry in a struct array must have the same length.", field_name, child_datum_len, len)
-                    ));
+                    return Err(ArrowError::InvalidArgumentError(format!(
+                        "Array of field \"{}\" has length {}, but previous elements have length {}.
+                        All arrays in every entry in a struct array must have the same length.",
+                        field_name, child_datum_len, len
+                    )));
                 }
             } else {
                 len = Some(child_datum_len)
@@ -356,12 +357,10 @@ mod tests {
             None,
             Some("mark"),
         ]));
-        let ints: ArrayRef =
-            Arc::new(Int32Array::from(vec![Some(1), Some(2), None, Some(4)]));
+        let ints: ArrayRef = Arc::new(Int32Array::from(vec![Some(1), Some(2), None, Some(4)]));
 
         let arr =
-            StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())])
-                .unwrap();
+            StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())]).unwrap();
 
         let struct_data = arr.data();
         assert_eq!(4, struct_data.len());
@@ -399,30 +398,27 @@ mod tests {
             None,
             // 3 elements, not 4
         ]));
-        let ints: ArrayRef =
-            Arc::new(Int32Array::from(vec![Some(1), Some(2), None, Some(4)]));
+        let ints: ArrayRef = Arc::new(Int32Array::from(vec![Some(1), Some(2), None, Some(4)]));
 
-        let arr =
-            StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())]);
+        let arr = StructArray::try_from(vec![("f1", strings.clone()), ("f2", ints.clone())]);
 
         match arr {
             Err(ArrowError::InvalidArgumentError(e)) => {
-                assert!(e.starts_with("Array of field \"f2\" has length 4, but previous elements have length 3."));
+                assert!(e.starts_with(
+                    "Array of field \"f2\" has length 4, but previous elements have length 3."
+                ));
             }
             _ => panic!("This test got an unexpected error type"),
         };
     }
 
     #[test]
-    #[should_panic(
-        expected = "the field data types must match the array data in a StructArray"
-    )]
+    #[should_panic(expected = "the field data types must match the array data in a StructArray")]
     fn test_struct_array_from_mismatched_types() {
         drop(StructArray::from(vec![
             (
                 Field::new("b", DataType::Int16, false),
-                Arc::new(BooleanArray::from(vec![false, false, true, true]))
-                    as Arc<dyn Array>,
+                Arc::new(BooleanArray::from(vec![false, false, true, true])) as Arc<dyn Array>,
             ),
             (
                 Field::new("c", DataType::Utf8, false),
@@ -522,9 +518,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "all child arrays of a StructArray must have the same length"
-    )]
+    #[should_panic(expected = "all child arrays of a StructArray must have the same length")]
     fn test_invalid_struct_child_array_lengths() {
         drop(StructArray::from(vec![
             (

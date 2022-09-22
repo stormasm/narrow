@@ -25,9 +25,7 @@ use crate::array::{ArrayBuilder, FixedSizeBinaryBuilder};
 
 use crate::error::{ArrowError, Result};
 
-use crate::datatypes::{
-    validate_decimal256_precision_with_lt_bytes, validate_decimal_precision,
-};
+use crate::datatypes::{validate_decimal256_precision_with_lt_bytes, validate_decimal_precision};
 use crate::util::decimal::Decimal256;
 
 /// Array Builder for [`Decimal128Array`]
@@ -203,7 +201,8 @@ impl Decimal256Builder {
 
         if self.precision != value.precision() || self.scale != value.scale() {
             return Err(ArrowError::InvalidArgumentError(
-                "Decimal value does not have the same precision or scale as Decimal256Builder".to_string()
+                "Decimal value does not have the same precision or scale as Decimal256Builder"
+                    .to_string(),
             ));
         }
 
@@ -211,7 +210,8 @@ impl Decimal256Builder {
 
         if Self::BYTE_LENGTH != value_as_bytes.len() as i32 {
             return Err(ArrowError::InvalidArgumentError(
-                "Byte slice does not have the same length as Decimal256Builder value lengths".to_string()
+                "Byte slice does not have the same length as Decimal256Builder value lengths"
+                    .to_string(),
             ));
         }
         self.builder.append_value(value_as_bytes)
@@ -354,7 +354,11 @@ mod tests {
     fn test_decimal256_builder_out_of_range_precision_scale() {
         let mut builder = Decimal256Builder::new(75, 6);
 
-        let big_value = BigInt::from_str_radix("9999999999999999999999999999999999999999999999999999999999999999999999999999", 10).unwrap();
+        let big_value = BigInt::from_str_radix(
+            "9999999999999999999999999999999999999999999999999999999999999999999999999999",
+            10,
+        )
+        .unwrap();
         let value = Decimal256::from_big_int(&big_value, 75, 6).unwrap();
         builder.append_value(&value).unwrap();
     }
@@ -370,7 +374,11 @@ mod tests {
             builder.disable_value_validation();
         }
 
-        let big_value = BigInt::from_str_radix("9999999999999999999999999999999999999999999999999999999999999999999999999999", 10).unwrap();
+        let big_value = BigInt::from_str_radix(
+            "9999999999999999999999999999999999999999999999999999999999999999999999999999",
+            10,
+        )
+        .unwrap();
         let value = Decimal256::from_big_int(&big_value, 75, 6).unwrap();
         builder
             .append_value(&value)

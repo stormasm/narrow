@@ -22,10 +22,7 @@ use super::{Extend, _MutableArrayData};
 pub(super) fn build_extend(array: &ArrayData) -> Extend {
     if array.null_count() == 0 {
         Box::new(
-            move |mutable: &mut _MutableArrayData,
-                  index: usize,
-                  start: usize,
-                  len: usize| {
+            move |mutable: &mut _MutableArrayData, index: usize, start: usize, len: usize| {
                 mutable
                     .child_data
                     .iter_mut()
@@ -34,10 +31,7 @@ pub(super) fn build_extend(array: &ArrayData) -> Extend {
         )
     } else {
         Box::new(
-            move |mutable: &mut _MutableArrayData,
-                  index: usize,
-                  start: usize,
-                  len: usize| {
+            move |mutable: &mut _MutableArrayData, index: usize, start: usize, len: usize| {
                 (start..start + len).for_each(|i| {
                     if array.is_valid(i) {
                         mutable

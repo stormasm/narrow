@@ -69,8 +69,7 @@ impl MetadataVersion {
 
     pub const ENUM_MIN: i16 = 0;
     pub const ENUM_MAX: i16 = 4;
-    pub const ENUM_VALUES: &'static [Self] =
-        &[Self::V1, Self::V2, Self::V3, Self::V4, Self::V5];
+    pub const ENUM_VALUES: &'static [Self] = &[Self::V1, Self::V2, Self::V3, Self::V4, Self::V5];
     /// Returns the variant's name or "" if unknown.
     pub fn variant_name(self) -> Option<&'static str> {
         match self {
@@ -1125,10 +1124,7 @@ impl<'b> flatbuffers::Push for &'b Buffer {
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let src = unsafe {
-            ::std::slice::from_raw_parts(
-                *self as *const Buffer as *const u8,
-                Self::size(),
-            )
+            ::std::slice::from_raw_parts(*self as *const Buffer as *const u8, Self::size())
         };
         dst.copy_from_slice(src);
     }
@@ -1345,9 +1341,7 @@ pub struct Struct_Builder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> Struct_Builder<'a, 'b> {
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> Struct_Builder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> Struct_Builder<'a, 'b> {
         let start = _fbb.start_table();
         Struct_Builder {
             fbb_: _fbb,
@@ -1501,9 +1495,7 @@ pub struct LargeListBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> LargeListBuilder<'a, 'b> {
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> LargeListBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> LargeListBuilder<'a, 'b> {
         let start = _fbb.start_table();
         LargeListBuilder {
             fbb_: _fbb,
@@ -1599,9 +1591,7 @@ impl<'a: 'b, 'b> FixedSizeListBuilder<'a, 'b> {
             .push_slot::<i32>(FixedSizeList::VT_LISTSIZE, listSize, 0);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> FixedSizeListBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> FixedSizeListBuilder<'a, 'b> {
         let start = _fbb.start_table();
         FixedSizeListBuilder {
             fbb_: _fbb,
@@ -1844,10 +1834,7 @@ impl<'a: 'b, 'b> UnionBuilder<'a, 'b> {
             .push_slot::<UnionMode>(Union::VT_MODE, mode, UnionMode::Sparse);
     }
     #[inline]
-    pub fn add_typeIds(
-        &mut self,
-        typeIds: flatbuffers::WIPOffset<flatbuffers::Vector<'b, i32>>,
-    ) {
+    pub fn add_typeIds(&mut self, typeIds: flatbuffers::WIPOffset<flatbuffers::Vector<'b, i32>>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Union::VT_TYPEIDS, typeIds);
     }
@@ -2059,16 +2046,11 @@ pub struct FloatingPointBuilder<'a: 'b, 'b> {
 impl<'a: 'b, 'b> FloatingPointBuilder<'a, 'b> {
     #[inline]
     pub fn add_precision(&mut self, precision: Precision) {
-        self.fbb_.push_slot::<Precision>(
-            FloatingPoint::VT_PRECISION,
-            precision,
-            Precision::HALF,
-        );
+        self.fbb_
+            .push_slot::<Precision>(FloatingPoint::VT_PRECISION, precision, Precision::HALF);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> FloatingPointBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> FloatingPointBuilder<'a, 'b> {
         let start = _fbb.start_table();
         FloatingPointBuilder {
             fbb_: _fbb,
@@ -2223,9 +2205,7 @@ pub struct BinaryBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> BinaryBuilder<'a, 'b> {
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> BinaryBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> BinaryBuilder<'a, 'b> {
         let start = _fbb.start_table();
         BinaryBuilder {
             fbb_: _fbb,
@@ -2303,9 +2283,7 @@ pub struct LargeUtf8Builder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> LargeUtf8Builder<'a, 'b> {
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> LargeUtf8Builder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> LargeUtf8Builder<'a, 'b> {
         let start = _fbb.start_table();
         LargeUtf8Builder {
             fbb_: _fbb,
@@ -2383,9 +2361,7 @@ pub struct LargeBinaryBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> LargeBinaryBuilder<'a, 'b> {
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> LargeBinaryBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> LargeBinaryBuilder<'a, 'b> {
         let start = _fbb.start_table();
         LargeBinaryBuilder {
             fbb_: _fbb,
@@ -2481,9 +2457,7 @@ impl<'a: 'b, 'b> FixedSizeBinaryBuilder<'a, 'b> {
             .push_slot::<i32>(FixedSizeBinary::VT_BYTEWIDTH, byteWidth, 0);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> FixedSizeBinaryBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> FixedSizeBinaryBuilder<'a, 'b> {
         let start = _fbb.start_table();
         FixedSizeBinaryBuilder {
             fbb_: _fbb,
@@ -2694,9 +2668,7 @@ impl<'a: 'b, 'b> DecimalBuilder<'a, 'b> {
             .push_slot::<i32>(Decimal::VT_BITWIDTH, bitWidth, 128);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> DecimalBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> DecimalBuilder<'a, 'b> {
         let start = _fbb.start_table();
         DecimalBuilder {
             fbb_: _fbb,
@@ -3058,15 +3030,11 @@ impl<'a: 'b, 'b> TimestampBuilder<'a, 'b> {
     }
     #[inline]
     pub fn add_timezone(&mut self, timezone: flatbuffers::WIPOffset<&'b str>) {
-        self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>(
-            Timestamp::VT_TIMEZONE,
-            timezone,
-        );
+        self.fbb_
+            .push_slot_always::<flatbuffers::WIPOffset<_>>(Timestamp::VT_TIMEZONE, timezone);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> TimestampBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TimestampBuilder<'a, 'b> {
         let start = _fbb.start_table();
         TimestampBuilder {
             fbb_: _fbb,
@@ -3161,16 +3129,11 @@ pub struct IntervalBuilder<'a: 'b, 'b> {
 impl<'a: 'b, 'b> IntervalBuilder<'a, 'b> {
     #[inline]
     pub fn add_unit(&mut self, unit: IntervalUnit) {
-        self.fbb_.push_slot::<IntervalUnit>(
-            Interval::VT_UNIT,
-            unit,
-            IntervalUnit::YEAR_MONTH,
-        );
+        self.fbb_
+            .push_slot::<IntervalUnit>(Interval::VT_UNIT, unit, IntervalUnit::YEAR_MONTH);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> IntervalBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> IntervalBuilder<'a, 'b> {
         let start = _fbb.start_table();
         IntervalBuilder {
             fbb_: _fbb,
@@ -3268,9 +3231,7 @@ impl<'a: 'b, 'b> DurationBuilder<'a, 'b> {
             .push_slot::<TimeUnit>(Duration::VT_UNIT, unit, TimeUnit::MILLISECOND);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> DurationBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> DurationBuilder<'a, 'b> {
         let start = _fbb.start_table();
         DurationBuilder {
             fbb_: _fbb,
@@ -3354,16 +3315,8 @@ impl flatbuffers::Verifiable for KeyValue<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(
-                &"key",
-                Self::VT_KEY,
-                false,
-            )?
-            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(
-                &"value",
-                Self::VT_VALUE,
-                false,
-            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(&"key", Self::VT_KEY, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(&"value", Self::VT_VALUE, false)?
             .finish();
         Ok(())
     }
@@ -3397,9 +3350,7 @@ impl<'a: 'b, 'b> KeyValueBuilder<'a, 'b> {
             .push_slot_always::<flatbuffers::WIPOffset<_>>(KeyValue::VT_VALUE, value);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> KeyValueBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> KeyValueBuilder<'a, 'b> {
         let start = _fbb.start_table();
         KeyValueBuilder {
             fbb_: _fbb,
@@ -3479,10 +3430,8 @@ impl<'a> DictionaryEncoding<'a> {
     /// and to avoid uint64 indices unless they are required by an application.
     #[inline]
     pub fn indexType(&self) -> Option<Int<'a>> {
-        self._tab.get::<flatbuffers::ForwardsUOffset<Int>>(
-            DictionaryEncoding::VT_INDEXTYPE,
-            None,
-        )
+        self._tab
+            .get::<flatbuffers::ForwardsUOffset<Int>>(DictionaryEncoding::VT_INDEXTYPE, None)
     }
     /// By default, dictionaries are not ordered, or the order does not have
     /// semantic meaning. In some statistical, applications, dictionary-encoding
@@ -3520,11 +3469,7 @@ impl flatbuffers::Verifiable for DictionaryEncoding<'_> {
                 false,
             )?
             .visit_field::<bool>(&"isOrdered", Self::VT_ISORDERED, false)?
-            .visit_field::<DictionaryKind>(
-                &"dictionaryKind",
-                Self::VT_DICTIONARYKIND,
-                false,
-            )?
+            .visit_field::<DictionaryKind>(&"dictionaryKind", Self::VT_DICTIONARYKIND, false)?
             .finish();
         Ok(())
     }
@@ -3684,19 +3629,13 @@ impl<'a> Field<'a> {
     #[inline]
     pub fn type_(&self) -> Option<flatbuffers::Table<'a>> {
         self._tab
-            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(
-                Field::VT_TYPE_,
-                None,
-            )
+            .get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(Field::VT_TYPE_, None)
     }
     /// Present only if the field is dictionary encoded.
     #[inline]
     pub fn dictionary(&self) -> Option<DictionaryEncoding<'a>> {
         self._tab
-            .get::<flatbuffers::ForwardsUOffset<DictionaryEncoding>>(
-                Field::VT_DICTIONARY,
-                None,
-            )
+            .get::<flatbuffers::ForwardsUOffset<DictionaryEncoding>>(Field::VT_DICTIONARY, None)
     }
     /// children apply only to nested data types like Struct, List and Union. For
     /// primitive types children will have length 0.
@@ -3936,38 +3875,125 @@ impl flatbuffers::Verifiable for Field<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-     .visit_field::<flatbuffers::ForwardsUOffset<&str>>(&"name", Self::VT_NAME, false)?
-     .visit_field::<bool>(&"nullable", Self::VT_NULLABLE, false)?
-     .visit_union::<Type, _>(&"type_type", Self::VT_TYPE_TYPE, &"type_", Self::VT_TYPE_, false, |key, v, pos| {
-        match key {
-          Type::Null => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Null>>("Type::Null", pos),
-          Type::Int => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Int>>("Type::Int", pos),
-          Type::FloatingPoint => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FloatingPoint>>("Type::FloatingPoint", pos),
-          Type::Binary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Binary>>("Type::Binary", pos),
-          Type::Utf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Utf8>>("Type::Utf8", pos),
-          Type::Bool => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Bool>>("Type::Bool", pos),
-          Type::Decimal => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Decimal>>("Type::Decimal", pos),
-          Type::Date => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Date>>("Type::Date", pos),
-          Type::Time => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Time>>("Type::Time", pos),
-          Type::Timestamp => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Timestamp>>("Type::Timestamp", pos),
-          Type::Interval => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Interval>>("Type::Interval", pos),
-          Type::List => v.verify_union_variant::<flatbuffers::ForwardsUOffset<List>>("Type::List", pos),
-          Type::Struct_ => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Struct_>>("Type::Struct_", pos),
-          Type::Union => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Union>>("Type::Union", pos),
-          Type::FixedSizeBinary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeBinary>>("Type::FixedSizeBinary", pos),
-          Type::FixedSizeList => v.verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeList>>("Type::FixedSizeList", pos),
-          Type::Map => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Map>>("Type::Map", pos),
-          Type::Duration => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Duration>>("Type::Duration", pos),
-          Type::LargeBinary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeBinary>>("Type::LargeBinary", pos),
-          Type::LargeUtf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeUtf8>>("Type::LargeUtf8", pos),
-          Type::LargeList => v.verify_union_variant::<flatbuffers::ForwardsUOffset<LargeList>>("Type::LargeList", pos),
-          _ => Ok(()),
-        }
-     })?
-     .visit_field::<flatbuffers::ForwardsUOffset<DictionaryEncoding>>(&"dictionary", Self::VT_DICTIONARY, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<Field>>>>(&"children", Self::VT_CHILDREN, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>>>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
-     .finish();
+            .visit_field::<flatbuffers::ForwardsUOffset<&str>>(&"name", Self::VT_NAME, false)?
+            .visit_field::<bool>(&"nullable", Self::VT_NULLABLE, false)?
+            .visit_union::<Type, _>(
+                &"type_type",
+                Self::VT_TYPE_TYPE,
+                &"type_",
+                Self::VT_TYPE_,
+                false,
+                |key, v, pos| match key {
+                    Type::Null => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Null>>(
+                        "Type::Null",
+                        pos,
+                    ),
+                    Type::Int => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Int>>(
+                        "Type::Int",
+                        pos,
+                    ),
+                    Type::FloatingPoint => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FloatingPoint>>(
+                            "Type::FloatingPoint",
+                            pos,
+                        ),
+                    Type::Binary => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Binary>>(
+                        "Type::Binary",
+                        pos,
+                    ),
+                    Type::Utf8 => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Utf8>>(
+                        "Type::Utf8",
+                        pos,
+                    ),
+                    Type::Bool => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Bool>>(
+                        "Type::Bool",
+                        pos,
+                    ),
+                    Type::Decimal => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Decimal>>(
+                            "Type::Decimal",
+                            pos,
+                        ),
+                    Type::Date => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Date>>(
+                        "Type::Date",
+                        pos,
+                    ),
+                    Type::Time => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Time>>(
+                        "Type::Time",
+                        pos,
+                    ),
+                    Type::Timestamp => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Timestamp>>(
+                            "Type::Timestamp",
+                            pos,
+                        ),
+                    Type::Interval => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Interval>>(
+                            "Type::Interval",
+                            pos,
+                        ),
+                    Type::List => v.verify_union_variant::<flatbuffers::ForwardsUOffset<List>>(
+                        "Type::List",
+                        pos,
+                    ),
+                    Type::Struct_ => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Struct_>>(
+                            "Type::Struct_",
+                            pos,
+                        ),
+                    Type::Union => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Union>>(
+                        "Type::Union",
+                        pos,
+                    ),
+                    Type::FixedSizeBinary => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeBinary>>(
+                            "Type::FixedSizeBinary",
+                            pos,
+                        ),
+                    Type::FixedSizeList => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<FixedSizeList>>(
+                            "Type::FixedSizeList",
+                            pos,
+                        ),
+                    Type::Map => v.verify_union_variant::<flatbuffers::ForwardsUOffset<Map>>(
+                        "Type::Map",
+                        pos,
+                    ),
+                    Type::Duration => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<Duration>>(
+                            "Type::Duration",
+                            pos,
+                        ),
+                    Type::LargeBinary => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeBinary>>(
+                            "Type::LargeBinary",
+                            pos,
+                        ),
+                    Type::LargeUtf8 => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeUtf8>>(
+                            "Type::LargeUtf8",
+                            pos,
+                        ),
+                    Type::LargeList => v
+                        .verify_union_variant::<flatbuffers::ForwardsUOffset<LargeList>>(
+                            "Type::LargeList",
+                            pos,
+                        ),
+                    _ => Ok(()),
+                },
+            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<DictionaryEncoding>>(
+                &"dictionary",
+                Self::VT_DICTIONARY,
+                false,
+            )?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<Field>>,
+            >>(&"children", Self::VT_CHILDREN, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>,
+            >>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
+            .finish();
         Ok(())
     }
 }
@@ -3978,14 +4004,10 @@ pub struct FieldArgs<'a> {
     pub type_: Option<flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>>,
     pub dictionary: Option<flatbuffers::WIPOffset<DictionaryEncoding<'a>>>,
     pub children: Option<
-        flatbuffers::WIPOffset<
-            flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<Field<'a>>>,
-        >,
+        flatbuffers::WIPOffset<flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<Field<'a>>>>,
     >,
     pub custom_metadata: Option<
-        flatbuffers::WIPOffset<
-            flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>,
-        >,
+        flatbuffers::WIPOffset<flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>>,
     >,
 }
 impl<'a> Default for FieldArgs<'a> {
@@ -4023,18 +4045,12 @@ impl<'a: 'b, 'b> FieldBuilder<'a, 'b> {
             .push_slot::<Type>(Field::VT_TYPE_TYPE, type_type, Type::NONE);
     }
     #[inline]
-    pub fn add_type_(
-        &mut self,
-        type_: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>,
-    ) {
+    pub fn add_type_(&mut self, type_: flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Field::VT_TYPE_, type_);
     }
     #[inline]
-    pub fn add_dictionary(
-        &mut self,
-        dictionary: flatbuffers::WIPOffset<DictionaryEncoding<'b>>,
-    ) {
+    pub fn add_dictionary(&mut self, dictionary: flatbuffers::WIPOffset<DictionaryEncoding<'b>>) {
         self.fbb_
             .push_slot_always::<flatbuffers::WIPOffset<DictionaryEncoding>>(
                 Field::VT_DICTIONARY,
@@ -4398,25 +4414,29 @@ impl flatbuffers::Verifiable for Schema<'_> {
     ) -> Result<(), flatbuffers::InvalidFlatbuffer> {
         use flatbuffers::Verifiable;
         v.visit_table(pos)?
-     .visit_field::<Endianness>(&"endianness", Self::VT_ENDIANNESS, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<Field>>>>(&"fields", Self::VT_FIELDS, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>>>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
-     .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, Feature>>>(&"features", Self::VT_FEATURES, false)?
-     .finish();
+            .visit_field::<Endianness>(&"endianness", Self::VT_ENDIANNESS, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<Field>>,
+            >>(&"fields", Self::VT_FIELDS, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<
+                flatbuffers::Vector<'_, flatbuffers::ForwardsUOffset<KeyValue>>,
+            >>(&"custom_metadata", Self::VT_CUSTOM_METADATA, false)?
+            .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, Feature>>>(
+                &"features",
+                Self::VT_FEATURES,
+                false,
+            )?
+            .finish();
         Ok(())
     }
 }
 pub struct SchemaArgs<'a> {
     pub endianness: Endianness,
     pub fields: Option<
-        flatbuffers::WIPOffset<
-            flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<Field<'a>>>,
-        >,
+        flatbuffers::WIPOffset<flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<Field<'a>>>>,
     >,
     pub custom_metadata: Option<
-        flatbuffers::WIPOffset<
-            flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>,
-        >,
+        flatbuffers::WIPOffset<flatbuffers::Vector<'a, flatbuffers::ForwardsUOffset<KeyValue<'a>>>>,
     >,
     pub features: Option<flatbuffers::WIPOffset<flatbuffers::Vector<'a, Feature>>>,
 }
@@ -4438,11 +4458,8 @@ pub struct SchemaBuilder<'a: 'b, 'b> {
 impl<'a: 'b, 'b> SchemaBuilder<'a, 'b> {
     #[inline]
     pub fn add_endianness(&mut self, endianness: Endianness) {
-        self.fbb_.push_slot::<Endianness>(
-            Schema::VT_ENDIANNESS,
-            endianness,
-            Endianness::Little,
-        );
+        self.fbb_
+            .push_slot::<Endianness>(Schema::VT_ENDIANNESS, endianness, Endianness::Little);
     }
     #[inline]
     pub fn add_fields(
@@ -4475,9 +4492,7 @@ impl<'a: 'b, 'b> SchemaBuilder<'a, 'b> {
             .push_slot_always::<flatbuffers::WIPOffset<_>>(Schema::VT_FEATURES, features);
     }
     #[inline]
-    pub fn new(
-        _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    ) -> SchemaBuilder<'a, 'b> {
+    pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> SchemaBuilder<'a, 'b> {
         let start = _fbb.start_table();
         SchemaBuilder {
             fbb_: _fbb,
@@ -4530,9 +4545,7 @@ pub fn root_as_schema(buf: &[u8]) -> Result<Schema, flatbuffers::InvalidFlatbuff
 /// catch every error, or be maximally performant. For the
 /// previous, unchecked, behavior use
 /// `size_prefixed_root_as_schema_unchecked`.
-pub fn size_prefixed_root_as_schema(
-    buf: &[u8],
-) -> Result<Schema, flatbuffers::InvalidFlatbuffer> {
+pub fn size_prefixed_root_as_schema(buf: &[u8]) -> Result<Schema, flatbuffers::InvalidFlatbuffer> {
     flatbuffers::size_prefixed_root::<Schema>(buf)
 }
 #[inline]

@@ -66,8 +66,7 @@ pub fn concat(arrays: &[&dyn Array]) -> Result<ArrayRef> {
         .any(|array| array.data_type() != arrays[0].data_type())
     {
         return Err(ArrowError::InvalidArgumentError(
-            "It is not possible to concatenate arrays of different data types."
-                .to_string(),
+            "It is not possible to concatenate arrays of different data types.".to_string(),
         ));
     }
 
@@ -104,10 +103,7 @@ pub fn concat(arrays: &[&dyn Array]) -> Result<ArrayRef> {
 }
 
 /// Concatenates `batches` together into a single record batch.
-pub fn concat_batches(
-    schema: &SchemaRef,
-    batches: &[RecordBatch],
-) -> Result<RecordBatch> {
+pub fn concat_batches(schema: &SchemaRef, batches: &[RecordBatch]) -> Result<RecordBatch> {
     if batches.is_empty() {
         return Ok(RecordBatch::new_empty(schema.clone()));
     }
@@ -199,19 +195,8 @@ mod tests {
     #[test]
     fn test_concat_primitive_arrays() -> Result<()> {
         let arr = concat(&[
-            &PrimitiveArray::<Int64Type>::from(vec![
-                Some(-1),
-                Some(-1),
-                Some(2),
-                None,
-                None,
-            ]),
-            &PrimitiveArray::<Int64Type>::from(vec![
-                Some(101),
-                Some(102),
-                Some(103),
-                None,
-            ]),
+            &PrimitiveArray::<Int64Type>::from(vec![Some(-1), Some(-1), Some(2), None, None]),
+            &PrimitiveArray::<Int64Type>::from(vec![Some(101), Some(102), Some(103), None]),
             &PrimitiveArray::<Int64Type>::from(vec![Some(256), Some(512), Some(1024)]),
         ])?;
 
@@ -237,22 +222,13 @@ mod tests {
 
     #[test]
     fn test_concat_primitive_array_slices() -> Result<()> {
-        let input_1 = PrimitiveArray::<Int64Type>::from(vec![
-            Some(-1),
-            Some(-1),
-            Some(2),
-            None,
-            None,
-        ])
-        .slice(1, 3);
+        let input_1 =
+            PrimitiveArray::<Int64Type>::from(vec![Some(-1), Some(-1), Some(2), None, None])
+                .slice(1, 3);
 
-        let input_2 = PrimitiveArray::<Int64Type>::from(vec![
-            Some(101),
-            Some(102),
-            Some(103),
-            None,
-        ])
-        .slice(1, 3);
+        let input_2 =
+            PrimitiveArray::<Int64Type>::from(vec![Some(101), Some(102), Some(103), None])
+                .slice(1, 3);
         let arr = concat(&[input_1.as_ref(), input_2.as_ref()])?;
 
         let expected_output = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
@@ -309,20 +285,17 @@ mod tests {
             None,
             Some(vec![Some(10)]),
         ];
-        let list1_array =
-            ListArray::from_iter_primitive::<Int64Type, _, _>(list1.clone());
+        let list1_array = ListArray::from_iter_primitive::<Int64Type, _, _>(list1.clone());
 
         let list2 = vec![
             None,
             Some(vec![Some(100), None, Some(101)]),
             Some(vec![Some(102)]),
         ];
-        let list2_array =
-            ListArray::from_iter_primitive::<Int64Type, _, _>(list2.clone());
+        let list2_array = ListArray::from_iter_primitive::<Int64Type, _, _>(list2.clone());
 
         let list3 = vec![Some(vec![Some(1000), Some(1001)])];
-        let list3_array =
-            ListArray::from_iter_primitive::<Int64Type, _, _>(list3.clone());
+        let list3_array = ListArray::from_iter_primitive::<Int64Type, _, _>(list3.clone());
 
         let array_result = concat(&[&list1_array, &list2_array, &list3_array])?;
 
@@ -340,31 +313,28 @@ mod tests {
     #[test]
     fn test_concat_struct_arrays() -> Result<()> {
         let field = Field::new("field", DataType::Int64, true);
-        let input_primitive_1: ArrayRef =
-            Arc::new(PrimitiveArray::<Int64Type>::from(vec![
-                Some(-1),
-                Some(-1),
-                Some(2),
-                None,
-                None,
-            ]));
+        let input_primitive_1: ArrayRef = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
+            Some(-1),
+            Some(-1),
+            Some(2),
+            None,
+            None,
+        ]));
         let input_struct_1 = StructArray::from(vec![(field.clone(), input_primitive_1)]);
 
-        let input_primitive_2: ArrayRef =
-            Arc::new(PrimitiveArray::<Int64Type>::from(vec![
-                Some(101),
-                Some(102),
-                Some(103),
-                None,
-            ]));
+        let input_primitive_2: ArrayRef = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
+            Some(101),
+            Some(102),
+            Some(103),
+            None,
+        ]));
         let input_struct_2 = StructArray::from(vec![(field.clone(), input_primitive_2)]);
 
-        let input_primitive_3: ArrayRef =
-            Arc::new(PrimitiveArray::<Int64Type>::from(vec![
-                Some(256),
-                Some(512),
-                Some(1024),
-            ]));
+        let input_primitive_3: ArrayRef = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
+            Some(256),
+            Some(512),
+            Some(1024),
+        ]));
         let input_struct_3 = StructArray::from(vec![(field, input_primitive_3)]);
 
         let arr = concat(&[&input_struct_1, &input_struct_2, &input_struct_3])?;
@@ -397,23 +367,21 @@ mod tests {
     #[test]
     fn test_concat_struct_array_slices() -> Result<()> {
         let field = Field::new("field", DataType::Int64, true);
-        let input_primitive_1: ArrayRef =
-            Arc::new(PrimitiveArray::<Int64Type>::from(vec![
-                Some(-1),
-                Some(-1),
-                Some(2),
-                None,
-                None,
-            ]));
+        let input_primitive_1: ArrayRef = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
+            Some(-1),
+            Some(-1),
+            Some(2),
+            None,
+            None,
+        ]));
         let input_struct_1 = StructArray::from(vec![(field.clone(), input_primitive_1)]);
 
-        let input_primitive_2: ArrayRef =
-            Arc::new(PrimitiveArray::<Int64Type>::from(vec![
-                Some(101),
-                Some(102),
-                Some(103),
-                None,
-            ]));
+        let input_primitive_2: ArrayRef = Arc::new(PrimitiveArray::<Int64Type>::from(vec![
+            Some(101),
+            Some(102),
+            Some(103),
+            None,
+        ]));
         let input_struct_2 = StructArray::from(vec![(field, input_primitive_2)]);
 
         let arr = concat(&[
@@ -470,9 +438,7 @@ mod tests {
         Ok(())
     }
 
-    fn collect_string_dictionary(
-        dictionary: &DictionaryArray<Int32Type>,
-    ) -> Vec<Option<String>> {
+    fn collect_string_dictionary(dictionary: &DictionaryArray<Int32Type>) -> Vec<Option<String>> {
         let values = dictionary.values();
         let values = values.as_any().downcast_ref::<StringArray>().unwrap();
 
@@ -498,18 +464,15 @@ mod tests {
 
     #[test]
     fn test_string_dictionary_array() {
-        let input_1: DictionaryArray<Int32Type> =
-            vec!["hello", "A", "B", "hello", "hello", "C"]
-                .into_iter()
-                .collect();
-        let input_2: DictionaryArray<Int32Type> =
-            vec!["hello", "E", "E", "hello", "F", "E"]
-                .into_iter()
-                .collect();
+        let input_1: DictionaryArray<Int32Type> = vec!["hello", "A", "B", "hello", "hello", "C"]
+            .into_iter()
+            .collect();
+        let input_2: DictionaryArray<Int32Type> = vec!["hello", "E", "E", "hello", "F", "E"]
+            .into_iter()
+            .collect();
 
         let expected: Vec<_> = vec![
-            "hello", "A", "B", "hello", "hello", "C", "hello", "E", "E", "hello", "F",
-            "E",
+            "hello", "A", "B", "hello", "hello", "C", "hello", "E", "E", "hello", "F", "E",
         ]
         .into_iter()
         .map(|x| Some(x.to_string()))
@@ -521,10 +484,9 @@ mod tests {
 
     #[test]
     fn test_string_dictionary_array_nulls() {
-        let input_1: DictionaryArray<Int32Type> =
-            vec![Some("foo"), Some("bar"), None, Some("fiz")]
-                .into_iter()
-                .collect();
+        let input_1: DictionaryArray<Int32Type> = vec![Some("foo"), Some("bar"), None, Some("fiz")]
+            .into_iter()
+            .collect();
         let input_2: DictionaryArray<Int32Type> = vec![None].into_iter().collect();
         let expected = vec![
             Some("foo".to_string()),
@@ -559,8 +521,7 @@ mod tests {
 
     #[test]
     fn test_dictionary_concat_reuse() {
-        let array: DictionaryArray<Int8Type> =
-            vec!["a", "a", "b", "c"].into_iter().collect();
+        let array: DictionaryArray<Int8Type> = vec!["a", "a", "b", "c"].into_iter().collect();
         let copy: DictionaryArray<Int8Type> = array.data().clone().into();
 
         // dictionary is "a", "b", "c"

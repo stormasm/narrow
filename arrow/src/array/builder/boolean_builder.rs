@@ -222,8 +222,7 @@ mod tests {
 
     #[test]
     fn test_boolean_array_builder_append_slice() {
-        let arr1 =
-            BooleanArray::from(vec![Some(true), Some(false), None, None, Some(false)]);
+        let arr1 = BooleanArray::from(vec![Some(true), Some(false), None, None, Some(false)]);
 
         let mut builder = BooleanArray::builder(0);
         builder.append_slice(&[true, false]);

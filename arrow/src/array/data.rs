@@ -38,11 +38,7 @@ use std::sync::Arc;
 use super::equal::equal;
 
 #[inline]
-pub(crate) fn contains_nulls(
-    null_bit_buffer: Option<&Buffer>,
-    offset: usize,
-    len: usize,
-) -> bool {
+pub(crate) fn contains_nulls(null_bit_buffer: Option<&Buffer>, offset: usize, len: usize) -> bool {
     match null_bit_buffer {
         Some(buffer) => match BitSliceIterator::new(buffer, offset, len).next() {
             Some((start, end)) => start != 0 || end != len,
@@ -53,11 +49,7 @@ pub(crate) fn contains_nulls(
 }
 
 #[inline]
-pub(crate) fn count_nulls(
-    null_bit_buffer: Option<&Buffer>,
-    offset: usize,
-    len: usize,
-) -> usize {
+pub(crate) fn count_nulls(null_bit_buffer: Option<&Buffer>, offset: usize, len: usize) -> usize {
     if let Some(buf) = null_bit_buffer {
         len - buf.count_set_bits_offset(offset, len)
     } else {
@@ -234,10 +226,9 @@ pub(crate) fn into_buffers(
 ) -> Vec<Buffer> {
     match data_type {
         DataType::Null | DataType::Struct(_) | DataType::FixedSizeList(_, _) => vec![],
-        DataType::Utf8
-        | DataType::Binary
-        | DataType::LargeUtf8
-        | DataType::LargeBinary => vec![buffer1.into(), buffer2.into()],
+        DataType::Utf8 | DataType::Binary | DataType::LargeUtf8 | DataType::LargeBinary => {
+            vec![buffer1.into(), buffer2.into()]
+        }
         DataType::Union(_, _, mode) => {
             match mode {
                 // Based on Union's DataTypeLayout
@@ -631,17 +622,7 @@ impl ArrayData {
         };
 
         // Data was constructed correctly above
-        unsafe {
-            Self::new_unchecked(
-                data_type.clone(),
-                0,
-                Some(0),
-                None,
-                0,
-                buffers,
-                child_data,
-            )
-        }
+        unsafe { Self::new_unchecked(data_type.clone(), 0, Some(0), None, 0, buffers, child_data) }
     }
 
     /// "cheap" validation of an `ArrayData`. Ensures buffers are
@@ -677,9 +658,7 @@ impl ArrayData {
             )));
         }
 
-        for (i, (buffer, spec)) in
-            self.buffers.iter().zip(layout.buffers.iter()).enumerate()
-        {
+        for (i, (buffer, spec)) in self.buffers.iter().zip(layout.buffers.iter()).enumerate() {
             match spec {
                 BufferSpec::FixedWidth { byte_width } => {
                     let min_buffer_size = len_plus_offset
@@ -779,11 +758,7 @@ impl ArrayData {
     }
 
     /// Returns a reference to the data in `buffers[idx]` as a typed slice after validating
-    fn typed_buffer<T: ArrowNativeType + num::Num>(
-        &self,
-        idx: usize,
-        len: usize,
-    ) -> Result<&[T]> {
+    fn typed_buffer<T: ArrowNativeType + num::Num>(&self, idx: usize, len: usize) -> Result<&[T]> {
         let buffer = &self.buffers[idx];
 
         let required_len = (len + self.offset) * std::mem::size_of::<T>();
@@ -908,9 +883,7 @@ impl ArrayData {
                 for (i, field) in fields.iter().enumerate() {
                     let field_data = self.get_valid_child_data(i, field.data_type())?;
 
-                    if mode == &UnionMode::Sparse
-                        && field_data.len < (self.len + self.offset)
-                    {
+                    if mode == &UnionMode::Sparse && field_data.len < (self.len + self.offset) {
                         return Err(ArrowError::InvalidArgumentError(format!(
                             "Sparse union child array #{} has length smaller than expected for union array ({} < {})",
                             i, field_data.len, self.len + self.offset
@@ -940,10 +913,7 @@ impl ArrayData {
     /// Ensures that this array data has a single child_data with the
     /// expected type, and calls `validate()` on it. Returns a
     /// reference to that child_data
-    fn get_single_valid_child_data(
-        &self,
-        expected_type: &DataType,
-    ) -> Result<&ArrayData> {
+    fn get_single_valid_child_data(&self, expected_type: &DataType) -> Result<&ArrayData> {
         self.validate_num_child_data(1)?;
         self.get_valid_child_data(0, expected_type)
     }
@@ -964,19 +934,15 @@ impl ArrayData {
 
     /// Ensures that `child_data[i]` has the expected type, calls
     /// `validate()` on it, and returns a reference to that child_data
-    fn get_valid_child_data(
-        &self,
-        i: usize,
-        expected_type: &DataType,
-    ) -> Result<&ArrayData> {
-        let values_data = self.child_data
-            .get(i)
-            .ok_or_else(|| {
-                ArrowError::InvalidArgumentError(format!(
-                    "{} did not have enough child arrays. Expected at least {} but had only {}",
-                    self.data_type, i+1, self.child_data.len()
-                ))
-            })?;
+    fn get_valid_child_data(&self, i: usize, expected_type: &DataType) -> Result<&ArrayData> {
+        let values_data = self.child_data.get(i).ok_or_else(|| {
+            ArrowError::InvalidArgumentError(format!(
+                "{} did not have enough child arrays. Expected at least {} but had only {}",
+                self.data_type,
+                i + 1,
+                self.child_data.len()
+            ))
+        })?;
 
         if expected_type != &values_data.data_type {
             return Err(ArrowError::InvalidArgumentError(format!(
@@ -1055,9 +1021,7 @@ impl ArrayData {
             DataType::Utf8 => self.validate_utf8::<i32>(),
             DataType::LargeUtf8 => self.validate_utf8::<i64>(),
             DataType::Binary => self.validate_offsets_full::<i32>(self.buffers[1].len()),
-            DataType::LargeBinary => {
-                self.validate_offsets_full::<i64>(self.buffers[1].len())
-            }
+            DataType::LargeBinary => self.validate_offsets_full::<i64>(self.buffers[1].len()),
             DataType::List(_) | DataType::Map(_, _) => {
                 let child = &self.child_data[0];
                 self.validate_offsets_full::<i32>(child.len)
@@ -1162,34 +1126,28 @@ impl ArrayData {
         let values_buffer = &self.buffers[1].as_slice();
         if let Ok(values_str) = std::str::from_utf8(values_buffer) {
             // Validate Offsets are correct
-            self.validate_each_offset::<T, _>(
-                values_buffer.len(),
-                |string_index, range| {
-                    if !values_str.is_char_boundary(range.start)
-                        || !values_str.is_char_boundary(range.end)
-                    {
-                        return Err(ArrowError::InvalidArgumentError(format!(
-                            "incomplete utf-8 byte sequence from index {}",
-                            string_index
-                        )));
-                    }
-                    Ok(())
-                },
-            )
+            self.validate_each_offset::<T, _>(values_buffer.len(), |string_index, range| {
+                if !values_str.is_char_boundary(range.start)
+                    || !values_str.is_char_boundary(range.end)
+                {
+                    return Err(ArrowError::InvalidArgumentError(format!(
+                        "incomplete utf-8 byte sequence from index {}",
+                        string_index
+                    )));
+                }
+                Ok(())
+            })
         } else {
             // find specific offset that failed utf8 validation
-            self.validate_each_offset::<T, _>(
-                values_buffer.len(),
-                |string_index, range| {
-                    std::str::from_utf8(&values_buffer[range.clone()]).map_err(|e| {
-                        ArrowError::InvalidArgumentError(format!(
-                            "Invalid UTF8 sequence at string index {} ({:?}): {}",
-                            string_index, range, e
-                        ))
-                    })?;
-                    Ok(())
-                },
-            )
+            self.validate_each_offset::<T, _>(values_buffer.len(), |string_index, range| {
+                std::str::from_utf8(&values_buffer[range.clone()]).map_err(|e| {
+                    ArrowError::InvalidArgumentError(format!(
+                        "Invalid UTF8 sequence at string index {} ({:?}): {}",
+                        string_index, range, e
+                    ))
+                })?;
+                Ok(())
+            })
         }
     }
 
@@ -1220,8 +1178,7 @@ impl ArrayData {
         assert!(buffer.len() / std::mem::size_of::<T>() >= required_len);
 
         // Justification: buffer size was validated above
-        let indexes: &[T] =
-            &buffer.typed_data::<T>()[self.offset..self.offset + self.len];
+        let indexes: &[T] = &buffer.typed_data::<T>()[self.offset..self.offset + self.len];
 
         indexes.iter().enumerate().try_for_each(|(i, &dict_index)| {
             // Do not check the value is null (value can be arbitrary)
@@ -1579,9 +1536,8 @@ mod tests {
     use std::ptr::NonNull;
 
     use crate::array::{
-        make_array, Array, BooleanBuilder, Decimal128Builder, FixedSizeListBuilder,
-        Int32Array, Int32Builder, Int64Array, StringArray, StructBuilder, UInt64Array,
-        UInt8Builder,
+        make_array, Array, BooleanBuilder, Decimal128Builder, FixedSizeListBuilder, Int32Array,
+        Int32Builder, Int64Array, StringArray, StructBuilder, UInt64Array, UInt8Builder,
     };
     use crate::buffer::Buffer;
     use crate::datatypes::Field;
@@ -1795,16 +1751,14 @@ mod tests {
     fn test_bad_number_of_buffers() {
         let buffer1 = Buffer::from_slice_ref(&[0i32, 2i32]);
         let buffer2 = Buffer::from_slice_ref(&[0i32, 2i32]);
-        ArrayData::try_new(DataType::Int64, 1, None, 0, vec![buffer1, buffer2], vec![])
-            .unwrap();
+        ArrayData::try_new(DataType::Int64, 1, None, 0, vec![buffer1, buffer2], vec![]).unwrap();
     }
 
     #[test]
     #[should_panic(expected = "integer overflow computing min buffer size")]
     fn test_fixed_width_overflow() {
         let buffer = Buffer::from_slice_ref(&[0i32, 2i32]);
-        ArrayData::try_new(DataType::Int64, usize::MAX, None, 0, vec![buffer], vec![])
-            .unwrap();
+        ArrayData::try_new(DataType::Int64, usize::MAX, None, 0, vec![buffer], vec![]).unwrap();
     }
 
     #[test]
@@ -1829,8 +1783,7 @@ mod tests {
     #[should_panic(expected = "Dictionary key type must be integer, but was Utf8")]
     fn test_non_int_dictionary() {
         let i32_buffer = Buffer::from_slice_ref(&[0i32, 2i32]);
-        let data_type =
-            DataType::Dictionary(Box::new(DataType::Utf8), Box::new(DataType::Int32));
+        let data_type = DataType::Dictionary(Box::new(DataType::Utf8), Box::new(DataType::Int32));
         let child_data = ArrayData::try_new(
             DataType::Int32,
             1,
@@ -1855,17 +1808,13 @@ mod tests {
     #[should_panic(expected = "Expected LargeUtf8 but child data had Utf8")]
     fn test_mismatched_dictionary_types() {
         // test w/ dictionary created with a child array data that has type different than declared
-        let string_array: StringArray =
-            vec![Some("foo"), Some("bar")].into_iter().collect();
+        let string_array: StringArray = vec![Some("foo"), Some("bar")].into_iter().collect();
         let i32_buffer = Buffer::from_slice_ref(&[0i32, 1i32]);
         // Dict says LargeUtf8 but array is Utf8
-        let data_type = DataType::Dictionary(
-            Box::new(DataType::Int32),
-            Box::new(DataType::LargeUtf8),
-        );
+        let data_type =
+            DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::LargeUtf8));
         let child_data = string_array.into_data();
-        ArrayData::try_new(data_type, 1, None, 0, vec![i32_buffer], vec![child_data])
-            .unwrap();
+        ArrayData::try_new(data_type, 1, None, 0, vec![i32_buffer], vec![child_data]).unwrap();
     }
 
     #[test]
@@ -1930,9 +1879,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Buffer 0 of LargeUtf8 isn't large enough. Expected 8 bytes got 4"
-    )]
+    #[should_panic(expected = "Buffer 0 of LargeUtf8 isn't large enough. Expected 8 bytes got 4")]
     fn test_empty_large_utf8_array_with_wrong_type_offsets() {
         let data_buffer = Buffer::from(&[]);
         let offsets_buffer = Buffer::from_slice_ref(&[0i32]);
@@ -1948,9 +1895,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Buffer 0 of Utf8 isn't large enough. Expected 12 bytes got 8"
-    )]
+    #[should_panic(expected = "Buffer 0 of Utf8 isn't large enough. Expected 12 bytes got 8")]
     fn test_validate_offsets_i32() {
         let data_buffer = Buffer::from_slice_ref(&"abcdef".as_bytes());
         let offsets_buffer = Buffer::from_slice_ref(&[0i32, 2i32]);
@@ -1966,9 +1911,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Buffer 0 of LargeUtf8 isn't large enough. Expected 24 bytes got 16"
-    )]
+    #[should_panic(expected = "Buffer 0 of LargeUtf8 isn't large enough. Expected 24 bytes got 16")]
     fn test_validate_offsets_i64() {
         let data_buffer = Buffer::from_slice_ref(&"abcdef".as_bytes());
         let offsets_buffer = Buffer::from_slice_ref(&[0i64, 2i64]);
@@ -2306,41 +2249,31 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1"
-    )]
+    #[should_panic(expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1")]
     fn test_validate_utf8_index_backwards() {
         check_index_backwards_validation::<i32>(DataType::Utf8);
     }
 
     #[test]
-    #[should_panic(
-        expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1"
-    )]
+    #[should_panic(expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1")]
     fn test_validate_large_utf8_index_backwards() {
         check_index_backwards_validation::<i64>(DataType::LargeUtf8);
     }
 
     #[test]
-    #[should_panic(
-        expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1"
-    )]
+    #[should_panic(expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1")]
     fn test_validate_binary_index_backwards() {
         check_index_backwards_validation::<i32>(DataType::Binary);
     }
 
     #[test]
-    #[should_panic(
-        expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1"
-    )]
+    #[should_panic(expected = "Offset invariant failure: non-monotonic offset at slot 3: 2 > 1")]
     fn test_validate_large_binary_index_backwards() {
         check_index_backwards_validation::<i64>(DataType::LargeBinary);
     }
 
     #[test]
-    #[should_panic(
-        expected = "Value at position 1 out of bounds: 3 (should be in [0, 1])"
-    )]
+    #[should_panic(expected = "Value at position 1 out of bounds: 3 (should be in [0, 1])")]
     fn test_validate_dictionary_index_too_large() {
         let values: StringArray = [Some("foo"), Some("bar")].into_iter().collect();
 
@@ -2364,9 +2297,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Value at position 1 out of bounds: -1 (should be in [0, 1]"
-    )]
+    #[should_panic(expected = "Value at position 1 out of bounds: -1 (should be in [0, 1]")]
     fn test_validate_dictionary_index_negative() {
         let values: StringArray = [Some("foo"), Some("bar")].into_iter().collect();
 
@@ -2442,8 +2373,7 @@ mod tests {
 
     /// Test that the list of type `data_type` generates correct offset out of bounds errors
     fn check_list_offsets<T: ArrowNativeType>(data_type: DataType) {
-        let values: Int32Array =
-            [Some(1), Some(2), Some(3), Some(4)].into_iter().collect();
+        let values: Int32Array = [Some(1), Some(2), Some(3), Some(4)].into_iter().collect();
 
         // 5 is an invalid offset into a list of only three values
         let offsets: Vec<T> = [0, 2, 5, 4]
@@ -2487,8 +2417,7 @@ mod tests {
         expected = "Offset invariant failure: Could not convert offset -1 to usize at position 2"
     )]
     fn test_validate_list_negative_offsets() {
-        let values: Int32Array =
-            [Some(1), Some(2), Some(3), Some(4)].into_iter().collect();
+        let values: Int32Array = [Some(1), Some(2), Some(3), Some(4)].into_iter().collect();
         let field_type = Field::new("f", values.data_type().clone(), true);
         let data_type = DataType::List(Box::new(field_type));
 
@@ -2508,9 +2437,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Value at position 1 out of bounds: -1 (should be in [0, 1])"
-    )]
+    #[should_panic(expected = "Value at position 1 out of bounds: -1 (should be in [0, 1])")]
     /// test that children are validated recursively (aka bugs in child data of struct also are flagged)
     fn test_validate_recursive() {
         // Form invalid dictionary array
@@ -2639,9 +2566,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Need at least 8 bytes in buffers[1] in array of type Union"
-    )]
+    #[should_panic(expected = "Need at least 8 bytes in buffers[1] in array of type Union")]
     fn test_validate_union_dense_with_bad_len() {
         let field1 = vec![Some(1), Some(2)].into_iter().collect::<Int32Array>();
 
@@ -2812,8 +2737,7 @@ mod tests {
         let array = make_array(data);
         let array = array.as_any().downcast_ref::<StringArray>().unwrap();
 
-        let expected =
-            StringArray::from(vec![None, Some("foo"), Some("bar"), Some("foobar")]);
+        let expected = StringArray::from(vec![None, Some("foo"), Some("bar"), Some("foobar")]);
 
         assert_eq!(array, &expected);
     }
@@ -2823,8 +2747,7 @@ mod tests {
     fn test_decimal_full_validation() {
         let values_builder = UInt8Builder::with_capacity(10);
         let byte_width = 16;
-        let mut fixed_size_builder =
-            FixedSizeListBuilder::new(values_builder, byte_width);
+        let mut fixed_size_builder = FixedSizeListBuilder::new(values_builder, byte_width);
         let value_as_bytes = 123456_i128.to_le_bytes();
         fixed_size_builder
             .values()

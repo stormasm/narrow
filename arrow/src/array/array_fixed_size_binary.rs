@@ -569,8 +569,7 @@ mod tests {
     fn test_all_none_fixed_size_binary_array_from_sparse_iter() {
         let none_option: Option<[u8; 32]> = None;
         let input_arg = vec![none_option, none_option, none_option];
-        let arr =
-            FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
+        let arr = FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
         assert_eq!(0, arr.value_length());
         assert_eq!(3, arr.len())
     }
@@ -584,8 +583,7 @@ mod tests {
             None,
             Some(vec![13, 14]),
         ];
-        let arr =
-            FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
+        let arr = FixedSizeBinaryArray::try_from_sparse_iter(input_arg.into_iter()).unwrap();
         assert_eq!(2, arr.value_length());
         assert_eq!(5, arr.len())
     }
@@ -664,8 +662,7 @@ mod tests {
         expected = "column types must match schema types, expected FixedSizeBinary(2) but found FixedSizeBinary(0) at column index 0"
     )]
     fn fixed_size_binary_array_all_null_in_batch_with_schema() {
-        let schema =
-            Schema::new(vec![Field::new("a", DataType::FixedSizeBinary(2), true)]);
+        let schema = Schema::new(vec![Field::new("a", DataType::FixedSizeBinary(2), true)]);
 
         let none_option: Option<[u8; 2]> = None;
         let item = FixedSizeBinaryArray::try_from_sparse_iter(

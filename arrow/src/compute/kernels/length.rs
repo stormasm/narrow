@@ -256,9 +256,7 @@ mod tests {
     macro_rules! length_list_helper {
         ($offset_ty: ty, $result_ty: ty, $element_ty: ty, $value: expr, $expected: expr) => {{
             let array =
-                GenericListArray::<$offset_ty>::from_iter_primitive::<$element_ty, _, _>(
-                    $value,
-                );
+                GenericListArray::<$offset_ty>::from_iter_primitive::<$element_ty, _, _>($value);
             let result = length(&array)?;
             let result = result.as_any().downcast_ref::<$result_ty>().unwrap();
             let expected: $result_ty = $expected.into();
@@ -448,8 +446,7 @@ mod tests {
 
     #[test]
     fn length_offsets_binary() -> Result<()> {
-        let value: Vec<Option<&[u8]>> =
-            vec![Some(b"hello"), Some(b" "), Some(&[0xff, 0xf8]), None];
+        let value: Vec<Option<&[u8]>> = vec![Some(b"hello"), Some(b" "), Some(&[0xff, 0xf8]), None];
         let a = BinaryArray::from(value);
         let b = a.slice(1, 3);
         let result = length(b.as_ref())?;
@@ -611,8 +608,7 @@ mod tests {
 
     #[test]
     fn bit_length_offsets_binary() -> Result<()> {
-        let value: Vec<Option<&[u8]>> =
-            vec![Some(b"hello"), Some(&[]), Some(b"world"), None];
+        let value: Vec<Option<&[u8]>> = vec![Some(b"hello"), Some(&[]), Some(b"world"), None];
         let a = BinaryArray::from(value);
         let b = a.slice(1, 3);
         let result = bit_length(b.as_ref())?;

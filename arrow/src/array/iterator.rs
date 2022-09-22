@@ -20,8 +20,7 @@ use crate::array::{DecimalArray, FixedSizeBinaryArray};
 use crate::datatypes::{Decimal128Type, Decimal256Type};
 
 use super::{
-    BooleanArray, GenericBinaryArray, GenericListArray, GenericStringArray,
-    PrimitiveArray,
+    BooleanArray, GenericBinaryArray, GenericListArray, GenericStringArray, PrimitiveArray,
 };
 
 /// An iterator that returns Some(T) or None, that can be used on any [`ArrayAccessor`]
@@ -201,8 +200,7 @@ mod tests {
 
     #[test]
     fn test_string_array_iter_round_trip() {
-        let array =
-            StringArray::from(vec![Some("a"), None, Some("aaa"), None, Some("aaaaa")]);
+        let array = StringArray::from(vec![Some("a"), None, Some("aaa"), None, Some("aaaaa")]);
         let array = Arc::new(array) as ArrayRef;
 
         let array = array.as_any().downcast_ref::<StringArray>().unwrap();
@@ -225,8 +223,7 @@ mod tests {
 
         // check if DoubleEndedIterator is implemented
         let result: StringArray = array.iter().rev().collect();
-        let rev_array =
-            StringArray::from(vec![Some("aaaaa"), None, Some("aaa"), None, Some("a")]);
+        let rev_array = StringArray::from(vec![Some("aaaaa"), None, Some("aaa"), None, Some("a")]);
         assert_eq!(result, rev_array);
         // check if ExactSizeIterator is implemented
         let _ = array.iter().rposition(|opt_b| opt_b == Some("a"));

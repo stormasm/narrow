@@ -55,9 +55,7 @@ pub(super) fn combine_option_bitmap(
             Err(ArrowError::ComputeError(
                 "Arrays must not be empty".to_string(),
             )),
-            |(buffer, offset)| {
-                Ok(buffer.map(|buffer| buffer.bit_slice(offset, len_in_bits)))
-            },
+            |(buffer, offset)| Ok(buffer.map(|buffer| buffer.bit_slice(offset, len_in_bits))),
         )
 }
 
@@ -88,9 +86,8 @@ where
     // compute the value indices, and set offsets accordingly
     for i in 0..indices.len() {
         if indices.is_valid(i) {
-            let ix = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                ArrowError::ComputeError("Cast to usize failed".to_string())
-            })?;
+            let ix = ToPrimitive::to_usize(&indices.value(i))
+                .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
             let start = offsets[ix];
             let end = offsets[ix + 1];
             current_offset += end - start;
@@ -125,11 +122,9 @@ where
 
     for i in 0..indices.len() {
         if indices.is_valid(i) {
-            let index = ToPrimitive::to_usize(&indices.value(i)).ok_or_else(|| {
-                ArrowError::ComputeError("Cast to usize failed".to_string())
-            })?;
-            let start =
-                list.value_offset(index) as <UInt32Type as ArrowPrimitiveType>::Native;
+            let index = ToPrimitive::to_usize(&indices.value(i))
+                .ok_or_else(|| ArrowError::ComputeError("Cast to usize failed".to_string()))?;
+            let start = list.value_offset(index) as <UInt32Type as ArrowPrimitiveType>::Native;
 
             values.extend(start..start + length);
         }
@@ -205,10 +200,8 @@ pub(super) mod tests {
     #[test]
     fn test_combine_option_bitmap() {
         let none_bitmap = make_data_with_null_bit_buffer(8, 0, None);
-        let some_bitmap =
-            make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b01001010])));
-        let inverse_bitmap =
-            make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10110101])));
+        let some_bitmap = make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b01001010])));
+        let inverse_bitmap = make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10110101])));
         let some_other_bitmap =
             make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b11010111])));
         assert_eq!(
@@ -241,8 +234,7 @@ pub(super) mod tests {
         );
         assert_eq!(
             Some(Buffer::from([0b01000010])),
-            combine_option_bitmap(&[&some_bitmap, &some_other_bitmap, &none_bitmap], 8,)
-                .unwrap()
+            combine_option_bitmap(&[&some_bitmap, &some_other_bitmap, &none_bitmap], 8,).unwrap()
         );
         assert_eq!(
             Some(Buffer::from([0b00001001])),
@@ -261,12 +253,9 @@ pub(super) mod tests {
     #[test]
     fn test_combine_option_bitmap_with_offsets() {
         let none_bitmap = make_data_with_null_bit_buffer(8, 0, None);
-        let bitmap0 =
-            make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10101010])));
-        let bitmap1 =
-            make_data_with_null_bit_buffer(8, 1, Some(Buffer::from([0b01010100, 0b1])));
-        let bitmap2 =
-            make_data_with_null_bit_buffer(8, 2, Some(Buffer::from([0b10101000, 0b10])));
+        let bitmap0 = make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10101010])));
+        let bitmap1 = make_data_with_null_bit_buffer(8, 1, Some(Buffer::from([0b01010100, 0b1])));
+        let bitmap2 = make_data_with_null_bit_buffer(8, 2, Some(Buffer::from([0b10101000, 0b10])));
         assert_eq!(
             Some(Buffer::from([0b10101010])),
             combine_option_bitmap(&[&bitmap1], 8).unwrap()
@@ -296,10 +285,8 @@ pub(super) mod tests {
     #[test]
     fn test_compare_option_bitmap() {
         let none_bitmap = make_data_with_null_bit_buffer(8, 0, None);
-        let some_bitmap =
-            make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b01001010])));
-        let inverse_bitmap =
-            make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10110101])));
+        let some_bitmap = make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b01001010])));
+        let inverse_bitmap = make_data_with_null_bit_buffer(8, 0, Some(Buffer::from([0b10110101])));
         assert_eq!(
             None,
             compare_option_bitmap(&none_bitmap, &none_bitmap, 8).unwrap()
@@ -322,9 +309,7 @@ pub(super) mod tests {
         );
     }
 
-    pub(crate) fn build_generic_list<S, T>(
-        data: Vec<Option<Vec<T::Native>>>,
-    ) -> GenericListArray<S>
+    pub(crate) fn build_generic_list<S, T>(data: Vec<Option<Vec<T::Native>>>) -> GenericListArray<S>
     where
         S: OffsetSizeTrait + 'static,
         T: ArrowPrimitiveType,
@@ -477,14 +462,12 @@ pub(super) mod tests {
         );
 
         let indices = UInt32Array::from(vec![2, 1, 0]);
-        let indexed =
-            take_value_indices_from_fixed_size_list(&list, &indices, 3).unwrap();
+        let indexed = take_value_indices_from_fixed_size_list(&list, &indices, 3).unwrap();
 
         assert_eq!(indexed, UInt32Array::from(vec![6, 7, 8, 3, 4, 5, 0, 1, 2]));
 
         let indices = UInt32Array::from(vec![3, 2, 1, 2, 0]);
-        let indexed =
-            take_value_indices_from_fixed_size_list(&list, &indices, 3).unwrap();
+        let indexed = take_value_indices_from_fixed_size_list(&list, &indices, 3).unwrap();
 
         assert_eq!(
             indexed,

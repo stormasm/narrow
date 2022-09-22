@@ -170,8 +170,8 @@ pub fn duration_ns_to_duration(v: i64) -> Duration {
 #[cfg(test)]
 mod tests {
     use crate::temporal_conversions::{
-        date64_to_datetime, split_second, timestamp_ms_to_datetime,
-        timestamp_ns_to_datetime, timestamp_us_to_datetime, NANOSECONDS,
+        date64_to_datetime, split_second, timestamp_ms_to_datetime, timestamp_ns_to_datetime,
+        timestamp_us_to_datetime, NANOSECONDS,
     };
     use chrono::NaiveDateTime;
 

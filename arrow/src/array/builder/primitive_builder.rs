@@ -143,10 +143,7 @@ impl<T: ArrowPrimitiveType> PrimitiveBuilder<T> {
     /// This requires the iterator be a trusted length. This could instead require
     /// the iterator implement `TrustedLen` once that is stabilized.
     #[inline]
-    pub unsafe fn append_trusted_len_iter(
-        &mut self,
-        iter: impl IntoIterator<Item = T::Native>,
-    ) {
+    pub unsafe fn append_trusted_len_iter(&mut self, iter: impl IntoIterator<Item = T::Native>) {
         let iter = iter.into_iter();
         let len = iter
             .size_hint()

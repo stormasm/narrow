@@ -39,10 +39,7 @@ fn cmp_nans_last<T: Float>(a: &T, b: &T) -> Ordering {
     }
 }
 
-fn compare_primitives<T: ArrowPrimitiveType>(
-    left: &dyn Array,
-    right: &dyn Array,
-) -> DynComparator
+fn compare_primitives<T: ArrowPrimitiveType>(left: &dyn Array, right: &dyn Array) -> DynComparator
 where
     T::Native: Ord,
 {
@@ -58,10 +55,7 @@ fn compare_boolean(left: &dyn Array, right: &dyn Array) -> DynComparator {
     Box::new(move |i, j| left.value(i).cmp(&right.value(j)))
 }
 
-fn compare_float<T: ArrowPrimitiveType>(
-    left: &dyn Array,
-    right: &dyn Array,
-) -> DynComparator
+fn compare_float<T: ArrowPrimitiveType>(left: &dyn Array, right: &dyn Array) -> DynComparator
 where
     T::Native: Float,
 {
@@ -91,10 +85,8 @@ where
 
     let left_keys: PrimitiveArray<K> = PrimitiveArray::from(left.keys().data().clone());
     let right_keys: PrimitiveArray<K> = PrimitiveArray::from(right.keys().data().clone());
-    let left_values: PrimitiveArray<V> =
-        PrimitiveArray::from(left.values().data().clone());
-    let right_values: PrimitiveArray<V> =
-        PrimitiveArray::from(right.values().data().clone());
+    let left_values: PrimitiveArray<V> = PrimitiveArray::from(left.values().data().clone());
+    let right_values: PrimitiveArray<V> = PrimitiveArray::from(right.values().data().clone());
 
     Box::new(move |i: usize, j: usize| {
         let key_left = left_keys.value(i).to_usize().unwrap();
@@ -198,9 +190,7 @@ pub fn build_compare(left: &dyn Array, right: &dyn Array) -> Result<DynComparato
         (Float64, Float64) => compare_float::<Float64Type>(left, right),
         (Date32, Date32) => compare_primitives::<Date32Type>(left, right),
         (Date64, Date64) => compare_primitives::<Date64Type>(left, right),
-        (Time32(Second), Time32(Second)) => {
-            compare_primitives::<Time32SecondType>(left, right)
-        }
+        (Time32(Second), Time32(Second)) => compare_primitives::<Time32SecondType>(left, right),
         (Time32(Millisecond), Time32(Millisecond)) => {
             compare_primitives::<Time32MillisecondType>(left, right)
         }
@@ -245,10 +235,7 @@ pub fn build_compare(left: &dyn Array, right: &dyn Array) -> Result<DynComparato
         }
         (Utf8, Utf8) => compare_string::<i32>(left, right),
         (LargeUtf8, LargeUtf8) => compare_string::<i64>(left, right),
-        (
-            Dictionary(key_type_lhs, value_type_lhs),
-            Dictionary(key_type_rhs, value_type_rhs),
-        ) => {
+        (Dictionary(key_type_lhs, value_type_lhs), Dictionary(key_type_rhs, value_type_rhs)) => {
             if key_type_lhs != key_type_rhs || value_type_lhs != value_type_rhs {
                 return Err(ArrowError::InvalidArgumentError(
                     "Can't compare arrays of different types".to_string(),

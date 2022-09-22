@@ -21,8 +21,8 @@ use std::fmt;
 use num::Integer;
 
 use super::{
-    array::print_long_array, make_array, raw_pointer::RawPtrBox, Array, ArrayData,
-    ArrayRef, BooleanBufferBuilder, GenericListArrayIter, PrimitiveArray,
+    array::print_long_array, make_array, raw_pointer::RawPtrBox, Array, ArrayData, ArrayRef,
+    BooleanBufferBuilder, GenericListArrayIter, PrimitiveArray,
 };
 use crate::array::array::ArrayAccessor;
 use crate::{
@@ -63,8 +63,7 @@ impl<OffsetSize: OffsetSizeTrait> GenericListArray<OffsetSize> {
     /// The data type constructor of list array.
     /// The input is the schema of the child array and
     /// the output is the [`DataType`], List or LargeList.
-    pub const DATA_TYPE_CONSTRUCTOR: fn(Box<Field>) -> DataType = if OffsetSize::IS_LARGE
-    {
+    pub const DATA_TYPE_CONSTRUCTOR: fn(Box<Field>) -> DataType = if OffsetSize::IS_LARGE {
         DataType::LargeList
     } else {
         DataType::List
@@ -158,8 +157,7 @@ impl<OffsetSize: OffsetSizeTrait> GenericListArray<OffsetSize> {
         let iterator = iter.into_iter();
         let (lower, _) = iterator.size_hint();
 
-        let mut offsets =
-            MutableBuffer::new((lower + 1) * std::mem::size_of::<OffsetSize>());
+        let mut offsets = MutableBuffer::new((lower + 1) * std::mem::size_of::<OffsetSize>());
         let mut length_so_far = OffsetSize::zero();
         offsets.push(length_so_far);
 
@@ -170,8 +168,7 @@ impl<OffsetSize: OffsetSizeTrait> GenericListArray<OffsetSize> {
                 // regardless of whether the item is Some, the offsets and null buffers must be updated.
                 match &maybe_slice {
                     Some(x) => {
-                        length_so_far +=
-                            OffsetSize::from_usize(x.as_ref().len()).unwrap();
+                        length_so_far += OffsetSize::from_usize(x.as_ref().len()).unwrap();
                         null_buf.append(true);
                     }
                     None => null_buf.append(false),
@@ -197,15 +194,12 @@ impl<OffsetSize: OffsetSizeTrait> GenericListArray<OffsetSize> {
 
 impl<OffsetSize: OffsetSizeTrait> From<ArrayData> for GenericListArray<OffsetSize> {
     fn from(data: ArrayData) -> Self {
-        Self::try_new_from_array_data(data).expect(
-            "Expected infallable creation of GenericListArray from ArrayDataRef failed",
-        )
+        Self::try_new_from_array_data(data)
+            .expect("Expected infallable creation of GenericListArray from ArrayDataRef failed")
     }
 }
 
-impl<OffsetSize: 'static + OffsetSizeTrait> From<GenericListArray<OffsetSize>>
-    for ArrayData
-{
+impl<OffsetSize: 'static + OffsetSizeTrait> From<GenericListArray<OffsetSize>> for ArrayData {
     fn from(array: GenericListArray<OffsetSize>) -> Self {
         array.data
     }
@@ -214,9 +208,10 @@ impl<OffsetSize: 'static + OffsetSizeTrait> From<GenericListArray<OffsetSize>>
 impl<OffsetSize: OffsetSizeTrait> GenericListArray<OffsetSize> {
     fn try_new_from_array_data(data: ArrayData) -> Result<Self, ArrowError> {
         if data.buffers().len() != 1 {
-            return Err(ArrowError::InvalidArgumentError(
-                format!("ListArray data should contain a single buffer only (value offsets), had {}",
-                        data.len())));
+            return Err(ArrowError::InvalidArgumentError(format!(
+                "ListArray data should contain a single buffer only (value offsets), had {}",
+                data.len()
+            )));
         }
 
         if data.child_data().len() != 1 {
@@ -375,8 +370,7 @@ mod tests {
         let value_offsets = Buffer::from(&[0, 3, 6, 8].to_byte_slice());
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -412,8 +406,7 @@ mod tests {
         let value_offsets = Buffer::from([]);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type)
             .len(0)
             .add_buffer(value_offsets)
@@ -439,8 +432,7 @@ mod tests {
         let value_offsets = Buffer::from_slice_ref(&[0, 3, 6, 8]);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type.clone())
             .len(3)
             .add_buffer(value_offsets.clone())
@@ -626,8 +618,7 @@ mod tests {
         bit_util::set_bit(&mut null_bits, 8);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type)
             .len(9)
             .add_buffer(value_offsets)
@@ -659,8 +650,7 @@ mod tests {
         }
 
         // Check offset and length for each non-null value.
-        let sliced_list_array =
-            sliced_array.as_any().downcast_ref::<ListArray>().unwrap();
+        let sliced_list_array = sliced_array.as_any().downcast_ref::<ListArray>().unwrap();
         assert_eq!(2, sliced_list_array.value_offsets()[2]);
         assert_eq!(2, sliced_list_array.value_length(2));
         assert_eq!(4, sliced_list_array.value_offsets()[3]);
@@ -772,9 +762,7 @@ mod tests {
         list_array.value(10);
     }
     #[test]
-    #[should_panic(
-        expected = "ListArray data should contain a single buffer only (value offsets)"
-    )]
+    #[should_panic(expected = "ListArray data should contain a single buffer only (value offsets)")]
     // Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
     #[cfg(not(feature = "force_validate"))]
@@ -785,8 +773,7 @@ mod tests {
                 .add_buffer(Buffer::from_slice_ref(&[0, 1, 2, 3, 4, 5, 6, 7]))
                 .build_unchecked()
         };
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = unsafe {
             ArrayData::builder(list_data_type)
                 .len(3)
@@ -797,16 +784,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "ListArray should contain a single child array (values array)"
-    )]
+    #[should_panic(expected = "ListArray should contain a single child array (values array)")]
     // Different error messages, so skip for now
     // https://github.com/apache/arrow-rs/issues/1545
     #[cfg(not(feature = "force_validate"))]
     fn test_list_array_invalid_child_array_len() {
         let value_offsets = Buffer::from_slice_ref(&[0, 2, 5, 7]);
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = unsafe {
             ArrayData::builder(list_data_type)
                 .len(3)
@@ -826,8 +810,7 @@ mod tests {
 
         let value_offsets = Buffer::from_slice_ref(&[2, 2, 5, 7]);
 
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type)
             .len(3)
             .add_buffer(value_offsets)
@@ -871,8 +854,7 @@ mod tests {
                 .build_unchecked()
         };
 
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = unsafe {
             ArrayData::builder(list_data_type)
                 .add_buffer(buf2)

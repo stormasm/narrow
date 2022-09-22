@@ -65,12 +65,10 @@ pub fn concat_elements_utf8<Offset: OffsetSizeTrait>(
     output_offsets.append(Offset::zero());
     for (left_idx, right_idx) in left_offsets.windows(2).zip(right_offsets.windows(2)) {
         output_values.append_slice(
-            &left_values
-                [left_idx[0].to_usize().unwrap()..left_idx[1].to_usize().unwrap()],
+            &left_values[left_idx[0].to_usize().unwrap()..left_idx[1].to_usize().unwrap()],
         );
         output_values.append_slice(
-            &right_values
-                [right_idx[0].to_usize().unwrap()..right_idx[1].to_usize().unwrap()],
+            &right_values[right_idx[0].to_usize().unwrap()..right_idx[1].to_usize().unwrap()],
         );
         output_offsets.append(Offset::from_usize(output_values.len()).unwrap());
     }

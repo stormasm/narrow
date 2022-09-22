@@ -23,9 +23,7 @@ use std::mem;
 use std::sync::Arc;
 
 use super::make_array;
-use super::{
-    array::print_long_array, raw_pointer::RawPtrBox, Array, ArrayData, ArrayRef,
-};
+use super::{array::print_long_array, raw_pointer::RawPtrBox, Array, ArrayData, ArrayRef};
 use crate::datatypes::{ArrowNativeType, DataType, Field, ToByteSlice};
 use crate::error::ArrowError;
 
@@ -116,9 +114,10 @@ impl From<MapArray> for ArrayData {
 impl MapArray {
     fn try_new_from_array_data(data: ArrayData) -> Result<Self, ArrowError> {
         if data.buffers().len() != 1 {
-            return Err(ArrowError::InvalidArgumentError(
-                format!("MapArray data should contain a single buffer only (value offsets), had {}",
-                        data.len())));
+            return Err(ArrowError::InvalidArgumentError(format!(
+                "MapArray data should contain a single buffer only (value offsets), had {}",
+                data.len()
+            )));
         }
 
         if data.child_data().len() != 1 {
@@ -133,9 +132,9 @@ impl MapArray {
         if let DataType::Struct(fields) = entries.data_type() {
             if fields.len() != 2 {
                 return Err(ArrowError::InvalidArgumentError(format!(
-                "MapArray should contain a struct array with 2 fields, have {} fields",
-                fields.len()
-            )));
+                    "MapArray should contain a struct array with 2 fields, have {} fields",
+                    fields.len()
+                )));
             }
         } else {
             return Err(ArrowError::InvalidArgumentError(format!(
@@ -388,8 +387,7 @@ mod tests {
         assert_eq!(2, map_array.value_length(1));
 
         let key_array = Arc::new(Int32Array::from(vec![3, 4, 5])) as ArrayRef;
-        let value_array =
-            Arc::new(UInt32Array::from(vec![None, Some(40), None])) as ArrayRef;
+        let value_array = Arc::new(UInt32Array::from(vec![None, Some(40), None])) as ArrayRef;
         let struct_array =
             StructArray::from(vec![(keys_field, key_array), (values_field, value_array)]);
         assert_eq!(
@@ -489,12 +487,9 @@ mod tests {
         //  [[a, b, c], [d, e, f], [g, h]]
         let entry_offsets = [0, 3, 6, 8];
 
-        let map_array = MapArray::new_from_strings(
-            keys.clone().into_iter(),
-            &values_data,
-            &entry_offsets,
-        )
-        .unwrap();
+        let map_array =
+            MapArray::new_from_strings(keys.clone().into_iter(), &values_data, &entry_offsets)
+                .unwrap();
 
         let values = map_array.values();
         assert_eq!(

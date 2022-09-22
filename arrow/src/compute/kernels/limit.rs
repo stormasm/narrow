@@ -107,8 +107,7 @@ mod tests {
         bit_util::set_bit(&mut null_bits, 8);
 
         // Construct a list array from the above two
-        let list_data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let list_data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let list_data = ArrayData::builder(list_data_type)
             .len(9)
             .add_buffer(value_offsets)
@@ -124,8 +123,7 @@ mod tests {
         assert_eq!(3, limit_array.null_count());
 
         // Check offset and length for each non-null value.
-        let limit_array: &ListArray =
-            limit_array.as_any().downcast_ref::<ListArray>().unwrap();
+        let limit_array: &ListArray = limit_array.as_any().downcast_ref::<ListArray>().unwrap();
 
         for i in 0..limit_array.len() {
             let offset = limit_array.value_offsets()[i];

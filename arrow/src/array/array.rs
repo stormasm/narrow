@@ -376,9 +376,7 @@ pub fn make_array(data: ArrayData) -> ArrayRef {
         DataType::Float64 => Arc::new(Float64Array::from(data)) as ArrayRef,
         DataType::Date32 => Arc::new(Date32Array::from(data)) as ArrayRef,
         DataType::Date64 => Arc::new(Date64Array::from(data)) as ArrayRef,
-        DataType::Time32(TimeUnit::Second) => {
-            Arc::new(Time32SecondArray::from(data)) as ArrayRef
-        }
+        DataType::Time32(TimeUnit::Second) => Arc::new(Time32SecondArray::from(data)) as ArrayRef,
         DataType::Time32(TimeUnit::Millisecond) => {
             Arc::new(Time32MillisecondArray::from(data)) as ArrayRef
         }
@@ -423,9 +421,7 @@ pub fn make_array(data: ArrayData) -> ArrayRef {
         }
         DataType::Binary => Arc::new(BinaryArray::from(data)) as ArrayRef,
         DataType::LargeBinary => Arc::new(LargeBinaryArray::from(data)) as ArrayRef,
-        DataType::FixedSizeBinary(_) => {
-            Arc::new(FixedSizeBinaryArray::from(data)) as ArrayRef
-        }
+        DataType::FixedSizeBinary(_) => Arc::new(FixedSizeBinaryArray::from(data)) as ArrayRef,
         DataType::Utf8 => Arc::new(StringArray::from(data)) as ArrayRef,
         DataType::LargeUtf8 => Arc::new(LargeStringArray::from(data)) as ArrayRef,
         DataType::List(_) => Arc::new(ListArray::from(data)) as ArrayRef,
@@ -433,34 +429,16 @@ pub fn make_array(data: ArrayData) -> ArrayRef {
         DataType::Struct(_) => Arc::new(StructArray::from(data)) as ArrayRef,
         DataType::Map(_, _) => Arc::new(MapArray::from(data)) as ArrayRef,
         DataType::Union(_, _, _) => Arc::new(UnionArray::from(data)) as ArrayRef,
-        DataType::FixedSizeList(_, _) => {
-            Arc::new(FixedSizeListArray::from(data)) as ArrayRef
-        }
+        DataType::FixedSizeList(_, _) => Arc::new(FixedSizeListArray::from(data)) as ArrayRef,
         DataType::Dictionary(ref key_type, _) => match key_type.as_ref() {
-            DataType::Int8 => {
-                Arc::new(DictionaryArray::<Int8Type>::from(data)) as ArrayRef
-            }
-            DataType::Int16 => {
-                Arc::new(DictionaryArray::<Int16Type>::from(data)) as ArrayRef
-            }
-            DataType::Int32 => {
-                Arc::new(DictionaryArray::<Int32Type>::from(data)) as ArrayRef
-            }
-            DataType::Int64 => {
-                Arc::new(DictionaryArray::<Int64Type>::from(data)) as ArrayRef
-            }
-            DataType::UInt8 => {
-                Arc::new(DictionaryArray::<UInt8Type>::from(data)) as ArrayRef
-            }
-            DataType::UInt16 => {
-                Arc::new(DictionaryArray::<UInt16Type>::from(data)) as ArrayRef
-            }
-            DataType::UInt32 => {
-                Arc::new(DictionaryArray::<UInt32Type>::from(data)) as ArrayRef
-            }
-            DataType::UInt64 => {
-                Arc::new(DictionaryArray::<UInt64Type>::from(data)) as ArrayRef
-            }
+            DataType::Int8 => Arc::new(DictionaryArray::<Int8Type>::from(data)) as ArrayRef,
+            DataType::Int16 => Arc::new(DictionaryArray::<Int16Type>::from(data)) as ArrayRef,
+            DataType::Int32 => Arc::new(DictionaryArray::<Int32Type>::from(data)) as ArrayRef,
+            DataType::Int64 => Arc::new(DictionaryArray::<Int64Type>::from(data)) as ArrayRef,
+            DataType::UInt8 => Arc::new(DictionaryArray::<UInt8Type>::from(data)) as ArrayRef,
+            DataType::UInt16 => Arc::new(DictionaryArray::<UInt16Type>::from(data)) as ArrayRef,
+            DataType::UInt32 => Arc::new(DictionaryArray::<UInt32Type>::from(data)) as ArrayRef,
+            DataType::UInt64 => Arc::new(DictionaryArray::<UInt64Type>::from(data)) as ArrayRef,
             dt => panic!("Unexpected dictionary key type {:?}", dt),
         },
         DataType::Null => Arc::new(NullArray::from(data)) as ArrayRef,
@@ -553,9 +531,7 @@ pub fn new_null_array(data_type: &DataType, length: usize) -> ArrayRef {
             IntervalUnit::YearMonth => {
                 new_null_sized_array::<IntervalYearMonthType>(data_type, length)
             }
-            IntervalUnit::DayTime => {
-                new_null_sized_array::<IntervalDayTimeType>(data_type, length)
-            }
+            IntervalUnit::DayTime => new_null_sized_array::<IntervalDayTimeType>(data_type, length),
             IntervalUnit::MonthDayNano => {
                 new_null_sized_array::<IntervalMonthDayNanoType>(data_type, length)
             }
@@ -571,15 +547,11 @@ pub fn new_null_array(data_type: &DataType, length: usize) -> ArrayRef {
                 vec![],
             )
         }),
-        DataType::Binary | DataType::Utf8 => {
-            new_null_binary_array::<i32>(data_type, length)
-        }
+        DataType::Binary | DataType::Utf8 => new_null_binary_array::<i32>(data_type, length),
         DataType::LargeBinary | DataType::LargeUtf8 => {
             new_null_binary_array::<i64>(data_type, length)
         }
-        DataType::List(field) => {
-            new_null_list_array::<i32>(data_type, field.data_type(), length)
-        }
+        DataType::List(field) => new_null_list_array::<i32>(data_type, field.data_type(), length),
         DataType::LargeList(field) => {
             new_null_list_array::<i64>(data_type, field.data_type(), length)
         }
@@ -679,10 +651,7 @@ fn new_null_binary_array<OffsetSize: OffsetSizeTrait>(
 }
 
 #[inline]
-fn new_null_sized_array<T: ArrowPrimitiveType>(
-    data_type: &DataType,
-    length: usize,
-) -> ArrayRef {
+fn new_null_sized_array<T: ArrowPrimitiveType>(data_type: &DataType, length: usize) -> ArrayRef {
     make_array(unsafe {
         ArrayData::new_unchecked(
             data_type.clone(),
@@ -697,11 +666,7 @@ fn new_null_sized_array<T: ArrowPrimitiveType>(
 }
 
 #[inline]
-fn new_null_sized_decimal(
-    data_type: &DataType,
-    length: usize,
-    byte_width: usize,
-) -> ArrayRef {
+fn new_null_sized_decimal(data_type: &DataType, length: usize, byte_width: usize) -> ArrayRef {
     make_array(unsafe {
         ArrayData::new_unchecked(
             data_type.clone(),
@@ -779,8 +744,7 @@ mod tests {
 
     #[test]
     fn test_empty_list_primitive() {
-        let data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
+        let data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, false)));
         let array = new_empty_array(&data_type);
         let a = array.as_any().downcast_ref::<ListArray>().unwrap();
         assert_eq!(a.len(), 0);
@@ -809,8 +773,7 @@ mod tests {
 
     #[test]
     fn test_null_struct() {
-        let struct_type =
-            DataType::Struct(vec![Field::new("data", DataType::Int64, false)]);
+        let struct_type = DataType::Struct(vec![Field::new("data", DataType::Int64, false)]);
         let array = new_null_array(&struct_type, 9);
 
         let a = array.as_any().downcast_ref::<StructArray>().unwrap();
@@ -837,8 +800,7 @@ mod tests {
 
     #[test]
     fn test_null_list_primitive() {
-        let data_type =
-            DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
+        let data_type = DataType::List(Box::new(Field::new("item", DataType::Int32, true)));
         let array = new_null_array(&data_type, 9);
         let a = array.as_any().downcast_ref::<ListArray>().unwrap();
         assert_eq!(a.len(), 9);
@@ -872,8 +834,8 @@ mod tests {
 
     #[test]
     fn test_null_dictionary() {
-        let values = vec![None, None, None, None, None, None, None, None, None]
-            as Vec<Option<&str>>;
+        let values =
+            vec![None, None, None, None, None, None, None, None, None] as Vec<Option<&str>>;
 
         let array: DictionaryArray<Int8Type> = values.into_iter().collect();
         let array = Arc::new(array) as ArrayRef;
@@ -904,8 +866,7 @@ mod tests {
     #[test]
     fn test_memory_size_primitive() {
         let arr = PrimitiveArray::<Int64Type>::from_iter_values(0..128);
-        let empty =
-            PrimitiveArray::<Int64Type>::from(ArrayData::new_empty(arr.data_type()));
+        let empty = PrimitiveArray::<Int64Type>::from(ArrayData::new_empty(arr.data_type()));
 
         // substract empty array to avoid magic numbers for the size of additional fields
         assert_eq!(
@@ -931,8 +892,7 @@ mod tests {
         // which includes the optional validity buffer
         // plus one buffer on the heap
         assert_eq!(
-            std::mem::size_of::<PrimitiveArray<Int64Type>>()
-                + std::mem::size_of::<Buffer>(),
+            std::mem::size_of::<PrimitiveArray<Int64Type>>() + std::mem::size_of::<Buffer>(),
             empty_with_bitmap.get_array_memory_size()
         );
 

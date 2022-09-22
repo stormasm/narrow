@@ -132,11 +132,7 @@ where
 ///
 /// - 1 byte `0` if null or `1` if valid
 /// - bytes of [`FixedLengthEncoding`]
-pub fn encode<
-    const N: usize,
-    T: FixedLengthEncoding<N>,
-    I: IntoIterator<Item = Option<T>>,
->(
+pub fn encode<const N: usize, T: FixedLengthEncoding<N>, I: IntoIterator<Item = Option<T>>>(
     out: &mut Rows,
     i: I,
     opts: SortOptions,

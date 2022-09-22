@@ -324,15 +324,12 @@ where
 
         try_for_each_valid_idx(len, 0, null_count, null_buffer.as_deref(), |idx| {
             unsafe {
-                *slice.get_unchecked_mut(idx) =
-                    op(a.value_unchecked(idx), b.value_unchecked(idx))?
+                *slice.get_unchecked_mut(idx) = op(a.value_unchecked(idx), b.value_unchecked(idx))?
             };
             Ok::<_, ArrowError>(())
         })?;
 
-        Ok(unsafe {
-            build_primitive_array(len, buffer.finish(), null_count, null_buffer)
-        })
+        Ok(unsafe { build_primitive_array(len, buffer.finish(), null_count, null_buffer) })
     }
 }
 
@@ -398,17 +395,16 @@ where
         let iter_a = ArrayIter::new(a);
         let iter_b = ArrayIter::new(b);
 
-        let values =
-            iter_a
-                .into_iter()
-                .zip(iter_b.into_iter())
-                .map(|(item_a, item_b)| {
-                    if let (Some(a), Some(b)) = (item_a, item_b) {
-                        op(a, b)
-                    } else {
-                        None
-                    }
-                });
+        let values = iter_a
+            .into_iter()
+            .zip(iter_b.into_iter())
+            .map(|(item_a, item_b)| {
+                if let (Some(a), Some(b)) = (item_a, item_b) {
+                    op(a, b)
+                } else {
+                    None
+                }
+            });
 
         Ok(values.collect())
     }
@@ -422,8 +418,7 @@ mod tests {
 
     #[test]
     fn test_unary_f64_slice() {
-        let input =
-            Float64Array::from(vec![Some(5.1f64), None, Some(6.8), None, Some(7.2)]);
+        let input = Float64Array::from(vec![Some(5.1f64), None, Some(6.8), None, Some(7.2)]);
         let input_slice = input.slice(1, 4);
         let input_slice: &Float64Array = as_primitive_array(&input_slice);
         let result = unary(input_slice, |n| n.round());

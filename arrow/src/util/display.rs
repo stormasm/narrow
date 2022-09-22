@@ -24,9 +24,8 @@ use std::sync::Arc;
 
 use crate::array::Array;
 use crate::datatypes::{
-    ArrowNativeType, ArrowPrimitiveType, DataType, Field, Int16Type, Int32Type,
-    Int64Type, Int8Type, TimeUnit, UInt16Type, UInt32Type, UInt64Type, UInt8Type,
-    UnionMode,
+    ArrowNativeType, ArrowPrimitiveType, DataType, Field, Int16Type, Int32Type, Int64Type,
+    Int8Type, TimeUnit, UInt16Type, UInt32Type, UInt64Type, UInt8Type, UnionMode,
 };
 use crate::{array, datatypes::IntervalUnit};
 
@@ -120,8 +119,7 @@ macro_rules! make_string_interval_month_day_nano {
         } else {
             let value: u128 = array.value($row) as u128;
 
-            let months_part: i32 =
-                ((value & 0xFFFFFFFF000000000000000000000000) >> 96) as i32;
+            let months_part: i32 = ((value & 0xFFFFFFFF000000000000000000000000) >> 96) as i32;
             let days_part: i32 = ((value & 0xFFFFFFFF0000000000000000) >> 64) as i32;
             let nanoseconds_part: i64 = (value & 0xFFFFFFFFFFFFFFFF) as i64;
 
@@ -378,8 +376,7 @@ pub fn array_value_to_string(column: &array::ArrayRef, row: usize) -> Result<Str
                 .downcast_ref::<array::StructArray>()
                 .ok_or_else(|| {
                     ArrowError::InvalidArgumentError(
-                        "Repl error: could not convert struct column to struct array."
-                            .to_string(),
+                        "Repl error: could not convert struct column to struct array.".to_string(),
                     )
                 })?;
 

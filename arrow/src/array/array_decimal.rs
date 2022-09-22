@@ -29,8 +29,8 @@ use super::{BooleanBufferBuilder, DecimalIter, FixedSizeBinaryArray};
 use crate::buffer::{Buffer, MutableBuffer};
 use crate::datatypes::validate_decimal_precision;
 use crate::datatypes::{
-    validate_decimal256_precision_with_lt_bytes, DataType, Decimal128Type,
-    Decimal256Type, DecimalType, NativeDecimalType,
+    validate_decimal256_precision_with_lt_bytes, DataType, Decimal128Type, Decimal256Type,
+    DecimalType, NativeDecimalType,
 };
 use crate::error::{ArrowError, Result};
 use crate::util::decimal::{Decimal, Decimal256};
@@ -172,11 +172,7 @@ impl<T: DecimalType> DecimalArray<T> {
     ///
     /// NB: This function does not validate that each value is in the permissible
     /// range for a decimal
-    pub fn from_fixed_size_binary_array(
-        v: FixedSizeBinaryArray,
-        precision: u8,
-        scale: u8,
-    ) -> Self {
+    pub fn from_fixed_size_binary_array(v: FixedSizeBinaryArray, precision: u8, scale: u8) -> Self {
         assert!(
             v.value_length() == Self::VALUE_LENGTH,
             "Value length of the array ({}) must equal to the byte width of the decimal ({})",
@@ -199,11 +195,7 @@ impl<T: DecimalType> DecimalArray<T> {
     /// NB: This function does not validate that each value is in the permissible
     /// range for a decimal.
     #[deprecated(note = "please use `from_fixed_size_binary_array` instead")]
-    pub fn from_fixed_size_list_array(
-        v: FixedSizeListArray,
-        precision: u8,
-        scale: u8,
-    ) -> Self {
+    pub fn from_fixed_size_list_array(v: FixedSizeListArray, precision: u8, scale: u8) -> Self {
         assert_eq!(
             v.data_ref().child_data().len(),
             1,
@@ -561,8 +553,8 @@ mod tests {
         // let val_8887: [u8; 16] = [192, 219, 180, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         // let val_neg_8887: [u8; 16] = [64, 36, 75, 238, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255];
         let values: [u8; 32] = [
-            192, 219, 180, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 36, 75, 238, 253,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+            192, 219, 180, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 36, 75, 238, 253, 255, 255,
+            255, 255, 255, 255, 255, 255, 255, 255, 255,
         ];
         let array_data = ArrayData::builder(DataType::Decimal128(38, 6))
             .len(2)
@@ -632,8 +624,7 @@ mod tests {
 
     #[test]
     fn test_decimal_from_iter() {
-        let array: Decimal128Array =
-            vec![Some(-100), None, Some(101)].into_iter().collect();
+        let array: Decimal128Array = vec![Some(-100), None, Some(101)].into_iter().collect();
         assert_eq!(array.len(), 3);
         assert_eq!(array.data_type(), &DataType::Decimal128(38, 10));
         assert_eq!(-100_i128, array.value(0).into());
@@ -657,8 +648,7 @@ mod tests {
         let data = vec![Some(-100), None, Some(101)];
         let array: Decimal128Array = data.clone().into_iter().collect();
 
-        let collected: Vec<_> =
-            array.into_iter().map(|d| d.map(|v| v.as_i128())).collect();
+        let collected: Vec<_> = array.into_iter().map(|d| d.map(|v| v.as_i128())).collect();
         assert_eq!(data, collected);
     }
 
@@ -814,10 +804,8 @@ mod tests {
         let null_buffer = Buffer::from_slice_ref(&[0b101]);
 
         // Construct a list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::UInt8, false)),
-            16,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::UInt8, false)), 16);
         let list_data = ArrayData::builder(list_data_type)
             .len(2)
             .null_bit_buffer(Some(null_buffer))
@@ -845,10 +833,8 @@ mod tests {
             .unwrap();
 
         // Construct a list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::UInt8, false)),
-            16,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::UInt8, false)), 16);
         let list_data = ArrayData::builder(list_data_type)
             .len(1)
             .add_child_data(value_data)
@@ -874,10 +860,8 @@ mod tests {
             .unwrap();
 
         // Construct a list array from the above two
-        let list_data_type = DataType::FixedSizeList(
-            Box::new(Field::new("item", DataType::UInt8, false)),
-            8,
-        );
+        let list_data_type =
+            DataType::FixedSizeList(Box::new(Field::new("item", DataType::UInt8, false)), 8);
         let list_data = ArrayData::builder(list_data_type)
             .len(2)
             .add_child_data(value_data)
@@ -913,30 +897,21 @@ mod tests {
         let value1 = BigInt::from_str_radix("12345", 10).unwrap();
         let value2 = BigInt::from_str_radix("56789", 10).unwrap();
 
-        let array: Decimal256Array =
-            vec![Some(value1.clone()), None, Some(value2.clone())]
-                .into_iter()
-                .collect();
+        let array: Decimal256Array = vec![Some(value1.clone()), None, Some(value2.clone())]
+            .into_iter()
+            .collect();
         assert_eq!(array.len(), 3);
         assert_eq!(array.data_type(), &DataType::Decimal256(76, 10));
         assert_eq!(
-            Decimal256::from_big_int(
-                &value1,
-                DECIMAL256_MAX_PRECISION,
-                DECIMAL_DEFAULT_SCALE,
-            )
-            .unwrap(),
+            Decimal256::from_big_int(&value1, DECIMAL256_MAX_PRECISION, DECIMAL_DEFAULT_SCALE,)
+                .unwrap(),
             array.value(0)
         );
         assert!(!array.is_null(0));
         assert!(array.is_null(1));
         assert_eq!(
-            Decimal256::from_big_int(
-                &value2,
-                DECIMAL256_MAX_PRECISION,
-                DECIMAL_DEFAULT_SCALE,
-            )
-            .unwrap(),
+            Decimal256::from_big_int(&value2, DECIMAL256_MAX_PRECISION, DECIMAL_DEFAULT_SCALE,)
+                .unwrap(),
             array.value(2)
         );
         assert!(!array.is_null(2));

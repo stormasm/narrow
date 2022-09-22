@@ -113,9 +113,7 @@ impl OrderPreservingInterner {
 
                     let hasher = &mut self.hasher;
                     let values = &self.values;
-                    v.insert_with_hasher(hash, interned, (), |key| {
-                        hasher.hash_one(&values[*key])
-                    });
+                    v.insert_with_hasher(hash, interned, (), |key| hasher.hash_one(&values[*key]));
                     out[idx] = Some(interned);
                 }
             }
@@ -435,17 +433,9 @@ mod tests {
 
         assert_eq!(interned[0], interned[5]);
         assert_eq!(interned[1], interned[4]);
-        assert!(
-            interner.normalized_key(interned[0]) < interner.normalized_key(interned[1])
-        );
-        assert!(
-            interner.normalized_key(interned[1]) < interner.normalized_key(interned[2])
-        );
-        assert!(
-            interner.normalized_key(interned[1]) < interner.normalized_key(interned[3])
-        );
-        assert!(
-            interner.normalized_key(interned[3]) < interner.normalized_key(interned[2])
-        );
+        assert!(interner.normalized_key(interned[0]) < interner.normalized_key(interned[1]));
+        assert!(interner.normalized_key(interned[1]) < interner.normalized_key(interned[2]));
+        assert!(interner.normalized_key(interned[1]) < interner.normalized_key(interned[3]));
+        assert!(interner.normalized_key(interned[3]) < interner.normalized_key(interned[2]));
     }
 }

@@ -20,8 +20,8 @@ use std::fmt;
 use std::{any::Any, iter::FromIterator};
 
 use super::{
-    array::print_long_array, raw_pointer::RawPtrBox, Array, ArrayData,
-    GenericBinaryArray, GenericListArray, GenericStringIter, OffsetSizeTrait,
+    array::print_long_array, raw_pointer::RawPtrBox, Array, ArrayData, GenericBinaryArray,
+    GenericListArray, GenericStringIter, OffsetSizeTrait,
 };
 use crate::array::array::ArrayAccessor;
 use crate::buffer::Buffer;
@@ -182,8 +182,7 @@ impl<OffsetSize: OffsetSizeTrait> GenericStringArray<OffsetSize> {
         let (_, data_len) = iter.size_hint();
         let data_len = data_len.expect("Iterator must be sized"); // panic if no upper bound.
 
-        let mut offsets =
-            MutableBuffer::new((data_len + 1) * std::mem::size_of::<OffsetSize>());
+        let mut offsets = MutableBuffer::new((data_len + 1) * std::mem::size_of::<OffsetSize>());
         let mut values = MutableBuffer::new(0);
 
         let mut length_so_far = OffsetSize::zero();
@@ -242,8 +241,7 @@ where
     }
 }
 
-impl<Ptr, OffsetSize: OffsetSizeTrait> FromIterator<Option<Ptr>>
-    for GenericStringArray<OffsetSize>
+impl<Ptr, OffsetSize: OffsetSizeTrait> FromIterator<Option<Ptr>> for GenericStringArray<OffsetSize>
 where
     Ptr: AsRef<str>,
 {
@@ -329,9 +327,7 @@ impl<OffsetSize: OffsetSizeTrait> Array for GenericStringArray<OffsetSize> {
     }
 }
 
-impl<'a, OffsetSize: OffsetSizeTrait> ArrayAccessor
-    for &'a GenericStringArray<OffsetSize>
-{
+impl<'a, OffsetSize: OffsetSizeTrait> ArrayAccessor for &'a GenericStringArray<OffsetSize> {
     type Item = &'a str;
 
     fn value(&self, index: usize) -> Self::Item {
@@ -382,9 +378,7 @@ impl<OffsetSize: OffsetSizeTrait> From<ArrayData> for GenericStringArray<OffsetS
     }
 }
 
-impl<OffsetSize: OffsetSizeTrait> From<Vec<Option<&str>>>
-    for GenericStringArray<OffsetSize>
-{
+impl<OffsetSize: OffsetSizeTrait> From<Vec<Option<&str>>> for GenericStringArray<OffsetSize> {
     fn from(v: Vec<Option<&str>>) -> Self {
         v.into_iter().collect()
     }
@@ -697,13 +691,11 @@ mod tests {
         let expected: LargeStringArray = data.clone().into_iter().map(Some).collect();
 
         // Iterator reports too many items
-        let arr =
-            LargeStringArray::from_iter_values(BadIterator::new(3, 10, data.clone()));
+        let arr = LargeStringArray::from_iter_values(BadIterator::new(3, 10, data.clone()));
         assert_eq!(expected, arr);
 
         // Iterator reports too few items
-        let arr =
-            LargeStringArray::from_iter_values(BadIterator::new(3, 1, data.clone()));
+        let arr = LargeStringArray::from_iter_values(BadIterator::new(3, 1, data.clone()));
         assert_eq!(expected, arr);
     }
 
@@ -719,9 +711,11 @@ mod tests {
 
         let offsets = [0, 5, 8, 15].map(|n| O::from_usize(n).unwrap());
         let null_buffer = Buffer::from_slice_ref(&[0b101]);
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt8, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt8,
+            false,
+        )));
 
         // [None, Some("Parquet")]
         let array_data = ArrayData::builder(data_type)
@@ -752,9 +746,7 @@ mod tests {
         _test_generic_string_array_from_list_array::<i64>();
     }
 
-    fn _test_generic_string_array_from_list_array_with_child_nulls_failed<
-        O: OffsetSizeTrait,
-    >() {
+    fn _test_generic_string_array_from_list_array_with_child_nulls_failed<O: OffsetSizeTrait>() {
         let values = b"HelloArrow";
         let child_data = ArrayData::builder(DataType::UInt8)
             .len(10)
@@ -764,9 +756,11 @@ mod tests {
             .unwrap();
 
         let offsets = [0, 5, 10].map(|n| O::from_usize(n).unwrap());
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt8, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt8,
+            false,
+        )));
 
         // [None, Some(b"Parquet")]
         let array_data = ArrayData::builder(data_type)
@@ -800,9 +794,11 @@ mod tests {
             .unwrap();
 
         let offsets = [0, 2, 3].map(|n| O::from_usize(n).unwrap());
-        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(
-            Field::new("item", DataType::UInt16, false),
-        ));
+        let data_type = GenericListArray::<O>::DATA_TYPE_CONSTRUCTOR(Box::new(Field::new(
+            "item",
+            DataType::UInt16,
+            false,
+        )));
 
         let array_data = ArrayData::builder(data_type)
             .len(2)

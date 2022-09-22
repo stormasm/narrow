@@ -30,17 +30,15 @@ use crate::array::*;
 #[cfg(feature = "simd")]
 use crate::buffer::MutableBuffer;
 use crate::compute::kernels::arity::unary;
-use crate::compute::{
-    binary, binary_opt, try_binary, try_unary, try_unary_dyn, unary_dyn,
-};
+use crate::compute::{binary, binary_opt, try_binary, try_unary, try_unary_dyn, unary_dyn};
 use crate::datatypes::{
     native_op::ArrowNativeTypeOp, ArrowNumericType, DataType, Date32Type, Date64Type,
     IntervalDayTimeType, IntervalMonthDayNanoType, IntervalUnit, IntervalYearMonthType,
 };
 #[cfg(feature = "dyn_arith_dict")]
 use crate::datatypes::{
-    Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
-    UInt32Type, UInt64Type, UInt8Type,
+    Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type,
+    UInt64Type, UInt8Type,
 };
 use crate::error::{ArrowError, Result};
 use crate::{datatypes, downcast_primitive_array};
@@ -333,8 +331,7 @@ where
             // process data in chunks of 64 elements since we also get 64 bits of validity information at a time
 
             // safety: result is newly created above, always written as a T below
-            let mut result_chunks =
-                unsafe { result.typed_data_mut().chunks_exact_mut(64) };
+            let mut result_chunks = unsafe { result.typed_data_mut().chunks_exact_mut(64) };
             let mut left_chunks = left.values().chunks_exact(64);
             let mut right_chunks = right.values().chunks_exact(64);
 
@@ -345,29 +342,31 @@ where
                         .borrow_mut()
                         .zip(left_chunks.borrow_mut().zip(right_chunks.borrow_mut())),
                 )
-                .try_for_each(
-                    |(mut mask, (result_slice, (left_slice, right_slice)))| {
-                        // split chunks further into slices corresponding to the vector length
-                        // the compiler is able to unroll this inner loop and remove bounds checks
-                        // since the outer chunk size (64) is always a multiple of the number of lanes
-                        result_slice
-                            .chunks_exact_mut(lanes)
-                            .zip(left_slice.chunks_exact(lanes).zip(right_slice.chunks_exact(lanes)))
-                            .try_for_each(|(result_slice, (left_slice, right_slice))| -> Result<()> {
-                                let simd_left = T::load(left_slice);
-                                let simd_right = T::load(right_slice);
+                .try_for_each(|(mut mask, (result_slice, (left_slice, right_slice)))| {
+                    // split chunks further into slices corresponding to the vector length
+                    // the compiler is able to unroll this inner loop and remove bounds checks
+                    // since the outer chunk size (64) is always a multiple of the number of lanes
+                    result_slice
+                        .chunks_exact_mut(lanes)
+                        .zip(
+                            left_slice
+                                .chunks_exact(lanes)
+                                .zip(right_slice.chunks_exact(lanes)),
+                        )
+                        .try_for_each(|(result_slice, (left_slice, right_slice))| -> Result<()> {
+                            let simd_left = T::load(left_slice);
+                            let simd_right = T::load(right_slice);
 
-                                let simd_result = simd_op(Some(mask), simd_left, simd_right)?;
+                            let simd_result = simd_op(Some(mask), simd_left, simd_right)?;
 
-                                T::write(simd_result, result_slice);
+                            T::write(simd_result, result_slice);
 
-                                // skip the shift and avoid overflow for u8 type, which uses 64 lanes.
-                                mask >>= T::lanes() % 64;
+                            // skip the shift and avoid overflow for u8 type, which uses 64 lanes.
+                            mask >>= T::lanes() % 64;
 
-                                Ok(())
-                            })
-                    },
-                )?;
+                            Ok(())
+                        })
+                })?;
 
             let valid_remainder = valid_chunks.remainder_bits();
 
@@ -381,26 +380,23 @@ where
         }
         None => {
             // safety: result is newly created above, always written as a T below
-            let mut result_chunks =
-                unsafe { result.typed_data_mut().chunks_exact_mut(lanes) };
+            let mut result_chunks = unsafe { result.typed_data_mut().chunks_exact_mut(lanes) };
             let mut left_chunks = left.values().chunks_exact(lanes);
             let mut right_chunks = right.values().chunks_exact(lanes);
 
             result_chunks
                 .borrow_mut()
                 .zip(left_chunks.borrow_mut().zip(right_chunks.borrow_mut()))
-                .try_for_each(
-                    |(result_slice, (left_slice, right_slice))| -> Result<()> {
-                        let simd_left = T::load(left_slice);
-                        let simd_right = T::load(right_slice);
+                .try_for_each(|(result_slice, (left_slice, right_slice))| -> Result<()> {
+                    let simd_left = T::load(left_slice);
+                    let simd_right = T::load(right_slice);
 
-                        let simd_result = simd_op(None, simd_left, simd_right)?;
+                    let simd_result = simd_op(None, simd_left, simd_right)?;
 
-                        T::write(simd_result, result_slice);
+                    T::write(simd_result, result_slice);
 
-                        Ok(())
-                    },
-                )?;
+                    Ok(())
+                })?;
 
             simd_checked_divide_op_remainder::<T, _>(
                 None,
@@ -688,13 +684,7 @@ where
             .take_iter_unchecked(right.keys_iter())
     };
 
-    math_checked_divide_op_on_iters(
-        left_iter,
-        right_iter,
-        op,
-        left.len(),
-        null_bit_buffer,
-    )
+    math_checked_divide_op_on_iters(left_iter, right_iter, op, left.len(), null_bit_buffer)
 }
 
 /// Perform `left + right` operation on two arrays. If either left or right value is null
@@ -702,10 +692,7 @@ where
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `add_checked` instead.
-pub fn add<T>(
-    left: &PrimitiveArray<T>,
-    right: &PrimitiveArray<T>,
-) -> Result<PrimitiveArray<T>>
+pub fn add<T>(left: &PrimitiveArray<T>, right: &PrimitiveArray<T>) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
@@ -809,12 +796,7 @@ pub fn add_dyn(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
 pub fn add_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
     match left.data_type() {
         DataType::Dictionary(_, _) => {
-            typed_dict_math_op!(
-                left,
-                right,
-                |a, b| a.add_checked(b),
-                math_checked_op_dict
-            )
+            typed_dict_math_op!(left, right, |a, b| a.add_checked(b), math_checked_op_dict)
         }
         DataType::Date32 => {
             let l = as_primitive_array::<Date32Type>(left);
@@ -883,10 +865,7 @@ pub fn add_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> 
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `add_scalar_checked` instead.
-pub fn add_scalar<T>(
-    array: &PrimitiveArray<T>,
-    scalar: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn add_scalar<T>(array: &PrimitiveArray<T>, scalar: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
@@ -940,8 +919,7 @@ where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
 {
-    try_unary_dyn::<_, T>(array, |value| value.add_checked(scalar))
-        .map(|a| Arc::new(a) as ArrayRef)
+    try_unary_dyn::<_, T>(array, |value| value.add_checked(scalar)).map(|a| Arc::new(a) as ArrayRef)
 }
 
 /// Perform `left - right` operation on two arrays. If either left or right value is null
@@ -949,10 +927,7 @@ where
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `subtract_checked` instead.
-pub fn subtract<T>(
-    left: &PrimitiveArray<T>,
-    right: &PrimitiveArray<T>,
-) -> Result<PrimitiveArray<T>>
+pub fn subtract<T>(left: &PrimitiveArray<T>, right: &PrimitiveArray<T>) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
@@ -1008,12 +983,7 @@ pub fn subtract_dyn(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
 pub fn subtract_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
     match left.data_type() {
         DataType::Dictionary(_, _) => {
-            typed_dict_math_op!(
-                left,
-                right,
-                |a, b| a.sub_checked(b),
-                math_checked_op_dict
-            )
+            typed_dict_math_op!(left, right, |a, b| a.sub_checked(b), math_checked_op_dict)
         }
         _ => {
             downcast_primitive_array!(
@@ -1034,10 +1004,7 @@ pub fn subtract_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<Array
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `subtract_scalar_checked` instead.
-pub fn subtract_scalar<T>(
-    array: &PrimitiveArray<T>,
-    scalar: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn subtract_scalar<T>(array: &PrimitiveArray<T>, scalar: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: datatypes::ArrowNumericType,
     T::Native: ArrowNativeTypeOp + Zero,
@@ -1081,16 +1048,12 @@ where
 ///
 /// This detects overflow and returns an `Err` for that. For an non-overflow-checking variant,
 /// use `subtract_scalar_dyn` instead.
-pub fn subtract_scalar_checked_dyn<T>(
-    array: &dyn Array,
-    scalar: T::Native,
-) -> Result<ArrayRef>
+pub fn subtract_scalar_checked_dyn<T>(array: &dyn Array, scalar: T::Native) -> Result<ArrayRef>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
 {
-    try_unary_dyn::<_, T>(array, |value| value.sub_checked(scalar))
-        .map(|a| Arc::new(a) as ArrayRef)
+    try_unary_dyn::<_, T>(array, |value| value.sub_checked(scalar)).map(|a| Arc::new(a) as ArrayRef)
 }
 
 /// Perform `-` operation on an array. If value is null then the result is also null.
@@ -1103,10 +1066,7 @@ where
 }
 
 /// Raise array with floating point values to the power of a scalar.
-pub fn powf_scalar<T>(
-    array: &PrimitiveArray<T>,
-    raise: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn powf_scalar<T>(array: &PrimitiveArray<T>, raise: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: datatypes::ArrowFloatNumericType,
     T::Native: Pow<T::Native, Output = T::Native>,
@@ -1119,10 +1079,7 @@ where
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `multiply_check` instead.
-pub fn multiply<T>(
-    left: &PrimitiveArray<T>,
-    right: &PrimitiveArray<T>,
-) -> Result<PrimitiveArray<T>>
+pub fn multiply<T>(left: &PrimitiveArray<T>, right: &PrimitiveArray<T>) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
@@ -1178,12 +1135,7 @@ pub fn multiply_dyn(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
 pub fn multiply_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<ArrayRef> {
     match left.data_type() {
         DataType::Dictionary(_, _) => {
-            typed_dict_math_op!(
-                left,
-                right,
-                |a, b| a.mul_checked(b),
-                math_checked_op_dict
-            )
+            typed_dict_math_op!(left, right, |a, b| a.mul_checked(b), math_checked_op_dict)
         }
         _ => {
             downcast_primitive_array!(
@@ -1204,10 +1156,7 @@ pub fn multiply_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<Array
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `multiply_scalar_checked` instead.
-pub fn multiply_scalar<T>(
-    array: &PrimitiveArray<T>,
-    scalar: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn multiply_scalar<T>(array: &PrimitiveArray<T>, scalar: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: datatypes::ArrowNumericType,
     T::Native: ArrowNativeTypeOp + Zero + One,
@@ -1251,33 +1200,24 @@ where
 ///
 /// This detects overflow and returns an `Err` for that. For an non-overflow-checking variant,
 /// use `multiply_scalar_dyn` instead.
-pub fn multiply_scalar_checked_dyn<T>(
-    array: &dyn Array,
-    scalar: T::Native,
-) -> Result<ArrayRef>
+pub fn multiply_scalar_checked_dyn<T>(array: &dyn Array, scalar: T::Native) -> Result<ArrayRef>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
 {
-    try_unary_dyn::<_, T>(array, |value| value.mul_checked(scalar))
-        .map(|a| Arc::new(a) as ArrayRef)
+    try_unary_dyn::<_, T>(array, |value| value.mul_checked(scalar)).map(|a| Arc::new(a) as ArrayRef)
 }
 
 /// Perform `left % right` operation on two arrays. If either left or right value is null
 /// then the result is also null. If any right hand value is zero then the result of this
 /// operation will be `Err(ArrowError::DivideByZero)`.
-pub fn modulus<T>(
-    left: &PrimitiveArray<T>,
-    right: &PrimitiveArray<T>,
-) -> Result<PrimitiveArray<T>>
+pub fn modulus<T>(left: &PrimitiveArray<T>, right: &PrimitiveArray<T>) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: Rem<Output = T::Native> + Zero + One,
 {
     #[cfg(feature = "simd")]
-    return simd_checked_divide_op(&left, &right, simd_checked_modulus::<T>, |a, b| {
-        a % b
-    });
+    return simd_checked_divide_op(&left, &right, simd_checked_modulus::<T>, |a, b| a % b);
     #[cfg(not(feature = "simd"))]
     return try_binary(left, right, |a, b| {
         if b.is_zero() {
@@ -1413,10 +1353,7 @@ pub fn divide_dyn_checked(left: &dyn Array, right: &dyn Array) -> Result<ArrayRe
 ///
 /// This doesn't detect overflow. Once overflowing, the result will wrap around.
 /// For an overflow-checking variant, use `divide_checked` instead.
-pub fn divide<T>(
-    left: &PrimitiveArray<T>,
-    right: &PrimitiveArray<T>,
-) -> Result<PrimitiveArray<T>>
+pub fn divide<T>(left: &PrimitiveArray<T>, right: &PrimitiveArray<T>) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp,
@@ -1427,10 +1364,7 @@ where
 /// Modulus every value in an array by a scalar. If any value in the array is null then the
 /// result is also null. If the scalar is zero then the result of this operation will be
 /// `Err(ArrowError::DivideByZero)`.
-pub fn modulus_scalar<T>(
-    array: &PrimitiveArray<T>,
-    modulo: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn modulus_scalar<T>(array: &PrimitiveArray<T>, modulo: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: Rem<Output = T::Native> + Zero,
@@ -1445,10 +1379,7 @@ where
 /// Divide every value in an array by a scalar. If any value in the array is null then the
 /// result is also null. If the scalar is zero then the result of this operation will be
 /// `Err(ArrowError::DivideByZero)`.
-pub fn divide_scalar<T>(
-    array: &PrimitiveArray<T>,
-    divisor: T::Native,
-) -> Result<PrimitiveArray<T>>
+pub fn divide_scalar<T>(array: &PrimitiveArray<T>, divisor: T::Native) -> Result<PrimitiveArray<T>>
 where
     T: ArrowNumericType,
     T::Native: Div<Output = T::Native> + Zero,
@@ -1484,10 +1415,7 @@ where
 ///
 /// This detects overflow and returns an `Err` for that. For an non-overflow-checking variant,
 /// use `divide_scalar_dyn` instead.
-pub fn divide_scalar_checked_dyn<T>(
-    array: &dyn Array,
-    divisor: T::Native,
-) -> Result<ArrayRef>
+pub fn divide_scalar_checked_dyn<T>(array: &dyn Array, divisor: T::Native) -> Result<ArrayRef>
 where
     T: ArrowNumericType,
     T::Native: ArrowNativeTypeOp + Zero,
@@ -1521,11 +1449,10 @@ mod tests {
 
     #[test]
     fn test_date32_month_add() {
-        let a = Date32Array::from(vec![Date32Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
-        let b =
-            IntervalYearMonthArray::from(vec![IntervalYearMonthType::make_value(1, 2)]);
+        let a = Date32Array::from(vec![Date32Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
+        let b = IntervalYearMonthArray::from(vec![IntervalYearMonthType::make_value(1, 2)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date32Array>().unwrap();
         assert_eq!(
@@ -1536,9 +1463,9 @@ mod tests {
 
     #[test]
     fn test_date32_day_time_add() {
-        let a = Date32Array::from(vec![Date32Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
+        let a = Date32Array::from(vec![Date32Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
         let b = IntervalDayTimeArray::from(vec![IntervalDayTimeType::make_value(1, 2)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date32Array>().unwrap();
@@ -1550,13 +1477,11 @@ mod tests {
 
     #[test]
     fn test_date32_month_day_nano_add() {
-        let a = Date32Array::from(vec![Date32Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
+        let a = Date32Array::from(vec![Date32Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
         let b =
-            IntervalMonthDayNanoArray::from(vec![IntervalMonthDayNanoType::make_value(
-                1, 2, 3,
-            )]);
+            IntervalMonthDayNanoArray::from(vec![IntervalMonthDayNanoType::make_value(1, 2, 3)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date32Array>().unwrap();
         assert_eq!(
@@ -1567,11 +1492,10 @@ mod tests {
 
     #[test]
     fn test_date64_month_add() {
-        let a = Date64Array::from(vec![Date64Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
-        let b =
-            IntervalYearMonthArray::from(vec![IntervalYearMonthType::make_value(1, 2)]);
+        let a = Date64Array::from(vec![Date64Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
+        let b = IntervalYearMonthArray::from(vec![IntervalYearMonthType::make_value(1, 2)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date64Array>().unwrap();
         assert_eq!(
@@ -1582,9 +1506,9 @@ mod tests {
 
     #[test]
     fn test_date64_day_time_add() {
-        let a = Date64Array::from(vec![Date64Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
+        let a = Date64Array::from(vec![Date64Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
         let b = IntervalDayTimeArray::from(vec![IntervalDayTimeType::make_value(1, 2)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date64Array>().unwrap();
@@ -1596,13 +1520,11 @@ mod tests {
 
     #[test]
     fn test_date64_month_day_nano_add() {
-        let a = Date64Array::from(vec![Date64Type::from_naive_date(
-            NaiveDate::from_ymd(2000, 1, 1),
-        )]);
+        let a = Date64Array::from(vec![Date64Type::from_naive_date(NaiveDate::from_ymd(
+            2000, 1, 1,
+        ))]);
         let b =
-            IntervalMonthDayNanoArray::from(vec![IntervalMonthDayNanoType::make_value(
-                1, 2, 3,
-            )]);
+            IntervalMonthDayNanoArray::from(vec![IntervalMonthDayNanoType::make_value(1, 2, 3)]);
         let c = add_dyn(&a, &b).unwrap();
         let c = c.as_any().downcast_ref::<Date64Array>().unwrap();
         assert_eq!(
@@ -2173,8 +2095,7 @@ mod tests {
         let a = Int32Array::from(vec![Some(15), None, Some(8), Some(1), Some(9), None]);
         let b = 3;
         let c = divide_scalar(&a, b).unwrap();
-        let expected =
-            Int32Array::from(vec![Some(5), None, Some(2), Some(0), Some(3), None]);
+        let expected = Int32Array::from(vec![Some(5), None, Some(2), Some(0), Some(3), None]);
         assert_eq!(c, expected);
     }
 
@@ -2183,8 +2104,7 @@ mod tests {
         let a = Int32Array::from(vec![Some(15), None, Some(8), Some(1), Some(9), None]);
         let b = 3;
         let c = modulus_scalar(&a, b).unwrap();
-        let expected =
-            Int32Array::from(vec![Some(0), None, Some(2), Some(1), Some(0), None]);
+        let expected = Int32Array::from(vec![Some(0), None, Some(2), Some(1), Some(0), None]);
         assert_eq!(c, expected);
     }
 
@@ -2348,13 +2268,11 @@ mod tests {
     #[should_panic(expected = "DivideByZero")]
     #[cfg(feature = "dyn_arith_dict")]
     fn test_int_array_divide_dyn_by_zero_dict() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(15).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(0).unwrap();
         let b = builder.finish();
 
@@ -2366,13 +2284,11 @@ mod tests {
     #[cfg(feature = "dyn_arith_dict")]
     fn test_f32_dict_array_divide_dyn_by_zero() {
         use crate::datatypes::Float32Type;
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Float32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Float32Type>::with_capacity(1, 1);
         builder.append(1.5).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Float32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Float32Type>::with_capacity(1, 1);
         builder.append(0.0).unwrap();
         let b = builder.finish();
 
@@ -2550,8 +2466,7 @@ mod tests {
         let a = Int32Array::from(vec![i32::MAX, i32::MIN]);
 
         let wrapped = add_scalar_dyn::<Int32Type>(&a, 1).unwrap();
-        let expected =
-            Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
+        let expected = Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
         assert_eq!(&expected, &wrapped);
 
         let overflow = add_scalar_checked_dyn::<Int32Type>(&a, 1);
@@ -2619,8 +2534,7 @@ mod tests {
         let b = Int32Array::from(vec![1, 1]);
 
         let wrapped = add_dyn(&a, &b).unwrap();
-        let expected =
-            Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
+        let expected = Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
         assert_eq!(&expected, &wrapped);
 
         let overflow = add_dyn_checked(&a, &b);
@@ -2630,21 +2544,18 @@ mod tests {
     #[test]
     #[cfg(feature = "dyn_arith_dict")]
     fn test_dictionary_add_dyn_wrapping_overflow() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(2, 2);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(2, 2);
         builder.append(i32::MAX).unwrap();
         builder.append(i32::MIN).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(2, 2);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(2, 2);
         builder.append(1).unwrap();
         builder.append(1).unwrap();
         let b = builder.finish();
 
         let wrapped = add_dyn(&a, &b).unwrap();
-        let expected =
-            Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
+        let expected = Arc::new(Int32Array::from(vec![-2147483648, -2147483647])) as ArrayRef;
         assert_eq!(&expected, &wrapped);
 
         let overflow = add_dyn_checked(&a, &b);
@@ -2667,13 +2578,11 @@ mod tests {
     #[test]
     #[cfg(feature = "dyn_arith_dict")]
     fn test_dictionary_subtract_dyn_wrapping_overflow() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(-2).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(i32::MAX).unwrap();
         let b = builder.finish();
 
@@ -2701,13 +2610,11 @@ mod tests {
     #[test]
     #[cfg(feature = "dyn_arith_dict")]
     fn test_dictionary_mul_dyn_wrapping_overflow() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(10).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(i32::MAX).unwrap();
         let b = builder.finish();
 
@@ -2735,13 +2642,11 @@ mod tests {
     #[test]
     #[cfg(feature = "dyn_arith_dict")]
     fn test_dictionary_div_dyn_wrapping_overflow() {
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(i32::MIN).unwrap();
         let a = builder.finish();
 
-        let mut builder =
-            PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
+        let mut builder = PrimitiveDictionaryBuilder::<Int8Type, Int32Type>::with_capacity(1, 1);
         builder.append(-1).unwrap();
         let b = builder.finish();
 

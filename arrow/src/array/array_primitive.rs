@@ -82,10 +82,7 @@ impl<T: ArrowPrimitiveType> PrimitiveArray<T> {
         //     raw_values alignment & location is ensured by fn from(ArrayDataRef)
         //     buffer bounds/offset is ensured by the ArrayData instance.
         unsafe {
-            std::slice::from_raw_parts(
-                self.raw_values.as_ptr().add(self.data.offset()),
-                self.len(),
-            )
+            std::slice::from_raw_parts(self.raw_values.as_ptr().add(self.data.offset()), self.len())
         }
     }
 
@@ -213,15 +210,9 @@ pub(crate) fn as_datetime<T: ArrowPrimitiveType>(v: i64) -> Option<NaiveDateTime
         DataType::Time32(_) | DataType::Time64(_) => None,
         DataType::Timestamp(unit, _) => match unit {
             TimeUnit::Second => Some(temporal_conversions::timestamp_s_to_datetime(v)),
-            TimeUnit::Millisecond => {
-                Some(temporal_conversions::timestamp_ms_to_datetime(v))
-            }
-            TimeUnit::Microsecond => {
-                Some(temporal_conversions::timestamp_us_to_datetime(v))
-            }
-            TimeUnit::Nanosecond => {
-                Some(temporal_conversions::timestamp_ns_to_datetime(v))
-            }
+            TimeUnit::Millisecond => Some(temporal_conversions::timestamp_ms_to_datetime(v)),
+            TimeUnit::Microsecond => Some(temporal_conversions::timestamp_us_to_datetime(v)),
+            TimeUnit::Nanosecond => Some(temporal_conversions::timestamp_ns_to_datetime(v)),
         },
         // interval is not yet fully documented [ARROW-3097]
         DataType::Interval(_) => None,
@@ -240,9 +231,7 @@ pub(crate) fn as_time<T: ArrowPrimitiveType>(v: i64) -> Option<NaiveTime> {
             let v = v as u32;
             match unit {
                 TimeUnit::Second => Some(temporal_conversions::time32s_to_time(v as i32)),
-                TimeUnit::Millisecond => {
-                    Some(temporal_conversions::time32ms_to_time(v as i32))
-                }
+                TimeUnit::Millisecond => Some(temporal_conversions::time32ms_to_time(v as i32)),
                 _ => None,
             }
         }
@@ -262,15 +251,9 @@ fn as_duration<T: ArrowPrimitiveType>(v: i64) -> Option<Duration> {
     match T::DATA_TYPE {
         DataType::Duration(unit) => match unit {
             TimeUnit::Second => Some(temporal_conversions::duration_s_to_duration(v)),
-            TimeUnit::Millisecond => {
-                Some(temporal_conversions::duration_ms_to_duration(v))
-            }
-            TimeUnit::Microsecond => {
-                Some(temporal_conversions::duration_us_to_duration(v))
-            }
-            TimeUnit::Nanosecond => {
-                Some(temporal_conversions::duration_ns_to_duration(v))
-            }
+            TimeUnit::Millisecond => Some(temporal_conversions::duration_ms_to_duration(v)),
+            TimeUnit::Microsecond => Some(temporal_conversions::duration_us_to_duration(v)),
+            TimeUnit::Nanosecond => Some(temporal_conversions::duration_ns_to_duration(v)),
         },
         _ => None,
     }
@@ -292,11 +275,7 @@ where
     ///
     /// functionally it is same as `value_as_datetime`, however it adds
     /// the passed tz to the to-be-returned NaiveDateTime
-    pub fn value_as_datetime_with_tz(
-        &self,
-        i: usize,
-        tz: FixedOffset,
-    ) -> Option<NaiveDateTime> {
+    pub fn value_as_datetime_with_tz(&self, i: usize, tz: FixedOffset) -> Option<NaiveDateTime> {
         as_datetime::<T>(i64::from(self.value(i))).map(|datetime| datetime + tz)
     }
 
@@ -402,25 +381,19 @@ def_from_for_primitive!(Float16Type, f16);
 def_from_for_primitive!(Float32Type, f32);
 def_from_for_primitive!(Float64Type, f64);
 
-impl<T: ArrowPrimitiveType> From<Option<<T as ArrowPrimitiveType>::Native>>
-    for NativeAdapter<T>
-{
+impl<T: ArrowPrimitiveType> From<Option<<T as ArrowPrimitiveType>::Native>> for NativeAdapter<T> {
     fn from(value: Option<<T as ArrowPrimitiveType>::Native>) -> Self {
         NativeAdapter { native: value }
     }
 }
 
-impl<T: ArrowPrimitiveType> From<&Option<<T as ArrowPrimitiveType>::Native>>
-    for NativeAdapter<T>
-{
+impl<T: ArrowPrimitiveType> From<&Option<<T as ArrowPrimitiveType>::Native>> for NativeAdapter<T> {
     fn from(value: &Option<<T as ArrowPrimitiveType>::Native>) -> Self {
         NativeAdapter { native: *value }
     }
 }
 
-impl<T: ArrowPrimitiveType, Ptr: Into<NativeAdapter<T>>> FromIterator<Ptr>
-    for PrimitiveArray<T>
-{
+impl<T: ArrowPrimitiveType, Ptr: Into<NativeAdapter<T>>> FromIterator<Ptr> for PrimitiveArray<T> {
     fn from_iter<I: IntoIterator<Item = Ptr>>(iter: I) -> Self {
         let iter = iter.into_iter();
         let (lower, _) = iter.size_hint();
@@ -476,15 +449,8 @@ impl<T: ArrowPrimitiveType> PrimitiveArray<T> {
 
         let (null, buffer) = trusted_len_unzip(iterator);
 
-        let data = ArrayData::new_unchecked(
-            T::DATA_TYPE,
-            len,
-            None,
-            Some(null),
-            0,
-            vec![buffer],
-            vec![],
-        );
+        let data =
+            ArrayData::new_unchecked(T::DATA_TYPE, len, None, Some(null), 0, vec![buffer], vec![]);
         PrimitiveArray::from(data)
     }
 }
@@ -505,9 +471,7 @@ macro_rules! def_numeric_from_vec {
         }
 
         // Constructs a primitive array from a vector. Should only be used for testing.
-        impl From<Vec<Option<<$ty as ArrowPrimitiveType>::Native>>>
-            for PrimitiveArray<$ty>
-        {
+        impl From<Vec<Option<<$ty as ArrowPrimitiveType>::Native>>> for PrimitiveArray<$ty> {
             fn from(data: Vec<Option<<$ty as ArrowPrimitiveType>::Native>>) -> Self {
                 PrimitiveArray::from_iter(data.iter())
             }
@@ -547,10 +511,9 @@ def_numeric_from_vec!(TimestampNanosecondType);
 impl<T: ArrowTimestampType> PrimitiveArray<T> {
     /// Construct a timestamp array from a vec of i64 values and an optional timezone
     pub fn from_vec(data: Vec<i64>, timezone: Option<String>) -> Self {
-        let array_data =
-            ArrayData::builder(DataType::Timestamp(T::get_time_unit(), timezone))
-                .len(data.len())
-                .add_buffer(Buffer::from_slice_ref(&data));
+        let array_data = ArrayData::builder(DataType::Timestamp(T::get_time_unit(), timezone))
+            .len(data.len())
+            .add_buffer(Buffer::from_slice_ref(&data));
         let array_data = unsafe { array_data.build_unchecked() };
         PrimitiveArray::from(array_data)
     }
@@ -588,11 +551,10 @@ impl<T: ArrowTimestampType> PrimitiveArray<T> {
             }
         }
 
-        let array_data =
-            ArrayData::builder(DataType::Timestamp(T::get_time_unit(), timezone))
-                .len(data_len)
-                .add_buffer(val_buf.into())
-                .null_bit_buffer(Some(null_buf.into()));
+        let array_data = ArrayData::builder(DataType::Timestamp(T::get_time_unit(), timezone))
+            .len(data_len)
+            .add_buffer(val_buf.into())
+            .null_bit_buffer(Some(null_buf.into()));
         let array_data = unsafe { array_data.build_unchecked() };
         PrimitiveArray::from(array_data)
     }
@@ -691,8 +653,7 @@ mod tests {
         // 1:        00:00:00.001
         // 37800005: 10:30:00.005
         // 86399210: 23:59:59.210
-        let arr: PrimitiveArray<Time32MillisecondType> =
-            vec![1, 37_800_005, 86_399_210].into();
+        let arr: PrimitiveArray<Time32MillisecondType> = vec![1, 37_800_005, 86_399_210].into();
         assert_eq!(3, arr.len());
         assert_eq!(0, arr.offset());
         assert_eq!(0, arr.null_count());
@@ -975,11 +936,10 @@ mod tests {
 
     #[test]
     fn test_timestamp_fmt_debug() {
-        let arr: PrimitiveArray<TimestampMillisecondType> =
-            TimestampMillisecondArray::from_vec(
-                vec![1546214400000, 1546214400000, -1546214400000],
-                None,
-            );
+        let arr: PrimitiveArray<TimestampMillisecondType> = TimestampMillisecondArray::from_vec(
+            vec![1546214400000, 1546214400000, -1546214400000],
+            None,
+        );
         assert_eq!(
             "PrimitiveArray<Timestamp(Millisecond, None)>\n[\n  2018-12-31T00:00:00,\n  2018-12-31T00:00:00,\n  1921-01-02T00:00:00,\n]",
             format!("{:?}", arr)
