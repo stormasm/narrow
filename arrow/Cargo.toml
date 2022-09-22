@@ -48,7 +48,8 @@ arrow-buffer = { version = "23.0.0" }
 arrow-schema = { version = "23.0.0", path = "../arrow-schema" }
 serde_json = { version = "1.0", default-features = false, features = ["std"], optional = true }
 indexmap = { version = "1.9", default-features = false, features = ["std"] }
-rand = { version = "0.8", default-features = false, features = ["std", "std_rng"], optional = true }
+rand = { version = "0.8" }
+#rand = { version = "0.8", default-features = false, features = ["std", "std_rng"], optional = true }
 num = { version = "0.4", default-features = false, features = ["std"] }
 half = { version = "2.0", default-features = false, features = ["num-traits"]}
 hashbrown = { version = "0.12", default-features = false }
@@ -83,7 +84,7 @@ prettyprint = ["comfy-table"]
 # not the core arrow code itself. Be aware that `rand` must be kept as
 # an optional dependency for supporting compile to wasm32-unknown-unknown
 # target without assuming an environment containing JavaScript.
-test_utils = ["rand"]
+#test_utils = ["rand"]
 pyarrow = ["pyo3", "ffi"]
 # force_validate runs full data validation for all arrays that are created
 # this is not enabled by default as it is too computationally expensive
@@ -99,7 +100,7 @@ dyn_cmp_dict = []
 dyn_arith_dict = []
 
 [dev-dependencies]
-rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
+#rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
 criterion = { version = "0.4", default-features = false }
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 tempfile = { version = "3", default-features = false }
