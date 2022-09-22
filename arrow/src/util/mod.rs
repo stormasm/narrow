@@ -22,7 +22,6 @@ pub mod bit_iterator;
 pub(crate) mod bit_mask;
 pub mod data_gen;
 pub mod display;
-#[cfg(feature = "prettyprint")]
 pub mod pretty;
 pub(crate) mod serialization;
 pub mod string_writer;
